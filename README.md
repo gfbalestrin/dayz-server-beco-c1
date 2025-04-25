@@ -1,1 +1,1 @@
-Teste2
+Dayz Server BECO-C1
