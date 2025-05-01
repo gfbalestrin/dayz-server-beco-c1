@@ -85,8 +85,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		INSERT_KILLFEED "$PlayerIdKiller" "$PlayerIdKilled" "$Weapon" "$Distance" "$Data" "$PosKiller" "$PostKilled"
 	# Eventos de restart do server
 	elif [[ "$Line" == *"AdminLog started on"* ]]; then
-		INSERT_CUSTOM_LOG "Evento de restart do server detectado!" "INFO" "$ScriptName"
+		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"
 		Content="Server successfully restarted!"
+		sleep 1
+		systemctl restart dayz-infos-logs-discord.service
 	else	
 		PlayerId=$(echo "$Content" | grep -oP 'id=\K[^ ]+' | head -n 1)
 		
@@ -97,7 +99,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 				SteamID=$(echo "$PlayerExists" | cut -d'|' -f2)
 				SteamName=$(echo "$PlayerExists" | cut -d'|' -f3)
 				PlayerInfo="**$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>))"
-				NewContent=$(echo "$Content" | sed -E "s/(Player )\"[^\"]+\"/\1\"$PlayerInfo\"/")		
+				INSERT_CUSTOM_LOG "Informações do jogador: $PlayerInfo" "INFO" "$ScriptName"
+				SafePlayerInfo=$(printf '%s\n' "$PlayerInfo" | sed 's/[&/]/\\&/g')
+                NewContent=$(echo "$Content" | sed -E "s|(Player )\"[^\"]+\"|\1\"$SafePlayerInfo\"|")		
+				
 				if [[ -n "$NewContent" ]]; then
 					Content="$NewContent"
 					INSERT_CUSTOM_LOG "Evento formatado com informações do jogador: $Content" "INFO" "$ScriptName"	

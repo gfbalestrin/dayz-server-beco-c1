@@ -25,6 +25,10 @@ function MonitorLog() {
 		INSERT_RPT_LOG "$Line" "INFO"
 
 		if [[ "$Content" == *"kicked from server"* ]]; then
+			if [[ "$Content" == *"Connection with host has been lost"* || "$Content" == *"Server is shutting down"* ]]; then
+				INSERT_CUSTOM_LOG "Ignorando evento" "INFO" "$ScriptName"
+				continue
+			fi
 			SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogsAdmin" "$CurrentDate" "$ScriptName"
 			continue
 		elif [[ "$Content" == *"Invalid number"* ]]; then
@@ -134,7 +138,7 @@ function MonitorLog() {
 				INSERT_PLAYER_NAME_HISTORY "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
 			fi
 		elif [[ "$Line" == *"Termination successfully completed"* ]]; then
-			INSERT_CUSTOM_LOG "Fim do arquivo identificado. Interrompendo loop para realizar alteração no symlink" "INFO" "$ScriptName"
+			INSERT_CUSTOM_LOG "Fim do arquivo identificado." "INFO" "$ScriptName"
 			break
 		fi
 

@@ -139,6 +139,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="playerCoordsSelect" class="label-text">Coordenadas do jogador:</label>
+                        <select id="playerCoordsSelect" class="form-control"></select>
+                    </div>
+
                     <!-- Botão para carregar as coordenadas -->
                     <div class="controls">
                         <button onclick="carregarCoordenadas()" class="btn btn-primary">Carregar</button>
@@ -204,6 +209,18 @@
         </div>
     </div>
 
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="toastSucesso" class="toast align-items-center text-white bg-success border-0" role="success"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastSucessoMensagem">
+                    Sucesso.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- JS Bootstrap -->
@@ -224,6 +241,7 @@
 
         const playerSelect = document.getElementById('playerSelect');
         const dataSelect = document.getElementById('dataSelect');
+        const playerCoordsSelect = document.getElementById('playerCoordsSelect');
         const canvas = document.getElementById('mapaCanvas');
         const listaJogadoresOnline = document.getElementById("listaJogadoresOnline");
         const txtTotalPlayers = document.getElementById("txtTotalPlayers");
@@ -239,10 +257,21 @@
         let scaleMin = 0.2, scaleMax = 5;
         const zoomFactor = 1.1;
         var cacheCoordenadas = {}; // Evita chamadas repetidas
+        playerCoordsSelect.innerHTML = `<option value="">Selecione uma coordenada</option>`; 
 
         function mostrarToastErro(mensagem) {
             const toastEl = document.getElementById('toastErro');
             const toastBody = document.getElementById('toastErroMensagem');
+
+            toastBody.textContent = mensagem;
+
+            const toast = new bootstrap.Toast(toastEl, { delay: 5000 }); // 5 segundos
+            toast.show();
+        }
+
+        function mostrarToastSucesso(mensagem) {
+            const toastEl = document.getElementById('toastSucesso');
+            const toastBody = document.getElementById('toastSucessoMensagem');
 
             toastBody.textContent = mensagem;
 
@@ -295,8 +324,6 @@
             playerSelect.innerHTML = jogadores.map(j =>
                 `<option value="${j.PlayerID}" data-nome="${j.PlayerName}" data-steam="${j.SteamName}">${j.PlayerName} (${j.SteamName})</option>`
             ).join('');
-
-
         }
 
         async function carregarDatas() {
@@ -309,6 +336,35 @@
             const datas = await res.json();
 
             dataSelect.innerHTML = datas.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        async function carregarBackups() {
+            const selecionados = Array.from(playerCoordsSelect.selectedOptions).map(opt => opt.value);
+            if (!selecionados.length) {
+                return;
+            }
+
+            const res = await fetch(`/api/backups/${selecionados[0]}`);
+            const backups = await res.json();
+
+            if (backups.length) {
+                mostrarToastSucesso(`O backup está disponível!`);
+            } else {
+                mostrarToastErro(`Backup não disponível!`);
+            }
+        }
+
+        function carregarPlayerIdsCoords(nJogadores, playerCoords) {     
+            
+            playerCoordsSelect.innerHTML = `<option value="">Selecione uma coordenada</option>`; 
+            if (playerCoords == null)
+                return;
+            if (nJogadores.length > 1)
+                return;    
+                            
+            playerCoordsSelect.innerHTML += playerCoords.map(j =>
+                `<option value="${j.PlayerCoordId}" data-id="${j.PlayerId}">${j.Data} (${j.CoordX};${j.CoordZ};${j.CoordY})</option>`
+            ).join('');
         }
 
         function showLoading() {
@@ -345,12 +401,14 @@
 
             const data = online ? yyyyMMdd : dataSelect.value;
             cacheCoordenadas = {}; // limpa cache anterior
-
+            
             for (const jogador of jogadores) {
                 const res = await fetch(`/api/coords/${jogador.PlayerID}/${data}`);
                 const texto = await res.text();
                 //const linhas = texto.trim().split('\n').filter(l => l);
                 const linhas = JSON.parse(texto);
+                console.log("linhas", linhas)
+                carregarPlayerIdsCoords(jogadores.length, linhas)
                 const horaInicio = document.getElementById('horaInicio').value;
                 const horaFim = document.getElementById('horaFim').value;
 
@@ -383,7 +441,6 @@
                             label: p.label
                         }));
                 }
-                console.log("pontos", pontos)
                 cacheCoordenadas[jogador.PlayerID] = { jogador, pontos };
             }
 
@@ -504,7 +561,6 @@
                         y: 4096 - (p.y / escala),
                         label: p.label
                     }));
-                console.log("pontos", pontos)
                 animacaoJogadores.push({ jogador, pontos });
             }
 
@@ -523,7 +579,6 @@
                 redesenharCanvas(); // redesenha o fundo e trajetos
 
                 for (const grupo of animacaoJogadores) {
-                    console.log("grupo", grupo)
                     const { jogador, pontos } = grupo;
                     ctx.strokeStyle = getCor(jogador.PlayerID);
                     ctx.lineWidth = 2 / scale;
@@ -619,6 +674,7 @@
         }
 
         playerSelect.addEventListener('change', carregarDatas);
+        playerCoordsSelect.addEventListener('change', carregarBackups);
         //window.onload = carregarJogadores;
         window.onload = async function () {
             ctx.drawImage(imagem, offsetX, offsetY);
@@ -669,7 +725,6 @@
 
             for (const jogadorId in cacheCoordenadas) {
                 const { jogador, pontos } = cacheCoordenadas[jogadorId];
-                console.log("pontos", pontos)   
 
                 ctx.strokeStyle = getCor(jogador.PlayerID);
                 ctx.lineWidth = 2 / scale;
@@ -681,6 +736,7 @@
                 ctx.stroke();
 
                 pontos.forEach((ponto, index) => {
+
                     ctx.beginPath();
                     ctx.arc(ponto.x, ponto.y, 5 / scale, 0, Math.PI * 2);
                     ctx.fillStyle = getCor(jogador.PlayerID);
@@ -696,10 +752,15 @@
                     }
 
                     ctx.fillText(`${index} - ${ponto.label} - ${jogador.PlayerName} (${jogador.SteamName})`, ponto.x + 8 / scale, ponto.y - 8 / scale);
-                });
+
+
+                });                
+            
             }
 
+            
         }
+
 
 
 

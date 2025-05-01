@@ -67,3 +67,15 @@ def get_coords_por_data(player_id: str, data: str):
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+@app.get("/api/backups/{player_coord_id}")
+def get_backup(player_coord_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM players_coord_backup
+        WHERE PlayerCoordId = ? 
+    """, (player_coord_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
