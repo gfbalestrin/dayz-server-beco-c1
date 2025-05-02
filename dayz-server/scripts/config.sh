@@ -25,6 +25,7 @@ export AppServerBecoC1LogsDbFile=$(jq -r '.App.ServerBecoC1LogsDbFile' "$CONFIG_
 export AppScriptUpdatePlayersOnlineFile=$(jq -r '.App.ScriptUpdatePlayersOnlineFile' "$CONFIG_FILE")
 export AppScriptExtractPlayersStatsFile=$(jq -r '.App.ScriptExtractPlayersStatsFile' "$CONFIG_FILE")
 export AppScriptUpdateGeneralKillfeed=$(jq -r '.App.ScriptUpdateGeneralKillfeed' "$CONFIG_FILE")
+export AppScriptGetPlayerDamage=$(jq -r '.App.ScriptGetPlayerDamage' "$CONFIG_FILE")
 
 # Print all variables
 # echo "DayzServerFolder: $DayzServerFolder"
@@ -52,6 +53,9 @@ export DiscordWebhookLogsAdmin=$(jq -r '.Discord.WebhookLogsAdmin' "$CONFIG_FILE
 export DiscordChannelPlayersOnlineChannelId=$(jq -r '.Discord.ChannelPlayersOnline.ChannelId' "$CONFIG_FILE")
 export DiscordChannelPlayersOnlineMessageId=$(jq -r '.Discord.ChannelPlayersOnline.MessageId' "$CONFIG_FILE")
 export DiscordChannelPlayersOnlineBotToken=$(jq -r '.Discord.ChannelPlayersOnline.BotToken' "$CONFIG_FILE")
+export DiscordChannelPlayersStatsChannelId=$(jq -r '.Discord.ChannelPlayersStats.ChannelId' "$CONFIG_FILE")
+export DiscordChannelPlayersStatsMessageId=$(jq -r '.Discord.ChannelPlayersStats.MessageId' "$CONFIG_FILE")
+export DiscordChannelPlayersStatsBotToken=$(jq -r '.Discord.ChannelPlayersStats.BotToken' "$CONFIG_FILE")
 
 INSERT_ADM_LOG() {
     local message="$1"
@@ -230,6 +234,71 @@ EOF
     done
 
     echo "Failed to insert log after $max_retries attempts."
+    return 1
+}
+
+INSERT_PLAYER_DAMAGE() {
+    local PlayerIDAttacker="$1"
+    local PlayerIDVictim="$2"
+    local PosAttacker="$3"
+    local PosVictim="$4"
+    local LocalDamage="$5"
+    local HitType="$6"
+    local Damage="$7"
+    local Health="$8"
+    local Data="$9"
+    local Weapon="$10"
+    local DistanceMeter="$11"
+    
+    local max_retries=5
+    local retry_delay=0.2
+    local attempt=1
+
+    local escaped_message
+    local escaped_level
+    local escaped_source
+
+    # Escapar aspas simples
+    PlayerIDAttacker=$(echo "$PlayerIDAttacker" | sed "s/'/''/g")
+    PlayerIDVictim=$(echo "$PlayerIDVictim" | sed "s/'/''/g")
+    PosAttacker=$(echo "$PosAttacker" | sed "s/'/''/g")
+    PosVictim=$(echo "$PosVictim" | sed "s/'/''/g")
+    LocalDamage=$(echo "$LocalDamage" | sed "s/'/''/g")
+    HitType=$(echo "$HitType" | sed "s/'/''/g")
+    Damage=$(echo "$Damage" | sed "s/'/''/g")
+    Health=$(echo "$Health" | sed "s/'/''/g")
+    Data=$(echo "$Data" | sed "s/'/''/g")
+    Weapon=$(echo "$Weapon" | sed "s/'/''/g")
+    DistanceMeter=$(echo "$DistanceMeter" | sed "s/'/''/g")
+
+    while (( attempt <= max_retries )); do
+        sqlite3 "$AppFolder/$AppPlayerBecoC1DbFile" <<EOF
+INSERT INTO players_damage (PlayerIDAttacker, PlayerIDVictim, PosAttacker, PosVictim, LocalDamage, HitType, Damage, Health, Data, Weapon, DistanceMeter)
+VALUES (
+    '$PlayerIDAttacker',
+    '$PlayerIDVictim',
+    '$PosAttacker',
+    '$PosVictim',
+    '$LocalDamage',
+    '$HitType',
+    '$Damage',
+    '$Health',
+    '$Data',
+    '$Weapon',
+    '$DistanceMeter'
+);
+EOF
+
+        if [[ $? -eq 0 ]]; then
+            return 0
+        else
+            echo "Attempt $attempt failed. Retrying in $retry_delay seconds..."
+            sleep "$retry_delay"
+            attempt=$((attempt + 1))
+        fi
+    done
+
+    echo "Failed to insert after $max_retries attempts."
     return 1
 }
 

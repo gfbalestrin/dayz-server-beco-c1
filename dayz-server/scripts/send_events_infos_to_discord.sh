@@ -19,17 +19,21 @@ update_symlink() {
 }
 
 function MonitorLog() {
-	tail -n +1 -F "$LogFileName" | grep -n --line-buffered -e "is connected" -e "Shutting down in 60 seconds" -e "Invalid number -nan" -e "kicked from server" -e "Termination successfully completed" | while IFS='' read -r Line; do
+	tail -n +1 -F "$LogFileName" | grep -n --line-buffered -e "is connected" -e "Shutting down in 60 seconds" -e "Invalid number -nan" -e "kicked from server" -e "Termination successfully completed" -e "Mission script has no main function" | while IFS='' read -r Line; do
 		CurrentDate=$(date "+%d/%m/%Y %H:%M:%S")
 		Content=$(echo $Line | cut -c 15-)
 		INSERT_RPT_LOG "$Line" "INFO"
+		INSERT_CUSTOM_LOG "Evento capturado: '$Content'" "INFO" "$ScriptName"
 
-		if [[ "$Content" == *"kicked from server"* ]]; then
+		if [[ "$Content" == *"Mission script has no main function"* ]]; then
+			SEND_DISCORD_WEBHOOK "Administrador fez alguma merda no script init.c e o servidor está inoperante" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+			continue
+		elif [[ "$Content" == *"kicked from server"* ]]; then
 			if [[ "$Content" == *"Connection with host has been lost"* || "$Content" == *"Server is shutting down"* ]]; then
 				INSERT_CUSTOM_LOG "Ignorando evento" "INFO" "$ScriptName"
 				continue
 			fi
-			SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogsAdmin" "$CurrentDate" "$ScriptName"
+			SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
 			continue
 		elif [[ "$Content" == *"Invalid number"* ]]; then
 			PlayerId=""

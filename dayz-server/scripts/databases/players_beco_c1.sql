@@ -83,3 +83,24 @@ CREATE TABLE IF NOT EXISTS players_coord_backup (
     TimeStamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (PlayerCoordId) REFERENCES players_coord(PlayerCoordId) ON DELETE CASCADE
 );
+
+-- Tabela players_damage
+CREATE TABLE IF NOT EXISTS players_damage (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    PlayerIDAttacker TEXT NOT NULL,
+    PlayerIDVictim TEXT NOT NULL,
+    PosAttacker TEXT,
+    PosVictim TEXT,
+    LocalDamage TEXT,
+    HitType TEXT,
+    Damage REAL,
+    Health REAL,
+    Data DATETIME,     
+    Weapon TEXT,
+    DistanceMeter REAL DEFAULT 0,
+    FOREIGN KEY (PlayerIDAttacker) REFERENCES players_database(PlayerID) ON DELETE CASCADE,
+    FOREIGN KEY (PlayerIDVictim) REFERENCES players_database(PlayerID) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_damage_killer ON players_damage(PlayerIDAttacker);
+CREATE INDEX IF NOT EXISTS idx_damage_killed ON players_damage(PlayerIDVictim);
