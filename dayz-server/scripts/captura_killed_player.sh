@@ -4,26 +4,26 @@
 if [[ -z "$1" ]]; then
   echo "Erro: Você deve fornecer o Message como parâmetro."
   echo "Uso: $0 <Message>"
-  echo "Exemplo: Player ""Survivor"" (id=abcdefghijklmnopqrstuvxz pos=<2635.0, 1313.7, 22.9>)[HP: 75.919] hit by Player ""Survivor (2)"" (id=abcdefghijklmnopqrstuvxz pos=<2634.2, 1311.6, 23.0>) into Torso(30) for 24.081 damage (Bullet_545x39) with KA-74 from 2.27205 meters"
+  echo "Exemplo: Player ""dexx"" (DEAD) (id=UwSzI-jZF1KfvnpZLC0LrnjeWwEsPTdAe29fimFnSfM= pos=<2635.3, 1313.4, 22.9>) killed by Player ""Guzulino"" (id=xblv1tW0AmFhZcO4gmLYztqErmih0lCfKd2VqVxwz3E= pos=<2634.2, 1311.6, 23.0>) with KA-74 from 2.0941
+2 meters"
   exit 1
 fi
 
 Message="$1"
-echo "$Message" | grep -q "\[HP: 0\]" && echo "Dano 0 será ignorado" && exit 1
 
 # Extrai nome do atingido
 ATINGIDO=$(echo "$Message" | sed -n 's/Player "\([^"]*\)".*/\1/p')
 # Extrai nome do atacante
-ATACANTE=$(echo "$Message" | sed -n 's/.*hit by Player "\([^"]*\)".*/\1/p')
+ATACANTE=$(echo "$Message" | sed -n 's/.*killed by Player "\([^"]*\)".*/\1/p')
 
 # Ignora se algum dos nomes não foi capturado
 [ -z "$ATINGIDO" ] && echo "Nome do player atingido não foi identificado" && exit 1
 [ -z "$ATACANTE" ] && echo "Nome do player que atacou não foi identificado" && exit 1
 
 # Captura os IDs dos jogadores
-IDS=$(echo "$Message" | grep -oP 'id=\K[a-zA-Z0-9_\-=]+')
-ID_ATINGIDO=$(echo "$IDS" | sed -n '1p')
-ID_ATACANTE=$(echo "$IDS" | sed -n '2p')
+IDS=$(echo "$Message" | grep -oP 'id=[^ ]+')
+ID_ATINGIDO=$(echo "$IDS" | sed -n '1p' | cut -d= -f2)
+ID_ATACANTE=$(echo "$IDS" | sed -n '2p' | cut -d= -f2)
 
 # Extrai outras informações
 HP=$(echo "$Message" | grep -oP '\[HP: \K[0-9.]+' || echo "Desconhecido")
@@ -31,7 +31,7 @@ LOCAL=$(echo "$Message" | grep -oP 'into \K[^ ]+' | sed 's/([0-9]*)//g')
 DANO=$(echo "$Message" | grep -oP 'for \K[0-9.]+(?= damage)')
 TIPO=$(echo "$Message" | grep -oP 'damage \(\K[^)]+' || echo "Desconhecido")
 DISTANCIA=$(echo "$Message" | grep -oP 'from \K[0-9.]+(?= meters)' || echo "0")
-ARMA=$(echo "$Message" | grep -oP 'with \K[^ ]+' || echo "Soco")
+ARMA=$(echo "$Message" | grep -oP 'with \K[^ ]+' || echo "Desconhecida")
 
 # Posições
 POS_ATINGIDO=$(echo "$Message" | grep -oP 'pos=<[^>]+>' | sed -n '1p' | sed 's/pos=<//' | sed 's/>//')

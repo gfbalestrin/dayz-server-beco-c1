@@ -19,7 +19,9 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 	INSERT_CUSTOM_LOG "Evento capturado: '$Content'" "INFO" "$ScriptName"
 	# Dano em player
 	if [[ "$Content" == *"hit by Player"* ]]; then
-		DamageParsed=$("$AppFolder/$AppScriptParseDamageFile" "$Content")
+		DamageParsed=$("$AppFolder/$AppScriptGetPlayerDamageFile" "$Content")
+		echo $DamageParsed
+		INSERT_CUSTOM_LOG "$DamageParsed" "INFO" "$ScriptName"
 		if [ $? -eq 0 ]; then
 			INSERT_CUSTOM_LOG "Inserindo informações de dano no banco de dados..." "ERROR" "$ScriptName"
 			PlayerIdAttacker=$(echo "$DamageParsed" | cut -d'|' -f1)
@@ -44,7 +46,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 				PlayerAttackerInfo="**$PlayerAttackerName** ([$AttackerSteamName](<https://steamcommunity.com/profiles/$AttackerSteamID>))"
 				SafePlayerAttackerInfo=$(printf '%s\n' "$PlayerAttackerInfo" | sed 's/[&/]/\\&/g')								
 			else
-				INSERT_CUSTOM_LOG "PlayerIdAttacker não encontrado no banco de dados. Ignorando..." "INFO" "$ScriptName"
+				INSERT_CUSTOM_LOG "PlayerIdAttacker não encontrado no banco de dados. Ignorando log para o discord..." "ERROR" "$ScriptName"
 				continue
 			fi	
 
@@ -57,11 +59,11 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 				PlayerVictimInfo="**$PlayerVictimName** ([$VictimSteamName](<https://steamcommunity.com/profiles/$VictimSteamID>))"
 				SafePlayerVictimInfo=$(printf '%s\n' "$PlayerVictimInfo" | sed 's/[&/]/\\&/g')								
 			else
-				INSERT_CUSTOM_LOG "PlayerIdVictim não encontrado no banco de dados. Ignorando..." "INFO" "$ScriptName"
+				INSERT_CUSTOM_LOG "PlayerIdVictim não encontrado no banco de dados. Ignorando log para o discord..." "ERROR" "$ScriptName"
 				continue
 			fi	
 			
-			Content="Player $SafePlayerVictimInfo levou um pau do $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $DistanceMeter metros, HP restante: $Health"
+			Content="Player $SafePlayerVictimInfo foi atingido por $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $DistanceMeter metros, HP restante: $Health"
 		else
 			INSERT_CUSTOM_LOG "Falha ao realizar o parse das informações da dano do player" "ERROR" "$ScriptName"
 		fi
@@ -156,6 +158,36 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		PosKiller=$(echo "$Content" | sed -n 's/.*pos=<[^>]*>.*pos=<\([^>]*\)>.*/\1/p')
 		Data=$(date "+%Y-%m-%d %H:%M:%S")
 		INSERT_KILLFEED "$PlayerIdKiller" "$PlayerIdKilled" "$Weapon" "$Distance" "$Data" "$PosKiller" "$PostKilled"
+
+		SafePlayerKillerInfo=""
+		PlayerKiller=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerIdKiller';")
+		if [[ -n "$PlayerKiller" ]]; then
+			PlayerKillerName=$(echo "$PlayerKiller" | cut -d'|' -f1)
+			KillerSteamID=$(echo "$PlayerKiller" | cut -d'|' -f2)
+			KillerSteamName=$(echo "$PlayerKiller" | cut -d'|' -f3)
+			PlayerKillerInfo="**$PlayerKillerName** ([$KillerSteamName](<https://steamcommunity.com/profiles/$KillerSteamID>))"
+			SafePlayerKillerInfo=$(printf '%s\n' "$PlayerKillerInfo" | sed 's/[&/]/\\&/g')								
+		else
+			INSERT_CUSTOM_LOG "PlayerIdKiller não encontrado no banco de dados" "ERROR" "$ScriptName"
+		fi	
+
+		SafePlayerVictimInfo=""
+		PlayerVictim=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerIdKilled';")
+		if [[ -n "$PlayerVictim" ]]; then
+			PlayerVictimName=$(echo "$PlayerVictim" | cut -d'|' -f1)
+			VictimSteamID=$(echo "$PlayerVictim" | cut -d'|' -f2)
+			VictimSteamName=$(echo "$PlayerVictim" | cut -d'|' -f3)
+			PlayerVictimInfo="**$PlayerVictimName** ([$VictimSteamName](<https://steamcommunity.com/profiles/$VictimSteamID>))"
+			SafePlayerVictimInfo=$(printf '%s\n' "$PlayerVictimInfo" | sed 's/[&/]/\\&/g')								
+		else
+			INSERT_CUSTOM_LOG "PlayerIdVictim não encontrado no banco de dados. Ignorando log para o discord..." "ERROR" "$ScriptName"
+		fi	
+
+		if [[ -n "$SafePlayerKillerInfo" && -n "$SafePlayerVictimInfo" ]]; then
+			Content="💀 Player $SafePlayerVictimInfo foi executado pelo $SafePlayerKillerInfo. Arma: $Weapon, distância: $Distance metros, posição do killer: <ocultado>, posição do killed: <ocultado>"
+		else
+			INSERT_CUSTOM_LOG "PlayerIdKilled ou PlayerIdVictim não encontrado no banco de dados. Usando o conteúdo original para o discord..." "ERROR" "$ScriptName"
+		fi
 	# Eventos de restart do server
 	elif [[ "$Line" == *"AdminLog started on"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"

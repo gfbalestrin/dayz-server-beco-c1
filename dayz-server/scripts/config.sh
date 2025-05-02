@@ -25,7 +25,7 @@ export AppServerBecoC1LogsDbFile=$(jq -r '.App.ServerBecoC1LogsDbFile' "$CONFIG_
 export AppScriptUpdatePlayersOnlineFile=$(jq -r '.App.ScriptUpdatePlayersOnlineFile' "$CONFIG_FILE")
 export AppScriptExtractPlayersStatsFile=$(jq -r '.App.ScriptExtractPlayersStatsFile' "$CONFIG_FILE")
 export AppScriptUpdateGeneralKillfeed=$(jq -r '.App.ScriptUpdateGeneralKillfeed' "$CONFIG_FILE")
-export AppScriptGetPlayerDamage=$(jq -r '.App.ScriptGetPlayerDamage' "$CONFIG_FILE")
+export AppScriptGetPlayerDamageFile=$(jq -r '.App.ScriptGetPlayerDamageFile' "$CONFIG_FILE")
 
 # Print all variables
 # echo "DayzServerFolder: $DayzServerFolder"
