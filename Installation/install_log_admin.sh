@@ -91,7 +91,7 @@ jq --arg v "$AppFolder/atualiza_players_online.sh" '.App.ScriptUpdatePlayersOnli
 jq --arg v "$AppFolder/extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "$AppFolder/monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "$AppFolder/captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "true" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "1" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
 curl -o atualiza_players_online.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/atualiza_players_online.sh
 chmod +x atualiza_players_online.sh
