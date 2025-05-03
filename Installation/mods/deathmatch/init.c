@@ -39,8 +39,8 @@ class CustomMission: MissionServer
 	float m_AdminCheckCooldown = 30.0;
 	float m_AdminCheckTimer = 0.0;
 	// Coordenadas do canto inferior esquerdo e superior direito do retângulo
-	vector areaMin = "2450 0 1090"; // X Y Z (Y não é usado nesse caso)
-	vector areaMax = "3280 0 1462";
+	vector areaMin = "2350 0 1000"; // inferior esquerdo
+	vector areaMax = "3000 0 1450"; // superior direito
 
 	
 
@@ -73,8 +73,35 @@ class CustomMission: MissionServer
 	vector GetRandomSafeSpawnPosition()
 	{
 		ref array<vector> safeZones = new array<vector>;
-		safeZones.Insert(Vector(2671, 3, 1372));  // Galpão da prisão
-		safeZones.Insert(Vector(2651, 1, 1395));  // Skipinho da prisão
+		// Zonas ao redor da prisão
+		safeZones.Insert(Vector(2672.192383, 3.129421, 1374.600342));
+		safeZones.Insert(Vector(2651.712646, 1.712951, 1395.944336));
+		safeZones.Insert(Vector(2608.701416, 2.664377, 1389.977295));
+		safeZones.Insert(Vector(2587.730713, 1.549090, 1411.275513));
+		safeZones.Insert(Vector(2514.658203, 3.143692, 1437.058716));
+		safeZones.Insert(Vector(2428.497070, 2.656586, 1389.492920));
+		safeZones.Insert(Vector(2441.603516, 4.024718, 1367.078125));
+		safeZones.Insert(Vector(2492.065918, 4.098767, 1341.991577));
+		safeZones.Insert(Vector(2516.317627, 7.819347, 1311.331055));
+		safeZones.Insert(Vector(2536.916992, 9.694158, 1265.117065));
+		safeZones.Insert(Vector(2486.790039, 4.087596, 1217.682617));
+		safeZones.Insert(Vector(2538.850098, 3.324883, 1217.530640));
+		safeZones.Insert(Vector(2584.148438, 6.621020, 1254.476318));
+		safeZones.Insert(Vector(2640.988770, 1.986329, 1231.470215));
+		safeZones.Insert(Vector(2666.184570, 4.790472, 1290.482300));
+		safeZones.Insert(Vector(2697.927734, 4.449666, 1280.248901));
+		safeZones.Insert(Vector(2713.756836, 2.746556, 1230.137573));
+		safeZones.Insert(Vector(2724.076904, 5.087080, 1168.243042));
+		safeZones.Insert(Vector(2760.935791, 1.811343, 1153.496460));
+		safeZones.Insert(Vector(2805.038086, 3.297328, 1134.619019));
+		safeZones.Insert(Vector(2898.120361, 4.845843, 1177.733643));
+		safeZones.Insert(Vector(2972.281982, 1.116114, 1146.199707));
+		safeZones.Insert(Vector(2866.358887, 1.210863, 1215.002686));
+		safeZones.Insert(Vector(2830.860352, 2.688663, 1264.097778));
+		safeZones.Insert(Vector(2799.674072, 7.554385, 1313.999878));
+		safeZones.Insert(Vector(2752.633301, 1.322555, 1342.637207));
+		safeZones.Insert(Vector(2717.519775, 2.653562, 1344.919312));
+
 		int index = Math.RandomInt(0, safeZones.Count());
 
 		return safeZones[index]; // Retorna a coordenada aleatória
@@ -230,6 +257,10 @@ class CustomMission: MissionServer
 					target.Update();
 					target.MessageStatus("Jogador movido para nova posição: " + newPos.ToString());	
 					break;
+				case "getposition":
+					target.MessageStatus("Posição atual: " + target.GetPosition().ToString());
+					WriteToLog(target.GetPosition().ToString());
+					break;
 			}
 		}
 
@@ -280,7 +311,7 @@ class CustomMission: MissionServer
 			GiveAdminLoadout(m_player);
 		}
 		m_player.SetAllowDamage(false);
-		
+
 		GiveSurvivorLoadout(m_player);
 		m_player.SetHealth("", "", 100);
 		m_player.SetHealth("GlobalHealth", "Blood", 5000);
@@ -301,6 +332,22 @@ class CustomMission: MissionServer
 		m_player.SetAllowDamage(true);
 
 		return m_player;
+	}
+
+	void WriteToLog(string content)
+	{
+		string fileName = "$profile:init.log"; // Caminho dentro da pasta do servidor
+		FileHandle file = OpenFile(fileName, FileMode.APPEND);
+
+		if (file != 0)
+		{
+			FPrintln(file, content); // Escreve a string com quebra de linha
+			CloseFile(file);
+		}
+		else
+		{
+			Print("Erro ao abrir o arquivo para escrita.");
+		}
 	}
 
 	override void StartingEquipSetup(PlayerBase player, bool clothesChosen)
