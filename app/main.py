@@ -37,7 +37,7 @@ def get_jogadores_online():
 def get_jogadores():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM players_database")
+    cursor.execute("SELECT * FROM players_database ORDER BY PlayerName ASC")  
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
@@ -57,7 +57,7 @@ def get_datas_por_player(player_id: str):
     return [row["Data"] for row in rows]
 
 @app.get("/api/coords/{player_id}/{data}")
-def get_coords_por_data(player_id: str, data: str):
+def get_coords_por_playerid_data(player_id: str, data: str):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -69,8 +69,21 @@ def get_coords_por_data(player_id: str, data: str):
     conn.close()
     return [dict(row) for row in rows]
 
+@app.get("/api/coords/{data}")
+def get_coords_por_data(data: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Distinct PlayerID FROM players_coord
+        WHERE DATE(Data) = ?
+        ORDER BY Data ASC
+    """, (data,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
 @app.get("/api/coords_events/{player_id}/{data}")
-def get_coords_por_data(player_id: str, data: str):
+def get_coords_events_por_playerid_data(player_id: str, data: str):
     conn = get_db_connection()
     cursor = conn.cursor()
 

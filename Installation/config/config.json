@@ -1,0 +1,29 @@
+{
+    "Linux": {
+        "User": {
+            "Name": "dayzadmin",        
+            "Password": "********"
+        }    
+    },
+    "DayZ": {
+        "ServerName": "[BR] BECO-C1 | TESTES | discord.gg/Zatp99MQ3a",
+        "PasswordAdmin": "*********",
+        "MaxPlayers": 60,
+        "MotdMessage": "Bem vindo ao servidor!",
+        "MotdIntervalSeconds": 600,
+        "PcCpuMaxCores": 4,
+        "PcCpuReservedcores": 1,        
+        "RConPassword": "**************",
+        "MaxPing": 400,
+        "RestrictRCon": "0",
+        "RConPort": "2305",
+        "RConIP": "0.0.0.0",
+        "MpMission": "dayzOffline.chernarusplus",
+        "LimitFPS": "200"
+    },
+    "App": {
+    },
+    "Steam": {
+        "Account": "contasteam"        
+    }    
+}

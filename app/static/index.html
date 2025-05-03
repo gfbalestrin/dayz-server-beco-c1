@@ -123,6 +123,10 @@
                         <label for="playerSelect" class="label-text">Todos players<span
                                 id="txtTotalPlayers"></span>:</label>
                         <select id="playerSelect" multiple class="form-control-lg" size="10"></select>
+                        <div>
+                            <button class="btn btn-sm btn-secondary" onclick="ExecucaoPorDataDeHoje()">Online hoje</button>
+                            <button class="btn btn-sm btn-secondary" onclick="ExecucaoInicial()">Online agora (padrão)</button>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -240,6 +244,19 @@
         </div>
     </div>
 
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="toastInfo" class="toast align-items-center text-white bg-info border-0" role="success"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastInfoMensagem">
+                    Info.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
+
     <div id="loadingSpinner" class="d-none text-center">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Carregando...</span>
@@ -333,6 +350,23 @@
             toast.show();
         }
 
+        function mostrarToastInfo(mensagem) {
+            // const toastElements = document.querySelectorAll('.toast');
+            // toastElements.forEach(toastEl => {
+            // const toast = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
+            //     toast.hide();
+            // });
+            const toastEl = document.getElementById('toastInfo');
+            const toastBody = document.getElementById('toastInfoMensagem');
+
+            toastBody.textContent = mensagem;
+
+            const toast = new bootstrap.Toast(toastEl, {
+            autohide: false  // não esconde automaticamente
+            });             
+            toast.show();
+        }
+
         function estaNoIntervalo(dateStr, inicio, fim) {
             if (!dateStr)
                 return false;
@@ -371,9 +405,44 @@
 
         }
 
+        async function carregarJogadoresPorData(filtroData = "") {
+            if (!filtroData)
+            {
+                const hoje = new Date();
+                const saoPauloDate = new Intl.DateTimeFormat('pt-BR', {
+                    timeZone: 'America/Sao_Paulo',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(hoje);
+                const [day, month, year] = saoPauloDate.split('/');
+                filtroData = `${year}-${month}-${day}`;
+            }            
+
+            let resFiltro = await fetch(`/api/coords/${filtroData}`);
+            let jogadoresFiltro = await resFiltro.json();
+
+            for (let jogador_filtro of jogadoresFiltro) {
+                let jogador_filtro_id = jogador_filtro.PlayerID.trim();
+                let encontrou = false;
+                for (let option of playerSelect.options) {
+                    let jogador_option_id = option.value;
+                    if (jogador_option_id != jogador_filtro_id) {
+                        continue;
+                    }
+                    console.log(`Encontrou!`)
+                    option.selected = true;
+                    encontrou = true;
+                }
+                if (!encontrou)
+                    mostrarToastErro(`Falha ao carregar dados do jogador ${jogador_online_id}!`);
+            }
+        }
+
         async function carregarJogadores() {
-            const res = await fetch('/api/jogadores');
-            const jogadores = await res.json();
+            let res = await fetch('/api/jogadores');
+            let jogadores = await res.json();
+            
             txtTotalPlayers.innerHTML = ` (${jogadores.length})`;
             playerSelect.innerHTML = jogadores.map(j =>
                 `<option value="${j.PlayerID}" data-nome="${j.PlayerName}" data-steam="${j.SteamName}">${j.PlayerName} (${j.SteamName})</option>`
@@ -519,7 +588,10 @@
             hideLoading();
             redesenharCanvas();
 
-            mostrarToastSucesso("Informações atualizadas com sucesso!");
+            if (!apenasOnline)
+            {
+                mostrarToastInfo(`Exibindo coordenadas de ${jogadores.length} jogadores conforme filtro.`);
+            }
         }
 
         function desenharPontoAtual() {
@@ -790,7 +862,26 @@
             await carregarJogadoresOnline();
             await carregarCoordenadas(true);
             await carregarDatas();
-            mostrarToastSucesso("Informações atualizadas com sucesso!");
+            mostrarToastInfo(`Exibindo última posição dos jogadores online ${txtTotalPlayersOnline.innerHTML }.`);
+        }
+        async function ExecucaoPorDataDeHoje() {
+            const hoje = new Date();
+            const saoPauloDate = new Intl.DateTimeFormat('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(hoje);
+            const [day, month, year] = saoPauloDate.split('/');
+            ExecucaoPorData(`${year}-${month}-${day}`)
+        }
+        async function ExecucaoPorData(filtrarData = "") {
+            ctx.drawImage(imagem, offsetX, offsetY);
+            await carregarJogadores();
+            await carregarJogadoresPorData(filtrarData);
+            await carregarCoordenadas(true);
+            await carregarDatas();
+            mostrarToastInfo(`Exibindo última posição de todos os jogadores que logaram na data de ${filtrarData}.`);
         }
         window.onload = async function () {
             await ExecucaoInicial();

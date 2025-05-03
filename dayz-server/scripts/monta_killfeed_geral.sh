@@ -4,8 +4,8 @@ source ./config.sh
 
 PLAYERS_BECO_C1_DB="$AppFolder/$AppPlayerBecoC1DbFile"
 
-Title="💀 **Ranking geral de kills (atualizado em $CURRENT_DATE):**\n\n"
-Content=""
+CURRENT_DATE=`date "+%d/%m/%Y %H:%M:%S"`
+Content="💀 **Ranking geral de kills (atualizado em $CURRENT_DATE):**\n\n"
 i=1
 while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills LongestKill Weapon; do
     echo "--------------------------------------------"

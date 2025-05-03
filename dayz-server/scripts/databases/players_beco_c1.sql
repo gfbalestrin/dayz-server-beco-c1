@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS players_stats (
     Longest_survivor_hit REAL,
     Players_killed INTEGER,
     Infected_killed INTEGER,
-    Playtime REAL
+    Playtime REAL,
     FOREIGN KEY (PlayerID) REFERENCES players_database(PlayerID) ON DELETE CASCADE
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS ranking_infected_killed (
     Longest_survivor_hit REAL,
     Players_killed INTEGER,
     Infected_killed INTEGER,
-    Playtime REAL
+    Playtime REAL,
     FOREIGN KEY (PlayerID) REFERENCES players_database(PlayerID)
 );
 

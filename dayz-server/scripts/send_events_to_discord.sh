@@ -62,10 +62,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 				INSERT_CUSTOM_LOG "PlayerIdVictim não encontrado no banco de dados. Ignorando log para o discord..." "ERROR" "$ScriptName"
 				continue
 			fi	
-			
-			Content="Player $SafePlayerVictimInfo foi atingido por $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $DistanceMeter metros, HP restante: $Health"
+			metros=$(echo $DistanceMeter | cut -d '.' -f 1)
+			Content="Jogador $SafePlayerVictimInfo foi atingido por $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $metros metros, HP restante: $Health"
 		else
-			INSERT_CUSTOM_LOG "Falha ao realizar o parse das informações da dano do player" "ERROR" "$ScriptName"
+			INSERT_CUSTOM_LOG "Falha ao realizar o parse das informações de dano do player" "ERROR" "$ScriptName"
 		fi
 	# Chat do jogo com comandos do admin
 	elif [[ "$Content" == *"Chat("* ]]; then
@@ -141,10 +141,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		fi
 
 		if [[ "$Content" == *"is connected"* ]]; then
-			Content="Player **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) is connected"
+			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) conectou"
 			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" &
 		elif [[ "$Content" == *"has been disconnected"* ]]; then
-			Content="Player **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) has been disconnected"
+			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) desconectou"
 			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "DISCONNECT" &
 		fi
 	# Evento de morte por player
@@ -184,19 +184,27 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		fi	
 
 		if [[ -n "$SafePlayerKillerInfo" && -n "$SafePlayerVictimInfo" ]]; then
-			Content="💀 Player $SafePlayerVictimInfo foi executado pelo $SafePlayerKillerInfo. Arma: $Weapon, distância: $Distance metros, posição do killer: <ocultado>, posição do killed: <ocultado>"
+			metros=$(echo $Distance | cut -d '.' -f 1)
+			Content="💀 Jogador $SafePlayerVictimInfo foi executado por $SafePlayerKillerInfo. Arma: $Weapon, distância: $metros metros"
 		else
 			INSERT_CUSTOM_LOG "PlayerIdKilled ou PlayerIdVictim não encontrado no banco de dados. Usando o conteúdo original para o discord..." "ERROR" "$ScriptName"
 		fi
 	# Eventos de restart do server
 	elif [[ "$Line" == *"AdminLog started on"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"
-		Content="Server successfully restarted!"
+		Content="Servidor reiniciado. Aguardando liberação de conexão..."
 		sleep 1
 		# Configurar visudo
 		# <usuario> ALL=NOPASSWD: /bin/systemctl restart dayz-infos-logs-discord.service
 		sudo systemctl restart dayz-infos-logs-discord.service
-	else	
+	else
+					
+		Content="${Content//is unconscious/está inconsciente}"
+		Content="${Content//bled out/morreu por sangramento}"
+		Content="${Content//killed by/morto por}"
+		Content="${Content/(DEAD)/}"
+		Content=$(echo "$Content" | sed -E 's/died\. Status> Water: ([0-9]+\.[0-9]+) Energy: ([0-9]+\.[0-9]+) Bleed sources: ([0-9]+)/morreu. Stats> Sede: \1 Energia: \2 Cortes: \3/')
+
 		PlayerId=$(echo "$Content" | grep -oP 'id=\K[^ ]+' | head -n 1)
 		
 		if [[ ${#PlayerId} -eq 44 ]]; then
@@ -222,7 +230,11 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		else
 			INSERT_CUSTOM_LOG "Não foi possível capturar o PlayerId do evento" "INFO" "$ScriptName"		
 		fi
+
+		Content="${Content//Player/Jogador}"
 	fi
+
+	
 
 	# Remove aspas
 	Content=$(echo $Content | sed -e 's|["'\'']||g')
