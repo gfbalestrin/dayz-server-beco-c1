@@ -76,21 +76,21 @@ mkdir -p scripts
 cd scripts
 
 curl -o config.json https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/config.json
-curl -o config.sh https://github.com/gfbalestrin/dayz-server-beco-c1/blob/main/dayz-server/scripts/config.sh
+curl -o config.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/config.sh
 chmod +x config.sh
 
 jq --arg v "$DayzFolder" '.Dayz.ServerFolder = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/storage_1/players.db" '.Dayz.PlayerDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt" '.Dayz.AdminIdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt" '.Dayz.AdminCmdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "mpmissions/$DayzMpmission/storage_1/players.db" '.Dayz.PlayerDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "mpmissions/$DayzMpmission/admin_ids.txt" '.Dayz.AdminIdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "mpmissions/$DayzMpmission/admin_cmds.txt" '.Dayz.AdminCmdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 AppFolder="$DayzFolder/scripts"
 jq --arg v "$AppFolder" '.App.Folder = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/databases/players_beco_c1.db" '.App.PlayerBecoC1DbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/databases/server_beco_c1_logs.db" '.App.ServerBecoC1LogsDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/atualiza_players_online.sh" '.App.ScriptUpdatePlayersOnlineFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "$AppFolder/captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "databases/players_beco_c1.db" '.App.PlayerBecoC1DbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "databases/server_beco_c1_logs.db" '.App.ServerBecoC1LogsDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "atualiza_players_online.sh" '.App.ScriptUpdatePlayersOnlineFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "1" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
 curl -o atualiza_players_online.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/atualiza_players_online.sh
@@ -136,3 +136,72 @@ chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/
 echo "✔ Scripts configurados com sucesso."
 echo "Configurando serviço de logs..."
 sleep 5
+
+# Criar dayz-logs-discord.service
+cat <<EOF > /etc/systemd/system/dayz-logs-discord.service
+[Unit]
+Description=DayZ Logs Discord
+Wants=network-online.target
+After=network.target
+
+[Service]
+ExecStart=${DayzFolder}/scripts/send_events_to_discord.sh &
+WorkingDirectory=${DayzFolder}/scripts/
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s INT \$MAINPID
+User=${LinuxUserName}
+Group=${LinuxUserName}
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Criar dayz-infos-logs-discord.service
+cat <<EOF > /etc/systemd/system/dayz-infos-logs-discord.service
+[Unit]
+Description=DayZ Infos Logs Discord
+Wants=network-online.target
+After=network.target
+
+[Service]
+ExecStart=${DayzFolder}/scripts/send_events_infos_to_discord.sh &
+WorkingDirectory=${DayzFolder}/scripts/
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s INT \$MAINPID
+User=${LinuxUserName}
+Group=${LinuxUserName}
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Atualizar systemd e habilitar os serviços
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl enable dayz-logs-discord.service
+systemctl enable dayz-infos-logs-discord.service
+
+systemctl start dayz-logs-discord.service
+systemctl start dayz-infos-logs-discord.service
+
+systemctl status dayz-logs-discord.service
+systemctl status dayz-infos-logs-discord.service
+
+echo "Serviços criados e habilitados com sucesso."
+
+cd "$DayzFolder/mpmissions/$DayzMpmission/"
+rm init.c
+curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/init.c
+chown "$LinuxUserName:$LinuxUserName" init.c
+mkdir admin
+cd admin
+curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/AdminLoadout.c
+chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
+curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c
+chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
+
+systemctl restart dayz-server.service
