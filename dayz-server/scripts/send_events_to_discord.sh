@@ -74,6 +74,12 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			INSERT_CUSTOM_LOG "Ignorando pois PlayerId está em branco" "INFO" "$ScriptName"
 			continue
 		fi
+		if [[ "$DayzDeathmatch" -eq 1 ]]; then
+			Command=$(echo "$Content" | sed -n 's|.*\/admin ||p')
+			echo "$PlayerId $Command" >>"$DayzServerFolder/$DayzAdminCmdsFile"
+			continue
+		fi		
+
 		if ! grep -q "$PlayerId" "$DayzServerFolder/$DayzAdminIdsFile"; then			
 			continue
 		fi

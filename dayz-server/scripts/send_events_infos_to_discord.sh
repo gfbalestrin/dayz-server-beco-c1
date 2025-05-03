@@ -147,7 +147,7 @@ function MonitorLog() {
 
 				PlayerNew="**$PlayerName** ([$PlayerSteamName](<https://steamcommunity.com/profiles/$PlayerSteamId>))"
 				PlayerOld="**$PlayerNameCurrent** ([$PlayerSteamNameCurrent](<https://steamcommunity.com/profiles/$PlayerSteamIdCurrent>))"
-				SEND_DISCORD_WEBHOOK "Jogador $PlayerOld alterou nome para $PlayerNew" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+				#SEND_DISCORD_WEBHOOK "Jogador $PlayerOld alterou nome para $PlayerNew" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
 			fi
 		elif [[ "$Line" == *"Termination successfully completed"* ]]; then
 			INSERT_CUSTOM_LOG "Fim do arquivo identificado." "INFO" "$ScriptName"

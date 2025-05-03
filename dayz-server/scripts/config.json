@@ -5,7 +5,8 @@
         "LogRPTFile": "profiles/DayZServer_current.RPT",
         "PlayerDbFile": "mpmissions/dayzOffline.chernarusplus/storage_1/players.db",
         "AdminIdsFile": "mpmissions/dayzOffline.chernarusplus/admin_ids.txt",
-        "AdminCmdsFile": "mpmissions/dayzOffline.chernarusplus/admin_cmds.txt"
+        "AdminCmdsFile": "mpmissions/dayzOffline.chernarusplus/admin_cmds.txt",
+        "Deathmatch": "0"
     },
     "App": {
         "Folder": "/etc/servers/dayz-server/scripts",

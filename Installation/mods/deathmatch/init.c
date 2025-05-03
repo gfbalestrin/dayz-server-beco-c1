@@ -42,6 +42,8 @@ class CustomMission: MissionServer
 	vector areaMin = "2450 0 1090"; // X Y Z (Y não é usado nesse caso)
 	vector areaMax = "3280 0 1462";
 
+	
+
 	override void OnUpdate(float timeslice)
 	{
 		super.OnUpdate(timeslice);
@@ -66,6 +68,16 @@ class CustomMission: MissionServer
 		}
 	}
 
+	vector GetRandomSafeSpawnPosition()
+	{
+		ref array<vector> safeZones = new array<vector>;
+		safeZones.Insert(Vector(2671, 3, 1372));  // Galpão da prisão
+		safeZones.Insert(Vector(2651, 1, 1395));  // Skipinho da prisão
+		int index = Math.RandomInt(0, safeZones.Count());
+
+		return safeZones[index]; // Retorna a coordenada aleatória
+	}
+
 	void CheckPlayerArea(PlayerBase player)
 	{
 		vector pos = player.GetPosition();
@@ -73,12 +85,11 @@ class CustomMission: MissionServer
 		// Checa se o jogador está fora da área permitida
 		if (pos[0] < areaMin[0] || pos[0] > areaMax[0] || pos[2] < areaMin[2] || pos[2] > areaMax[2])
 		{
-			// Exemplo: teleportar de volta ao centro da área
-			vector safePos = "2686 0 1312";
-			player.SetPosition(safePos);
+			// Aplica dano de corte (faz o jogador começar a sangrar)
+            string ammoType = "MeleeSlash";
+            player.ProcessDirectDamage(DT_CUSTOM, player, "", ammoType, "0 0 0", 5.0);
 
-			// Opcional: mensagem para o jogador
-			player.MessageStatus("Você não pode sair da zona segura!");
+            player.MessageStatus("Você saiu da zona segura e começou a sangrar!");
 		}
 	}
 
@@ -260,12 +271,21 @@ class CustomMission: MissionServer
 		GetGame().SelectPlayer( identity, m_player );
 
 		array<string> adminIDs = LoadAdminIDs("$mission:admin_ids.txt");
-        	if (adminIDs.Find(identity.GetId()) != -1 && identity.GetName() == "Admin")
-        	{
-            		m_player.SetAllowDamage(false);
-            		m_player.MessageStatus("⚡ God Mode Ativado (Admin)");
-            		GiveAdminLoadout(m_player);
-        	}
+		if (adminIDs.Find(identity.GetId()) != -1 && identity.GetName() == "Admin")
+		{
+			m_player.SetAllowDamage(false);
+			m_player.MessageStatus("⚡ God Mode Ativado (Admin)");
+			GiveAdminLoadout(m_player);
+		}
+
+		// Obtenha uma posição aleatória da zona segura
+		vector safePosition = GetRandomSafeSpawnPosition();
+
+		// Define a posição do jogador para a coordenada da zona segura
+		m_player.SetPosition(safePosition);
+
+		// Mensagem opcional de boas-vindas
+		m_player.MessageStatus("Você foi teletransportado para uma zona segura!");
 
 		return m_player;
 	}
