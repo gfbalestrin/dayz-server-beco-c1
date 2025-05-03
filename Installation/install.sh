@@ -196,7 +196,7 @@ sed -i "s#serverTimePersistent=0;#serverTimePersistent=1;#g" "$ServerDZFile"
 # Adicionar antes de 'class Missions'
 motd="motd[] = { \"$DayzMotdMessage\" };"
 sed -i "/class Missions/i $motd" "$ServerDZFile"
-sed -i "/class Missions/i motdInterval = $DayzMotdIntervalSeconds" "$ServerDZFile"
+sed -i "/class Missions/i motdInterval = $DayzMotdIntervalSeconds;" "$ServerDZFile"
 sed -i "/class Missions/i BattlEye = 1;" "$ServerDZFile" 
 
 echo "Arquivo $ServerDZFile editado com sucesso."
