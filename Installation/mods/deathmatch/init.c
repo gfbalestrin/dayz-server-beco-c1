@@ -63,6 +63,8 @@ class CustomMission: MissionServer
 				if (player)
 				{
 					CheckPlayerArea(player);
+
+					player.MessageStatus("Para criar um item use: /admin giveitem <item_name>");
 				}
 			}
 		}
@@ -277,6 +279,15 @@ class CustomMission: MissionServer
 			m_player.MessageStatus("⚡ God Mode Ativado (Admin)");
 			GiveAdminLoadout(m_player);
 		}
+		m_player.SetAllowDamage(false);
+		
+		GiveSurvivorLoadout(m_player);
+		m_player.SetHealth("", "", 100);
+		m_player.SetHealth("GlobalHealth", "Blood", 5000);
+		m_player.SetHealth("GlobalHealth", "Shock", 0);
+		m_player.GetStatEnergy().Set(4000);
+		m_player.GetStatWater().Set(4000);
+		m_player.MessageStatus("Você foi curado");
 
 		// Obtenha uma posição aleatória da zona segura
 		vector safePosition = GetRandomSafeSpawnPosition();
@@ -286,6 +297,8 @@ class CustomMission: MissionServer
 
 		// Mensagem opcional de boas-vindas
 		m_player.MessageStatus("Você foi teletransportado para uma zona segura!");
+
+		m_player.SetAllowDamage(true);
 
 		return m_player;
 	}
@@ -297,36 +310,36 @@ class CustomMission: MissionServer
 		ItemBase itemBs;
 		float rand;
 
-		itemClothing = player.FindAttachmentBySlotName( "Body" );
-		if ( itemClothing )
-		{
-			SetRandomHealth( itemClothing );
+		// itemClothing = player.FindAttachmentBySlotName( "Body" );
+		// if ( itemClothing )
+		// {
+		// 	SetRandomHealth( itemClothing );
 			
-			itemEnt = itemClothing.GetInventory().CreateInInventory( "BandageDressing" );
-			player.SetQuickBarEntityShortcut(itemEnt, 2);
+		// 	itemEnt = itemClothing.GetInventory().CreateInInventory( "BandageDressing" );
+		// 	player.SetQuickBarEntityShortcut(itemEnt, 2);
 			
-			string chemlightArray[] = { "Chemlight_White", "Chemlight_Yellow", "Chemlight_Green", "Chemlight_Red" };
-			int rndIndex = Math.RandomInt( 0, 4 );
-			itemEnt = itemClothing.GetInventory().CreateInInventory( chemlightArray[rndIndex] );
-			SetRandomHealth( itemEnt );
-			player.SetQuickBarEntityShortcut(itemEnt, 1);
+		// 	string chemlightArray[] = { "Chemlight_White", "Chemlight_Yellow", "Chemlight_Green", "Chemlight_Red" };
+		// 	int rndIndex = Math.RandomInt( 0, 4 );
+		// 	itemEnt = itemClothing.GetInventory().CreateInInventory( chemlightArray[rndIndex] );
+		// 	SetRandomHealth( itemEnt );
+		// 	player.SetQuickBarEntityShortcut(itemEnt, 1);
 
-			rand = Math.RandomFloatInclusive( 0.0, 1.0 );
-			if ( rand < 0.35 )
-				itemEnt = player.GetInventory().CreateInInventory( "Apple" );
-			else if ( rand > 0.65 )
-				itemEnt = player.GetInventory().CreateInInventory( "Pear" );
-			else
-				itemEnt = player.GetInventory().CreateInInventory( "Plum" );
-			player.SetQuickBarEntityShortcut(itemEnt, 3);
-			SetRandomHealth( itemEnt );
-		}
+		// 	rand = Math.RandomFloatInclusive( 0.0, 1.0 );
+		// 	if ( rand < 0.35 )
+		// 		itemEnt = player.GetInventory().CreateInInventory( "Apple" );
+		// 	else if ( rand > 0.65 )
+		// 		itemEnt = player.GetInventory().CreateInInventory( "Pear" );
+		// 	else
+		// 		itemEnt = player.GetInventory().CreateInInventory( "Plum" );
+		// 	player.SetQuickBarEntityShortcut(itemEnt, 3);
+		// 	SetRandomHealth( itemEnt );
+		// }
 		
-		itemClothing = player.FindAttachmentBySlotName( "Legs" );
-		if ( itemClothing )
-			SetRandomHealth( itemClothing );
+		// itemClothing = player.FindAttachmentBySlotName( "Legs" );
+		// if ( itemClothing )
+		// 	SetRandomHealth( itemClothing );
 		
-		itemClothing = player.FindAttachmentBySlotName( "Feet" );
+		// itemClothing = player.FindAttachmentBySlotName( "Feet" );
 	}
 };
 

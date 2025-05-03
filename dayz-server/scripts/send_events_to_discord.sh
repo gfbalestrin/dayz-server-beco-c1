@@ -75,6 +75,13 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			continue
 		fi
 		if [[ "$DayzDeathmatch" -eq 1 ]]; then
+			if [[ "$Content" == *"teleport"* ]]; then
+				continue
+			elif [[ "$Content" == *"godmode"* ]]; then
+				continue
+			elif [[ "$Content" == *"heal"* ]]; then
+				continue
+			fi
 			Command=$(echo "$Content" | sed -n 's|.*\/admin ||p')
 			echo "$PlayerId $Command" >>"$DayzServerFolder/$DayzAdminCmdsFile"
 			continue
