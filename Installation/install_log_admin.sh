@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DELAY=10
+DELAY=5
 
 # Função de ajuda
 usage() {
@@ -79,7 +79,31 @@ curl -o config.json https://raw.githubusercontent.com/gfbalestrin/dayz-server-be
 curl -o config.sh https://github.com/gfbalestrin/dayz-server-beco-c1/blob/main/dayz-server/scripts/config.sh
 chmod +x config.sh
 
-curl -o send_events_to_discord.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/send_events_to_discord.sh
+jq --arg v "$DayzFolder" '.Dayz.ServerFolder = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/storage_1/players.db" '.Dayz.PlayerDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt" '.Dayz.AdminIdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt" '.Dayz.AdminCmdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+AppFolder="$DayzFolder/scripts"
+jq --arg v "$AppFolder" '.App.Folder = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/databases/players_beco_c1.db" '.App.PlayerBecoC1DbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/databases/server_beco_c1_logs.db" '.App.ServerBecoC1LogsDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/atualiza_players_online.sh" '.App.ScriptUpdatePlayersOnlineFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$AppFolder/captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "true" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+curl -o atualiza_players_online.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/atualiza_players_online.sh
+chmod +x atualiza_players_online.sh
+
+echo "#!/bin/bash" > "extrai_players_stats.sh"
+chmod +x extrai_players_stats.sh
+
+curl -o monta_killfeed_geral.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/monta_killfeed_geral.sh
+chmod +x monta_killfeed_geral.sh
+
+curl -o captura_dano_player.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/captura_dano_player.sh
+chmod +x captura_dano_player.sh
 
 curl -o send_events_to_discord.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/send_events_to_discord.sh
 chmod +x send_events_to_discord.sh
@@ -100,5 +124,15 @@ echo "✔ Banco players_beco_c1.db criado com sucesso."
 sqlite3 "server_beco_c1_logs.db" < "server_beco_c1_logs.sql"
 echo "✔ Banco server_beco_c1_logs.db criado com sucesso."
 
-
 chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder"
+
+echo "" > "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt"
+
+echo "" > "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt"
+
+
+echo "✔ Scripts configurados com sucesso."
+echo "Configurando serviço de logs..."
+sleep 5

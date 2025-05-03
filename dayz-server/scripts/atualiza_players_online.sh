@@ -14,6 +14,7 @@ EVENT=$2
 CONTENT=""
 
 function SincronizaDiscord() {
+    [[ -z "$DiscordDesactive" || "$DiscordDesactive" -eq 0 ]] || return 0
     URL="https://discord.com/api/v10/channels/$DISCORD_CHANNEL_ID/messages/$DISCORD_MESSAGE_ID"
     echo "Atualizando a mensagem com ID $DISCORD_MESSAGE_ID no canal $DISCORD_CHANNEL_ID..."
     echo "Mensagem: $CONTENT"

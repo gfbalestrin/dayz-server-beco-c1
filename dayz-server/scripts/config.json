@@ -20,6 +20,7 @@
         ]
     },
     "Discord": {
+        "Desactive": false,
         "WebhookLogs": "https://discord.com/api/webhooks/1111111111111111111/abcdefghijklmnopqrstuvwxyz1234567890",
         "WebhookLogsAdmin": "https://discord.com/api/webhooks/222222222222222222/abcdefghijklmnopqrstuvwxyz1234567890",
         "ChannelPlayersOnline": {

@@ -48,6 +48,7 @@ for ((i = 0; i < spoof_count; i++)); do
     export AppSpoofTo_$i=$(jq -r ".App.SteamIdSpoof[$i].To" "$CONFIG_FILE")
 done
 
+export DiscordDesactive=$(jq -r '.Discord.Desactive' "$CONFIG_FILE")
 export DiscordWebhookLogs=$(jq -r '.Discord.WebhookLogs' "$CONFIG_FILE")
 export DiscordWebhookLogsAdmin=$(jq -r '.Discord.WebhookLogsAdmin' "$CONFIG_FILE")
 export DiscordChannelPlayersOnlineChannelId=$(jq -r '.Discord.ChannelPlayersOnline.ChannelId' "$CONFIG_FILE")
@@ -56,6 +57,7 @@ export DiscordChannelPlayersOnlineBotToken=$(jq -r '.Discord.ChannelPlayersOnlin
 export DiscordChannelPlayersStatsChannelId=$(jq -r '.Discord.ChannelPlayersStats.ChannelId' "$CONFIG_FILE")
 export DiscordChannelPlayersStatsMessageId=$(jq -r '.Discord.ChannelPlayersStats.MessageId' "$CONFIG_FILE")
 export DiscordChannelPlayersStatsBotToken=$(jq -r '.Discord.ChannelPlayersStats.BotToken' "$CONFIG_FILE")
+
 
 INSERT_ADM_LOG() {
     local message="$1"
@@ -474,6 +476,7 @@ GET_DAYZ_PLAYER_DATA(){
 }
 
 SEND_DISCORD_WEBHOOK() {
+    [[ -z "$DiscordDesactive" || "$DiscordDesactive" -eq 0 ]] || return 0
     local content="$1"
     local webhook_url="$2"
     local current_date="${3:-$(date '+%d/%m/%Y %H:%M:%S')}"
@@ -488,7 +491,7 @@ SEND_DISCORD_WEBHOOK() {
 
     local payload=$(
         cat <<EOF
-{ "content": "$current_date - $content" }
+{ "content": "$current_date - $content" }   
 EOF
     )
 
