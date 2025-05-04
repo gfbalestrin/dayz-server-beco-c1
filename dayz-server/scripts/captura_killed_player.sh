@@ -31,11 +31,12 @@ LOCAL=$(echo "$Message" | grep -oP 'into \K[^ ]+' | sed 's/([0-9]*)//g')
 DANO=$(echo "$Message" | grep -oP 'for \K[0-9.]+(?= damage)')
 TIPO=$(echo "$Message" | grep -oP 'damage \(\K[^)]+' || echo "Desconhecido")
 DISTANCIA=$(echo "$Message" | grep -oP 'from \K[0-9.]+(?= meters)' || echo "0")
-ARMA=$(echo "$Message" | grep -oP 'with \K[^ ]+' || echo "Desconhecida")
+DISTANCIA=$(echo $DISTANCIA | cut -d '.' -f 1)
+ARMA=$(echo "$Message" | grep -oP 'with \K[^ ]+' || echo "Soco")
 
 # Posições
-POS_ATINGIDO=$(echo "$Message" | grep -oP 'pos=<[^>]+>' | sed -n '1p' | sed 's/pos=<//' | sed 's/>//')
-POS_ATACANTE=$(echo "$Message" | grep -oP 'pos=<[^>]+>' | sed -n '2p' | sed 's/pos=<//' | sed 's/>//')
+POS_ATINGIDO=$(echo "$Message" | grep -oP 'pos=<[^>]+>' | sed -n '1p' | sed 's/pos=<//' | sed 's/>//' | sed 's/, */,/g')
+POS_ATACANTE=$(echo "$Message" | grep -oP 'pos=<[^>]+>' | sed -n '2p' | sed 's/pos=<//' | sed 's/>//' | sed 's/, */,/g')
 
 # Exibição
 # echo "O jogador \"$ATINGIDO\" (ID: $ID_ATINGIDO) foi atingido por \"$ATACANTE\" (ID: $ID_ATACANTE)."

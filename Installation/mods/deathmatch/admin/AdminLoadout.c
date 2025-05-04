@@ -7,7 +7,7 @@ void GiveSurvivorLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("BalaclavaMask_Black");
     player.GetInventory().CreateInInventory("TacticalGloves_Black");
     player.GetInventory().CreateInInventory("TacticalGoggles");
-
+    
      // Anexando os óculos de visão noturna ao capacete
     EntityAI helmet = player.GetInventory().CreateInInventory("Mich2001Helmet");
     EntityAI nvgoggles = helmet.GetInventory().CreateAttachment("NVGoggles");
@@ -27,6 +27,13 @@ void GiveSurvivorLoadout(PlayerBase player)
     // Mochila com espaço
     player.GetInventory().CreateInInventory("AliceBag_Camo");
     player.GetInventory().CreateInInventory("StarlightOptic");
+    player.GetInventory().CreateInInventory("Rangefinder");    
+
+    // Itens medicos
+    player.GetInventory().CreateInInventory("BandageDressing");
+    player.GetInventory().CreateInInventory("Morphine");
+    player.GetInventory().CreateInInventory("TetracyclineAntibiotics");
+    player.GetInventory().CreateInInventory("Painkiller");
 
     // Arma principal + miras + munição
     EntityAI m4 = player.GetInventory().CreateInInventory("M4A1");
@@ -35,6 +42,7 @@ void GiveSurvivorLoadout(PlayerBase player)
     m4.GetInventory().CreateAttachment("M4_RISHndgrd_Black");
     m4.GetInventory().CreateAttachment("M4_MPBttstck_Black");
     m4.GetInventory().CreateAttachment("Mag_STANAG_30Rnd");
+    player.SetQuickBarEntityShortcut(m4, 0, true);
 
     // Munições e carregadores
     for (int i = 0; i < 4; i++)
@@ -64,6 +72,7 @@ void GiveSurvivorLoadout(PlayerBase player)
 
     pistol.GetInventory().CreateAttachment("PistolSuppressor");
     pistol.GetInventory().CreateAttachment("UniversalLight");
+    player.SetQuickBarEntityShortcut(pistol, 3, true);
 
     // Equipamento de munição adicional
     player.GetInventory().CreateInInventory("Ammo_9x19");  // Reserva
@@ -74,6 +83,7 @@ void GiveSurvivorLoadout(PlayerBase player)
     EntityAI tundra = player.GetInventory().CreateInInventory("Winchester70");
     tundra.GetInventory().CreateAttachment("HuntingOptic");
     tundra.GetInventory().CreateAttachment("ImprovisedSuppressor");
+    player.SetQuickBarEntityShortcut(tundra, 2, true);
 
     EntityAI akm = player.GetInventory().CreateInInventory("AKM"); // ou: player.SpawnEntityOnGroundPos("AKM", akmPos);
 
@@ -99,6 +109,17 @@ void GiveSurvivorLoadout(PlayerBase player)
 
         // Munição extra no inventário do jogador (opcional)
         player.GetInventory().CreateInInventory("Ammo_762x39"); // Caixa de munição extra
+
+        player.SetQuickBarEntityShortcut(akm, 1, true);
+    }
+
+    // Cria o cinto
+    EntityAI belt = player.GetInventory().CreateInInventory("UtilityBelt");
+
+    // Cria a faca e anexa no slot do cinto
+    if (belt)
+    {
+        belt.GetInventory().CreateAttachment("CombatKnife");
     }
 }
 

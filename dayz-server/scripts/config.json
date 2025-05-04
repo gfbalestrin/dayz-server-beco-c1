@@ -6,7 +6,8 @@
         "PlayerDbFile": "mpmissions/dayzOffline.chernarusplus/storage_1/players.db",
         "AdminIdsFile": "mpmissions/dayzOffline.chernarusplus/admin_ids.txt",
         "AdminCmdsFile": "mpmissions/dayzOffline.chernarusplus/admin_cmds.txt",
-        "Deathmatch": "0"
+        "Deathmatch": "0",
+        "WipeOnRestart": "0"
     },
     "App": {
         "Folder": "/etc/servers/dayz-server/scripts",
@@ -16,6 +17,7 @@
         "ScriptExtractPlayersStatsFile": "extrai_players_stats.sh",
         "ScriptUpdateGeneralKillfeed": "monta_killfeed_geral.sh",
         "ScriptGetPlayerDamageFile": "captura_dano_player.sh",
+        "ScriptWipeFile": "wipe.sh",
         "SteamIdSpoof": [
             { "From": "11111111111111111", "To": "22222222222222222" }
         ]

@@ -85,7 +85,11 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
             parts = {
                 "Truck_01_Door_1_1",
                 "Truck_01_Door_2_1",
-                "Truck_01_Hood"
+                "Truck_01_Hood",
+                "Truck_01_WheelDouble",
+                "Truck_01_WheelDouble",
+                "Truck_01_WheelDouble",
+                "Truck_01_WheelDouble"
             };
             break;
 

@@ -19,6 +19,7 @@ export DayzPlayerDbFile=$(jq -r '.Dayz.PlayerDbFile' "$CONFIG_FILE")
 export DayzAdminIdsFile=$(jq -r '.Dayz.AdminIdsFile' "$CONFIG_FILE")
 export DayzAdminCmdsFile=$(jq -r '.Dayz.AdminCmdsFile' "$CONFIG_FILE")
 export DayzDeathmatch=$(jq -r '.Dayz.Deathmatch' "$CONFIG_FILE")
+export DayzWipeOnRestart=$(jq -r '.Dayz.WipeOnRestart' "$CONFIG_FILE")
 
 export AppFolder=$(jq -r '.App.Folder' "$CONFIG_FILE")
 export AppPlayerBecoC1DbFile=$(jq -r '.App.PlayerBecoC1DbFile' "$CONFIG_FILE")
@@ -27,6 +28,8 @@ export AppScriptUpdatePlayersOnlineFile=$(jq -r '.App.ScriptUpdatePlayersOnlineF
 export AppScriptExtractPlayersStatsFile=$(jq -r '.App.ScriptExtractPlayersStatsFile' "$CONFIG_FILE")
 export AppScriptUpdateGeneralKillfeed=$(jq -r '.App.ScriptUpdateGeneralKillfeed' "$CONFIG_FILE")
 export AppScriptGetPlayerDamageFile=$(jq -r '.App.ScriptGetPlayerDamageFile' "$CONFIG_FILE")
+export AppScriptWipeFile=$(jq -r '.App.ScriptWipeFile' "$CONFIG_FILE")
+
 
 # Print all variables
 # echo "DayzServerFolder: $DayzServerFolder"
@@ -250,8 +253,8 @@ INSERT_PLAYER_DAMAGE() {
     local Damage="$7"
     local Health="$8"
     local Data="$9"
-    local Weapon="$10"
-    local DistanceMeter="$11"
+    local Weapon="${10}"    
+    local DistanceMeter="${11}"
     
     local max_retries=5
     local retry_delay=0.2

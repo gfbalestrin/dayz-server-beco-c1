@@ -23,11 +23,13 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		echo $DamageParsed
 		INSERT_CUSTOM_LOG "$DamageParsed" "INFO" "$ScriptName"
 		if [ $? -eq 0 ]; then
-			INSERT_CUSTOM_LOG "Inserindo informações de dano no banco de dados..." "ERROR" "$ScriptName"
+			INSERT_CUSTOM_LOG "Inserindo informações de dano no banco de dados..." "INFO" "$ScriptName"
 			PlayerIdAttacker=$(echo "$DamageParsed" | cut -d'|' -f1)
 			PlayerIdVictim=$(echo "$DamageParsed" | cut -d'|' -f2)
 			PosAttacker=$(echo "$DamageParsed" | cut -d'|' -f3)
+			PosAttacker=$(echo "$PosAttacker" | sed 's/, */,/g')
 			PosVictim=$(echo "$DamageParsed" | cut -d'|' -f4)
+			PosVictim=$(echo "$PosVictim" | sed 's/, */,/g')
 			LocalDamage=$(echo "$DamageParsed" | cut -d'|' -f5)
 			HitType=$(echo "$DamageParsed" | cut -d'|' -f6)
 			Damage=$(echo "$DamageParsed" | cut -d'|' -f7)
@@ -35,7 +37,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			Data=$(date "+%Y-%m-%d %H:%M:%S")
 			Weapon=$(echo "$DamageParsed" | cut -d'|' -f9)
 			DistanceMeter=$(echo "$DamageParsed" | cut -d'|' -f10)
-			INSERT_DAMAGE "$PlayerIdAttacker" "$PlayerIdVictim" "$PosAttacker" "$PosVictim" "$LocalDamage" "$HitType" "$Damage" "$Health" "$Data" "$Weapon" "$DistanceMeter"
+			INSERT_PLAYER_DAMAGE "$PlayerIdAttacker" "$PlayerIdVictim" "$PosAttacker" "$PosVictim" "$LocalDamage" "$HitType" "$Damage" "$Health" "$Data" "$Weapon" "$DistanceMeter"
 
 			SafePlayerAttackerInfo=""
 			PlayerAttacker=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerIdAttacker';")
@@ -74,7 +76,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			INSERT_CUSTOM_LOG "Ignorando pois PlayerId está em branco" "INFO" "$ScriptName"
 			continue
 		fi
-		if [[ "$DayzDeathmatch" -eq 1 ]]; then
+		if [[ "$DayzDeathmatch" -eq "1" ]]; then
 			if [[ "$Content" == *"teleport"* ]]; then
 				continue
 			elif [[ "$Content" == *"godmode"* ]]; then
@@ -167,8 +169,11 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		PlayerIdKiller=$(echo "$Content" | sed -n 's|.*id=\([^ ]*\) pos.*|\1|p')
 		Weapon=$(echo "$Content" | grep -oP 'with \K\w+')
 		Distance=$(echo "$Content" | grep -oP 'from \K\d+\.\d+')
+		Distance=$(echo $Distance | cut -d '.' -f 1)
 		PostKilled=$(echo "$Content" | sed -n 's/.*pos=<\([^>]*\)>.*pos=<[^>]*>.*/\1/p')
+		PostKilled=$(echo "$PostKilled" | sed 's/, */,/g')
 		PosKiller=$(echo "$Content" | sed -n 's/.*pos=<[^>]*>.*pos=<\([^>]*\)>.*/\1/p')
+		PosKiller=$(echo "$PosKiller" | sed 's/, */,/g')
 		Data=$(date "+%Y-%m-%d %H:%M:%S")
 		INSERT_KILLFEED "$PlayerIdKiller" "$PlayerIdKilled" "$Weapon" "$Distance" "$Data" "$PosKiller" "$PostKilled"
 

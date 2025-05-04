@@ -60,6 +60,14 @@ function MonitorLog() {
 			
 			continue
 		elif [[ "$Content" == *"Shutting down in 60 seconds"* ]]; then
+			if [[ "$DayzDeathmatch" -eq "1" ]]; then
+				# if [[ "$DayzWipeOnRestart" -eq 1 ]]; then
+				# 	INSERT_CUSTOM_LOG "Executando script de wipe..." "INFO" "$ScriptName"
+				# 	echo "Executando script de wipe..."
+				# 	"$AppFolder/$AppScriptWipeFile"
+				# fi				
+				continue
+			fi
 			"$AppFolder/$AppScriptExtractPlayersStatsFile" &
 			"$AppFolder/$AppScriptUpdateGeneralKillfeed" &
 			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET" &

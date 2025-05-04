@@ -281,6 +281,9 @@ echo "WantedBy=multi-user.target" >> "$DayzServerServiceFile"
 
 echo "Configurando script de update $DayzFolder/update.sh ..."
 echo "#!/bin/bash" > "$DayzFolder/update.sh"
+if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
+    echo "cd /home/dayzadmin/servers/dayz-server/scripts/ && ./wipe.sh" >> "$DayzFolder/update.sh"
+fi
 echo "/home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir $DayzFolder/ +login $SteamAccount +app_update 223350 +quit" >> "$DayzFolder/update.sh"
 chmod +x "$DayzFolder/update.sh"
 

@@ -64,7 +64,8 @@ class CustomMission: MissionServer
 				{
 					CheckPlayerArea(player);
 
-					player.MessageStatus("Para criar um item use: /admin giveitem <item_name>");
+					//player.MessageImportant("/admin giveitem NOMEITEM");
+
 				}
 			}
 		}
