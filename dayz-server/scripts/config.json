@@ -6,6 +6,7 @@
         "PlayerDbFile": "mpmissions/dayzOffline.chernarusplus/storage_1/players.db",
         "AdminIdsFile": "mpmissions/dayzOffline.chernarusplus/admin_ids.txt",
         "AdminCmdsFile": "mpmissions/dayzOffline.chernarusplus/admin_cmds.txt",
+        "MessagesToSendoFile": "mpmissions/dayzOffline.chernarusplus/messages_to_send.txt",
         "Deathmatch": "0",
         "WipeOnRestart": "0"
     },

@@ -138,6 +138,13 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			continue
 		fi
 
+		# Mensagem ingame
+		if [[ "$Content" == *"is connected"* ]]; then
+			echo "Jogador $PlayerName conectou" >> "$DayzServerFolder/$MessagesToSendoFile"
+		elif [[ "$Content" == *"has been disconnected"* ]]; then
+			echo "Jogador $PlayerName desconectou" >> "$DayzServerFolder/$MessagesToSendoFile"
+		fi
+
 		PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
 		if [[ -z "$PlayerExists" ]]; then
 			INSERT_CUSTOM_LOG "Ignorando pois player não consta no banco" "INFO" "$ScriptName"
@@ -204,6 +211,9 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		if [[ -n "$SafePlayerKillerInfo" && -n "$SafePlayerVictimInfo" ]]; then
 			metros=$(echo $Distance | cut -d '.' -f 1)
 			Content="💀 Jogador $SafePlayerVictimInfo foi executado por $SafePlayerKillerInfo. Arma: $Weapon, distância: $metros metros"
+
+			# Mensagem ingame
+			echo "Jogador $PlayerKillerName eliminou $PlayerVictimName" >> "$DayzServerFolder/$MessagesToSendoFile"
 		else
 			INSERT_CUSTOM_LOG "PlayerIdKilled ou PlayerIdVictim não encontrado no banco de dados. Usando o conteúdo original para o discord..." "ERROR" "$ScriptName"
 		fi
@@ -221,7 +231,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		Content="${Content//bled out/morreu por sangramento}"
 		Content="${Content//killed by/morto por}"
 		Content="${Content/(DEAD)/}"
-		Content="${Content//died\./morreu para o ambiente}"
+		Content=$(echo $Content | sed 's/died\..*/morreu para o ambiente/')
 
 		PlayerId=$(echo "$Content" | grep -oP 'id=\K[^ ]+' | head -n 1)
 		

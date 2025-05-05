@@ -253,5 +253,10 @@ chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
 curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c
 chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
 
+echo > "$DayzFolder/mpmissions/$DayzMpmission/messages_to_send.txt"
+echo > "$DayzFolder/profiles/init.log"
+echo > "$DayzFolder/profiles/position.log"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/profiles"
+
 echo "Para iniciar o servidor digite o comando: "
 echo "systemctl start dayz-server && systemctl start dayz-logs-discord.service && systemctl start dayz-infos-logs-discord.service"

@@ -34,6 +34,7 @@ void main()
 }
 
 class SafeZoneData {
+	string regionStr;
     vector areaMin;
     vector areaMax;
     ref array<vector> safeZones;
@@ -47,23 +48,29 @@ class CustomMission: MissionServer
 {
 	float m_AdminCheckCooldown = 30.0;
 	float m_AdminCheckTimer = 0.0;
+	string FixedMessage1 = "Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade";
+	string FixedMessage2 = "O comando pode demorar até 30 segundos para ser executado";
 
+	string regionStr;
 	vector areaMin;
     vector areaMax;
     ref array<vector> safeZones;	
 
 	void CustomMission()
 	{
+		WriteToLog("Entrou no construtor CustomMission");
 		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
 		if (szData)
 		{
+			regionStr = szData.regionStr;
 			areaMin = szData.areaMin;
 			areaMax = szData.areaMax;
 			safeZones = szData.safeZones;
+			WriteToLog("Carregou region: " + regionStr);
 		}
 		else
 		{
-			Print("Erro ao carregar dados da zona segura.");
+			WriteToLog("Erro ao carregar dados da zona segura.");
 		}
 	}
 
@@ -71,11 +78,15 @@ class CustomMission: MissionServer
 	{
 		super.OnUpdate(timeslice);
 		m_AdminCheckTimer += timeslice;
-
 		if (m_AdminCheckTimer >= m_AdminCheckCooldown)
 		{
+			AppendMessage(FixedMessage1);
+			AppendMessage(FixedMessage2);
+
 			m_AdminCheckTimer = 0.0;
 			CheckAdminCommands();
+
+			array<string> msgs = CheckMessages();
 			
 			// Checar todos os jogadores
 			array<Man> players = new array<Man>;
@@ -85,10 +96,13 @@ class CustomMission: MissionServer
 				PlayerBase player = PlayerBase.Cast(man);
 				if (player)
 				{
-					CheckPlayerArea(player);
+					CheckPlayerArea(player);	
 
-					//player.MessageImportant("/admin giveitem NOMEITEM");
-
+					// Envia mensagens
+					foreach (string msg : msgs)
+					{
+						player.MessageImportant(msg);
+					}
 				}
 			}
 		}
@@ -98,7 +112,7 @@ class CustomMission: MissionServer
 	{
 		FileHandle file = OpenFile(path, FileMode.READ);
 		if (!file) {
-			Print("Arquivo não encontrado: " + path);
+			WriteToLog("Arquivo não encontrado: " + path);
 			return null;
 		}
 
@@ -125,6 +139,18 @@ class CustomMission: MissionServer
 				boolStr.ToLower();
 				if (boolStr.Contains("true")) {
 					auto data = new SafeZoneData();
+
+					// Region
+					int idxRegion = objStr.IndexOf("\"Region\":");
+					if (idxRegion != -1) {
+						string subRegion = objStr.Substring(idxRegion + 9, objStr.Length() - idxRegion - 9);
+						int sRelRegion = subRegion.IndexOf("\"") + 1;
+						string subRegion2 = subRegion.Substring(sRelRegion, subRegion.Length() - sRelRegion);
+						int eRelRegion = subRegion2.IndexOf("\"");
+						int sRegion = idxRegion + 9 + sRelRegion;
+						int eRegion = sRegion + eRelRegion;
+						data.regionStr = objStr.Substring(sRegion, eRegion - sRegion);
+					}
 
 					// AreaMin
 					int idxMin = objStr.IndexOf("\"AreaMin\":");
@@ -219,7 +245,51 @@ class CustomMission: MissionServer
             string ammoType = "MeleeSlash";
             player.ProcessDirectDamage(DT_CUSTOM, player, "", ammoType, "0 0 0", 5.0);
 
-            player.MessageImportant("Você saiu da zona segura e começou a sangrar!");
+            player.MessageImportant("VOCÊ SAIU DA ZONA SEGURA, VOLTE IMEDIATAMENTE POIS SUA VIDA IRÁ REDUZIR!");
+		} 
+	}
+
+	array<string> CheckMessages()
+	{
+		array<string> msgs = new array<string>();
+
+		string path = "$mission:messages_to_send.txt";
+        FileHandle file = OpenFile(path, FileMode.READ);
+        if (file == 0) {
+			return msgs;
+		}
+
+		string line;
+		
+        while (FGets(file, line) > 0)
+        {
+            line = line.Trim();
+            if (line != "") {				
+				msgs.Insert(line);
+			}
+		}		
+
+		CloseFile(file);
+		FileHandle clearFile = OpenFile(path, FileMode.WRITE);
+		if (clearFile != 0)
+			CloseFile(clearFile); // abrir em modo WRITE já limpa o conteúdo
+		
+		return msgs;
+	}
+
+	void AppendMessage(string message)
+	{
+		string path = "$mission:messages_to_send.txt";
+		FileHandle file = OpenFile(path, FileMode.APPEND);
+
+		if (file != 0)
+		{
+			FPrintln(file, message);
+			CloseFile(file);
+		}
+		else
+		{
+			WriteToLog("Erro ao abrir o arquivo para append: " + path);
 		}
 	}
 
@@ -360,7 +430,7 @@ class CustomMission: MissionServer
 					break;
 				case "getposition":
 					target.MessageStatus("Posição atual: " + target.GetPosition().ToString());
-					WriteToLog(target.GetPosition().ToString());
+					WriteToLog(target.GetPosition().ToString(), "position.log");
 					break;
 			}
 		}
@@ -408,7 +478,6 @@ class CustomMission: MissionServer
 		if (adminIDs.Find(identity.GetId()) != -1 && identity.GetName() == "Admin")
 		{
 			m_player.SetAllowDamage(false);
-			m_player.MessageStatus("⚡ God Mode Ativado (Admin)");
 			GiveAdminLoadout(m_player);
 		}
 		m_player.SetAllowDamage(false);
@@ -419,7 +488,6 @@ class CustomMission: MissionServer
 		m_player.SetHealth("GlobalHealth", "Shock", 0);
 		m_player.GetStatEnergy().Set(4000);
 		m_player.GetStatWater().Set(4000);
-		m_player.MessageStatus("Você foi curado");
 
 		// Obtenha uma posição aleatória da zona segura
 		vector safePosition = GetRandomSafeSpawnPosition();
@@ -427,17 +495,14 @@ class CustomMission: MissionServer
 		// Define a posição do jogador para a coordenada da zona segura
 		m_player.SetPosition(safePosition);
 
-		// Mensagem opcional de boas-vindas
-		m_player.MessageStatus("Você foi teletransportado para uma zona segura!");
-
 		m_player.SetAllowDamage(true);
 
 		return m_player;
 	}
 
-	void WriteToLog(string content)
+	void WriteToLog(string content, string logfile = "init.log")
 	{
-		string fileName = "$profile:init.log"; // Caminho dentro da pasta do servidor
+		string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
 		FileHandle file = OpenFile(fileName, FileMode.APPEND);
 
 		if (file != 0)
@@ -447,7 +512,7 @@ class CustomMission: MissionServer
 		}
 		else
 		{
-			Print("Erro ao abrir o arquivo para escrita.");
+			WriteToLog("Erro ao abrir o arquivo para escrita.");
 		}
 	}
 

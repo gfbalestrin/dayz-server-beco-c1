@@ -3,8 +3,9 @@
         "RegionId": 0,
         "Active": true,
         "Region": "Prisão",
+        "CustomMessage": "NÃO SAIA DA ILHA DA PRISÃO OU VOCÊ TOMARÁ DANO!",
         "AreaMin": "2350 0 1000",
-        "AreaMax": "3000 0 1450",
+        "AreaMax": "3000 0 1450",        
         "SafeZones": [
             "2672.192383, 3.129421, 1374.600342",
             "2651.712646, 1.712951, 1395.944336",
