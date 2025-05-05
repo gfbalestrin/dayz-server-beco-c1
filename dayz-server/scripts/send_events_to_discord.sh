@@ -140,9 +140,9 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 
 		# Mensagem ingame
 		if [[ "$Content" == *"is connected"* ]]; then
-			echo "Jogador $PlayerName conectou" >> "$DayzServerFolder/$MessagesToSendoFile"
+			echo "Jogador $PlayerName conectou" >> "$DayzServerFolder/$DayzMessagesToSendoFile"
 		elif [[ "$Content" == *"has been disconnected"* ]]; then
-			echo "Jogador $PlayerName desconectou" >> "$DayzServerFolder/$MessagesToSendoFile"
+			echo "Jogador $PlayerName desconectou" >> "$DayzServerFolder/$DayzMessagesToSendoFile"
 		fi
 
 		PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
@@ -213,14 +213,18 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			Content="💀 Jogador $SafePlayerVictimInfo foi executado por $SafePlayerKillerInfo. Arma: $Weapon, distância: $metros metros"
 
 			# Mensagem ingame
-			echo "Jogador $PlayerKillerName eliminou $PlayerVictimName" >> "$DayzServerFolder/$MessagesToSendoFile"
+			echo "Jogador $PlayerKillerName eliminou $PlayerVictimName" >> "$DayzServerFolder/$DayzMessagesToSendoFile"
 		else
 			INSERT_CUSTOM_LOG "PlayerIdKilled ou PlayerIdVictim não encontrado no banco de dados. Usando o conteúdo original para o discord..." "ERROR" "$ScriptName"
 		fi
 	# Eventos de restart do server
 	elif [[ "$Line" == *"AdminLog started on"* ]]; then
-		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"
-		Content="Servidor reiniciado. Aguardando liberação de conexão..."
+		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"		
+		if [[ "$DayzDayzWipeOnRestart" == "1" ]]; then
+			Content="Wipe realizado e servidor reiniciado. Aguardando liberação de conexão..."
+		else
+			Content="Servidor reiniciado. Aguardando liberação de conexão..."
+		fi
 		sleep 1
 		# Configurar visudo
 		# <usuario> ALL=NOPASSWD: /bin/systemctl restart dayz-infos-logs-discord.service

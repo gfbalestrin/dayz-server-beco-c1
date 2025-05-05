@@ -26,7 +26,11 @@ function MonitorLog() {
 		INSERT_CUSTOM_LOG "Evento capturado: '$Content'" "INFO" "$ScriptName"
 
 		if [[ "$Content" == *"Player connect enabled"* ]]; then
-			SEND_DISCORD_WEBHOOK "Servidor liberado para conexão de jogadores!" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+			MessagesXmlFile="$DayzServerFolder/$DayzMessagesXmlFile";
+			ProximoRestart=$(awk -F'[><]' '/<deadline>/ { print $3 }' "$MessagesXmlFile" | tail -n1 | xargs)
+			Segundos=$(( $ProximoRestart * 60 ))
+			ProximoHorario=$(TZ="America/Sao_Paulo" date -d "+$Segundos seconds" +"%d/%m/%Y %H:%M:%S")
+			SEND_DISCORD_WEBHOOK "Servidor liberado para conexão de jogadores. Horário do próximo restart: $ProximoHorario (daqui $ProximoRestart minutos)" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
 			continue
 		elif [[ "$Content" == *"Mission script has no main function"* ]]; then
 			SEND_DISCORD_WEBHOOK "Administrador fez alguma merda no script init.c e o servidor está inoperante" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
@@ -61,11 +65,41 @@ function MonitorLog() {
 			continue
 		elif [[ "$Content" == *"Shutting down in 60 seconds"* ]]; then
 			if [[ "$DayzDeathmatch" -eq "1" ]]; then
-				# if [[ "$DayzWipeOnRestart" -eq 1 ]]; then
-				# 	INSERT_CUSTOM_LOG "Executando script de wipe..." "INFO" "$ScriptName"
-				# 	echo "Executando script de wipe..."
-				# 	"$AppFolder/$AppScriptWipeFile"
-				# fi				
+				"$AppFolder/$AppScriptUpdateGeneralKillfeed" &
+				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET" &				
+
+				DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
+				MapaOld=$(jq -r '.[] | select(.Active == true) | .Region' $DeathMatchCoords)
+
+				# Encontra o índice atual com Active == true
+				CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+
+				# Conta o número total de elementos
+				TOTAL=$(jq 'length' "$DeathMatchCoords")
+
+				# Calcula o próximo índice (loop circular)
+				NEXT_INDEX=$(( (CURRENT_INDEX + 1) % TOTAL ))
+
+				# Atualiza o JSON
+				jq --argjson current "$CURRENT_INDEX" --argjson next "$NEXT_INDEX" '
+				. as $all
+				| map(
+					if .RegionId == $current then .Active = false
+					elif .RegionId == $next then .Active = true
+					else .
+					end
+					)
+				' "$DeathMatchCoords" > tmp.json && mv tmp.json "$DeathMatchCoords"
+
+				MapaNew=$(jq -r '.[] | select(.Active == true) | .Region' $DeathMatchCoords)
+				SEND_DISCORD_WEBHOOK "Servidor reiniciando..." "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+				SEND_DISCORD_WEBHOOK "Próximo mapa: '$MapaNew'" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+
+				CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+				NEXT_INDEX=$(( (CURRENT_INDEX + 1) % TOTAL ))
+				NEXT_REGION=$(jq -r ".[$NEXT_INDEX].Region" "$DeathMatchCoords")
+				MessagesXmlFile="$DayzServerFolder/$DayzMessagesXmlFile";
+				sed -i "s|<text>.*</text>|<text>O servidor vai ser reiniciado em #tmin minutos. Próximo mapa: $NEXT_REGION</text>|" $MessagesXmlFile
 				continue
 			fi
 			"$AppFolder/$AppScriptExtractPlayersStatsFile" &

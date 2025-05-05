@@ -19,6 +19,8 @@ export DayzPlayerDbFile=$(jq -r '.Dayz.PlayerDbFile' "$CONFIG_FILE")
 export DayzAdminIdsFile=$(jq -r '.Dayz.AdminIdsFile' "$CONFIG_FILE")
 export DayzAdminCmdsFile=$(jq -r '.Dayz.AdminCmdsFile' "$CONFIG_FILE")
 export DayzMessagesToSendoFile=$(jq -r '.Dayz.MessagesToSendoFile' "$CONFIG_FILE")
+export DayzDeathmatchCoords=$(jq -r '.Dayz.DeathmatchCoords' "$CONFIG_FILE")
+export DayzMessagesXmlFile=$(jq -r '.Dayz.MessagesXmlFile' "$CONFIG_FILE")
 export DayzDeathmatch=$(jq -r '.Dayz.Deathmatch' "$CONFIG_FILE")
 export DayzWipeOnRestart=$(jq -r '.Dayz.WipeOnRestart' "$CONFIG_FILE")
 
