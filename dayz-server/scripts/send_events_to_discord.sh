@@ -221,7 +221,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		Content="${Content//bled out/morreu por sangramento}"
 		Content="${Content//killed by/morto por}"
 		Content="${Content/(DEAD)/}"
-		Content=$(echo "$Content" | sed -E 's/died\. Status> Water: ([0-9]+\.[0-9]+) Energy: ([0-9]+\.[0-9]+) Bleed sources: ([0-9]+)/morreu. Stats> Sede: \1 Energia: \2 Cortes: \3/')
+		Content="${Content//died\./morreu para o ambiente}"
 
 		PlayerId=$(echo "$Content" | grep -oP 'id=\K[^ ]+' | head -n 1)
 		

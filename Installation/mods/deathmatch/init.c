@@ -33,14 +33,39 @@ void main()
 	}
 }
 
+class SafeZoneData {
+    vector areaMin;
+    vector areaMax;
+    ref array<vector> safeZones;
+
+    void SafeZoneData() {
+        safeZones = new array<vector>();
+    }
+}
 
 class CustomMission: MissionServer
 {
 	float m_AdminCheckCooldown = 30.0;
 	float m_AdminCheckTimer = 0.0;
-	// Coordenadas do canto inferior esquerdo e superior direito do retângulo
-	vector areaMin = "2350 0 1000"; // inferior esquerdo
-	vector areaMax = "3000 0 1450"; // superior direito	
+
+	vector areaMin;
+    vector areaMax;
+    ref array<vector> safeZones;	
+
+	void CustomMission()
+	{
+		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
+		if (szData)
+		{
+			areaMin = szData.areaMin;
+			areaMax = szData.areaMax;
+			safeZones = szData.safeZones;
+		}
+		else
+		{
+			Print("Erro ao carregar dados da zona segura.");
+		}
+	}
 
 	override void OnUpdate(float timeslice)
 	{
@@ -69,40 +94,117 @@ class CustomMission: MissionServer
 		}
 	}
 
+	ref SafeZoneData LoadActiveRegionData(string path)
+	{
+		FileHandle file = OpenFile(path, FileMode.READ);
+		if (!file) {
+			Print("Arquivo não encontrado: " + path);
+			return null;
+		}
+
+		string content, line;
+		while (FGets(file, line) > 0) {
+			content += line;
+		}
+		CloseFile(file);
+
+		int startObj = content.IndexOf("{");
+		while (startObj != -1)
+		{
+			// Procurar fechamento do objeto
+			string rest = content.Substring(startObj, content.Length() - startObj);
+			int relEnd = rest.IndexOf("}");
+			if (relEnd == -1) break;
+			int endObj = startObj + relEnd;
+
+			string objStr = content.Substring(startObj, endObj - startObj + 1);
+
+			int idxActive = objStr.IndexOf("\"Active\":");
+			if (idxActive != -1) {
+				string boolStr = objStr.Substring(idxActive + 9, 5);
+				boolStr.ToLower();
+				if (boolStr.Contains("true")) {
+					auto data = new SafeZoneData();
+
+					// AreaMin
+					int idxMin = objStr.IndexOf("\"AreaMin\":");
+					if (idxMin != -1) {
+						string subMin = objStr.Substring(idxMin + 10, objStr.Length() - idxMin - 10);
+						int sRel = subMin.IndexOf("\"") + 1;
+						string subMin2 = subMin.Substring(sRel, subMin.Length() - sRel);
+						int eRel = subMin2.IndexOf("\"");
+						int s = idxMin + 10 + sRel;
+						int e = s + eRel;
+						string minStr = objStr.Substring(s, e - s);
+						data.areaMin = minStr.ToVector();
+					}
+
+					// AreaMax
+					int idxMax = objStr.IndexOf("\"AreaMax\":");
+					if (idxMax != -1) {
+						string subMax = objStr.Substring(idxMax + 10, objStr.Length() - idxMax - 10);
+						int s2Rel = subMax.IndexOf("\"") + 1;
+						string subMax2 = subMax.Substring(s2Rel, subMax.Length() - s2Rel);
+						int e2Rel = subMax2.IndexOf("\"");
+						int s2 = idxMax + 10 + s2Rel;
+						int e2 = s2 + e2Rel;
+						string maxStr = objStr.Substring(s2, e2 - s2);
+						data.areaMax = maxStr.ToVector();
+					}
+
+					// SafeZones
+					int idxSafe = objStr.IndexOf("\"SafeZones\":");
+					if (idxSafe != -1) {
+						string subSafe = objStr.Substring(idxSafe, objStr.Length() - idxSafe);
+						int s3Rel = subSafe.IndexOf("[");
+						int e3Rel = subSafe.IndexOf("]");
+						int s3 = idxSafe + s3Rel;
+						int e3 = idxSafe + e3Rel;
+						string safeBlock = objStr.Substring(s3 + 1, e3 - s3 - 1);
+
+						array<string> entries = new array<string>();
+						safeBlock.Split(",", entries);
+
+						for (int i = 0; i + 2 < entries.Count(); i += 3) {
+							string vecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
+							vecStr.Replace("\"", "");
+							vecStr.Trim();
+							// Criar array para armazenar os valores separados
+							TStringArray parts = new TStringArray();
+							vecStr.Split(",", parts);
+
+							// Verificar se há exatamente 3 partes
+							if (parts.Count() == 3) {
+								float x = parts[0].Trim().ToFloat();
+								float y = parts[1].Trim().ToFloat();
+								float z = parts[2].Trim().ToFloat();
+								data.safeZones.Insert(Vector(x, y, z));
+							}
+							
+						}
+					}
+
+					return data;
+				}
+			}
+
+			// Próximo objeto
+			string rem = content.Substring(endObj + 1, content.Length() - endObj - 1);
+			int relNext = rem.IndexOf("{");
+			if (relNext != -1) {
+				startObj = endObj + 1 + relNext;
+			} else {
+				startObj = -1;
+			}
+		}
+
+
+		return null;
+	}
+
 	vector GetRandomSafeSpawnPosition()
 	{
-		ref array<vector> safeZones = new array<vector>;
-		// Zonas ao redor da prisão
-		safeZones.Insert(Vector(2672.192383, 3.129421, 1374.600342));
-		safeZones.Insert(Vector(2651.712646, 1.712951, 1395.944336));
-		safeZones.Insert(Vector(2608.701416, 2.664377, 1389.977295));
-		safeZones.Insert(Vector(2587.730713, 1.549090, 1411.275513));
-		safeZones.Insert(Vector(2514.658203, 3.143692, 1437.058716));
-		safeZones.Insert(Vector(2428.497070, 2.656586, 1389.492920));
-		safeZones.Insert(Vector(2441.603516, 4.024718, 1367.078125));
-		safeZones.Insert(Vector(2492.065918, 4.098767, 1341.991577));
-		safeZones.Insert(Vector(2516.317627, 7.819347, 1311.331055));
-		safeZones.Insert(Vector(2536.916992, 9.694158, 1265.117065));
-		safeZones.Insert(Vector(2486.790039, 4.087596, 1217.682617));
-		safeZones.Insert(Vector(2538.850098, 3.324883, 1217.530640));
-		safeZones.Insert(Vector(2584.148438, 6.621020, 1254.476318));
-		safeZones.Insert(Vector(2640.988770, 1.986329, 1231.470215));
-		safeZones.Insert(Vector(2666.184570, 4.790472, 1290.482300));
-		safeZones.Insert(Vector(2697.927734, 4.449666, 1280.248901));
-		safeZones.Insert(Vector(2713.756836, 2.746556, 1230.137573));
-		safeZones.Insert(Vector(2724.076904, 5.087080, 1168.243042));
-		safeZones.Insert(Vector(2760.935791, 1.811343, 1153.496460));
-		safeZones.Insert(Vector(2805.038086, 3.297328, 1134.619019));
-		safeZones.Insert(Vector(2898.120361, 4.845843, 1177.733643));
-		safeZones.Insert(Vector(2972.281982, 1.116114, 1146.199707));
-		safeZones.Insert(Vector(2866.358887, 1.210863, 1215.002686));
-		safeZones.Insert(Vector(2830.860352, 2.688663, 1264.097778));
-		safeZones.Insert(Vector(2799.674072, 7.554385, 1313.999878));
-		safeZones.Insert(Vector(2752.633301, 1.322555, 1342.637207));
-		safeZones.Insert(Vector(2717.519775, 2.653562, 1344.919312));
-
 		int index = Math.RandomInt(0, safeZones.Count());
-
 		return safeZones[index]; // Retorna a coordenada aleatória
 	}
 
@@ -117,7 +219,7 @@ class CustomMission: MissionServer
             string ammoType = "MeleeSlash";
             player.ProcessDirectDamage(DT_CUSTOM, player, "", ammoType, "0 0 0", 5.0);
 
-            player.MessageStatus("Você saiu da zona segura e começou a sangrar!");
+            player.MessageImportant("Você saiu da zona segura e começou a sangrar!");
 		}
 	}
 
