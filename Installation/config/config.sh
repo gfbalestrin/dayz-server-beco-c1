@@ -212,3 +212,42 @@ esac
 if [[ "$DayzMpmission" != "dayzOffline.chernarusplus" && "$DayzDeathmatch" == "1" ]]; then
   error_exit "Erro: Somente a missão dayzOffline.chernarusplus é compatível com o modo deathmatch."
 fi
+
+DiscordWebhookLogs=$(jq -r '.Discord.WebhookLogs // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordWebhookLogs" ]]; then
+    echo "Erro: DiscordWebhookLogs não encontrado no arquivo JSON."
+    return 1
+fi
+export DiscordWebhookLogs
+
+DiscordWebhookLogsAdmin=$(jq -r '.Discord.WebhookLogsAdmin // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordWebhookLogsAdmin" ]]; then
+    echo "Erro: DiscordWebhookLogsAdmin não encontrado no arquivo JSON."
+    return 1
+fi
+export DiscordWebhookLogsAdmin
+
+DiscordChannelPlayersOnlineId=$(jq -r '.Discord.ChannelPlayersOnline.ChannelId // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordChannelPlayersOnlineId" ]]; then
+    echo "Erro: DiscordChannelPlayersOnlineId não encontrado no arquivo JSON."
+    return 1
+fi
+export DiscordChannelPlayersOnlineId
+DiscordChannelPlayersOnlineBotToken=$(jq -r '.Discord.ChannelPlayersOnline.BotToken // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordChannelPlayersOnlineBotToken" ]]; then
+    echo "Erro: DiscordChannelPlayersOnlineBotToken não encontrado no arquivo JSON."
+    return 1
+fi
+
+DiscordChannelPlayersStatsId=$(jq -r '.Discord.ChannelPlayersStats.ChannelId // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordChannelPlayersStatsId" ]]; then
+    echo "Erro: DiscordChannelPlayersStatsId não encontrado no arquivo JSON."
+    return 1
+fi
+export DiscordChannelPlayersStatsId
+DiscordChannelPlayersStatsBotToken=$(jq -r '.Discord.ChannelPlayersStats.BotToken // empty' "$CONFIG_FILE")
+if [[ -z "$DiscordChannelPlayersStatsBotToken" ]]; then
+    echo "Erro: DiscordChannelPlayersStatsBotToken não encontrado no arquivo JSON."
+    return 1
+fi
+export DiscordChannelPlayersStatsBotToken

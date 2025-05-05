@@ -66,10 +66,6 @@ export CONFIG_FILE
 # Executa config.sh
 source "$CONFIG_SCRIPT"
 
-if [[ "$SKIP_DISCORD" == "0" ]]; then
-  
-fi
-
 DayzFolder="/home/$LinuxUserName/servers/dayz-server"
 echo "Diretório do servidor: $DayzFolder"
 cd "$DayzFolder"
@@ -94,8 +90,35 @@ jq --arg v "extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' c
 jq --arg v "monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
-
 jq --arg v "$SKIP_DISCORD" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+if [[ "$SKIP_DISCORD" == "0" ]]; then
+  jq --arg v "$DiscordWebhookLogs" '.Discord.WebhookLogs = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+  jq --arg v "$DiscordWebhookLogsAdmin" '.Discord.WebhookLogsAdmin = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+  jq --arg v "$DiscordChannelPlayersOnlineId" '.Discord.ChannelPlayersOnline.ChannelId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+  jq --arg v "$DiscordChannelPlayersOnlineBotToken" '.Discord.ChannelPlayersOnline.BotToken = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+  jq --arg v "$DiscordChannelPlayersStatsId" '.Discord.ChannelPlayersStats.ChannelId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+  jq --arg v "$DiscordChannelPlayersStatsBotToken" '.Discord.ChannelPlayersStats.BotToken = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+  # Criando mensagem inicial no canal de jogadores online para capturar o id da mensagem
+  MESSAGE_CONTENT="Mensagem criada automaticamente via API."
+  RESPONSE=$(curl -s -X POST "https://discord.com/api/v10/channels/$DiscordChannelPlayersOnlineId/messages" \
+    -H "Authorization: Bot $DiscordChannelPlayersOnlineBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$MESSAGE_CONTENT\"}")
+  MESSAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
+  jq --arg v "$MESSAGE_ID" '.Discord.ChannelPlayersOnline.MessageId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+  # Criando mensagem inicial no canal de jogadores stats para capturar o id da mensagem
+  MESSAGE_CONTENT="Mensagem criada automaticamente via API."
+  RESPONSE=$(curl -s -X POST "https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsId/messages" \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$MESSAGE_CONTENT\"}")
+  MESSAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
+  jq --arg v "$MESSAGE_ID" '.Discord.ChannelPlayersStats.MessageId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+fi
 
 curl -o atualiza_players_online.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/atualiza_players_online.sh
 chmod +x atualiza_players_online.sh
