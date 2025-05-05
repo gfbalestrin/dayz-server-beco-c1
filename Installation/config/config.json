@@ -6,7 +6,7 @@
         }    
     },
     "DayZ": {
-        "ServerName": "[BR] BECO-C1 | TESTES | discord.gg/Zatp99MQ3a",
+        "ServerName": "[BR] BECO-C1 | EM TESTE | discord.gg/Zatp99MQ3a",
         "PasswordAdmin": "*********",
         "MaxPlayers": 60,
         "MotdMessage": "Bem vindo ao servidor!",
@@ -19,7 +19,9 @@
         "RConPort": "2305",
         "RConIP": "0.0.0.0",
         "MpMission": "dayzOffline.chernarusplus",
-        "LimitFPS": "200"
+        "LimitFPS": "200",
+        "Deathmatch": "0",
+        "WipeOnRestart": "0"
     },
     "App": {
     },

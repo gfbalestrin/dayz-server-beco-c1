@@ -25,7 +25,6 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 [[ "$SKIP_DISCORD" -eq 1 ]] && echo "Flag --skip-discord foi ativada. O sistema integrado ao Discord não será instalado." 
-[[ "$SKIP_DISCORD" -eq 0 ]] && echo "Flag --skip-discord não foi ativada. A integração com o discord está desativada." && exit 1
 
 echo "Iniciando em $DELAY segundos..."
 sleep $DELAY

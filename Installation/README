@@ -13,3 +13,5 @@ chmod +x install.sh && chmod +x config/config.sh
 # Após a instalação:
 # Sistema de log e administração básico:
 ./install_log_admin.sh
+
+# Para configurar o Cftools e utilizar banlists públicas siga o tutorial:

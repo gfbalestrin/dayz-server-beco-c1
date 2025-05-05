@@ -123,3 +123,92 @@ if [[ -z "$DayzLimitFPS" ]]; then
     return 1
 fi
 export DayzLimitFPS
+
+DayzDeathmatch=$(jq -r '.DayZ.Deathmatch // empty' "$CONFIG_FILE")
+if [[ -z "$DayzDeathmatch" ]]; then
+    echo "Erro: Deathmatch não encontrado no arquivo JSON."
+    return 1
+fi
+export DayzDeathmatch
+
+DayzWipeOnRestart=$(jq -r '.DayZ.WipeOnRestart // empty' "$CONFIG_FILE")
+if [[ -z "$DayzWipeOnRestart" ]]; then
+    echo "Erro: WipeOnRestart não encontrado no arquivo JSON."
+    return 1
+fi
+export DayzWipeOnRestart
+
+# --- VALIDAÇÕES GERAIS ---
+
+# Função de erro
+error_exit() {
+  echo "Erro: $1"
+  exit 1
+}
+
+# Validação de variáveis obrigatórias não vazias
+[ -z "$LinuxUserName" ] && error_exit "LinuxUserName não pode estar vazio."
+[ -z "$LinuxUserPassword" ] && error_exit "LinuxUserPassword não pode estar vazio."
+[ -z "$DayzServerName" ] && error_exit "DayzServerName não pode estar vazio."
+[ -z "$DayzPasswordAdmin" ] && error_exit "DayzPasswordAdmin não pode estar vazio."
+[ -z "$DayzMaxPlayers" ] && error_exit "DayzMaxPlayers não pode estar vazio."
+[ -z "$DayzMotdMessage" ] && error_exit "DayzMotdMessage não pode estar vazio."
+[ -z "$DayzMotdIntervalSeconds" ] && error_exit "DayzMotdIntervalSeconds não pode estar vazio."
+[ -z "$DayzPcCpuMaxCores" ] && error_exit "DayzPcCpuMaxCores não pode estar vazio."
+[ -z "$DayzPcCpuReservedcores" ] && error_exit "DayzPcCpuReservedcores não pode estar vazio."
+[ -z "$DayzRConPassword" ] && error_exit "DayzRConPassword não pode estar vazio."
+[ -z "$DayzMaxPing" ] && error_exit "DayzMaxPing não pode estar vazio."
+[ -z "$DayzRestrictRCon" ] && error_exit "DayzRestrictRCon não pode estar vazio."
+[ -z "$DayzRConPort" ] && error_exit "DayzRConPort não pode estar vazio."
+[ -z "$DayzRConIP" ] && error_exit "DayzRConIP não pode estar vazio."
+[ -z "$DayzMpmission" ] && error_exit "DayzMpmission não pode estar vazio."
+[ -z "$DayzLimitFPS" ] && error_exit "DayzLimitFPS não pode estar vazio."
+[ -z "$DayzDeathmatch" ] && error_exit "DayzDeathmatch não pode estar vazio."
+[ -z "$DayzWipeOnRestart" ] && error_exit "DayzWipeOnRestart não pode estar vazio."
+[ -z "$SteamAccount" ] && error_exit "SteamAccount não pode estar vazio."
+
+# --- VALIDAÇÕES DE FORMATO/VALOR ---
+
+# DayzMaxPlayers deve ser um número inteiro entre 1 e 60
+[[ "$DayzMaxPlayers" =~ ^[0-9]+$ ]] && [ "$DayzMaxPlayers" -le 60 ] && [ "$DayzMaxPlayers" -ge 1 ] || error_exit "DayzMaxPlayers deve ser um número inteiro entre 1 e 60."
+
+# DayzMotdIntervalSeconds deve estar entre 60 e 3600
+[[ "$DayzMotdIntervalSeconds" =~ ^[0-9]+$ ]] && [ "$DayzMotdIntervalSeconds" -ge 60 ] && [ "$DayzMotdIntervalSeconds" -le 3600 ] || error_exit "DayzMotdIntervalSeconds deve estar entre 60 e 3600."
+
+# DayzPcCpuMaxCores deve ser número inteiro >= 1
+[[ "$DayzPcCpuMaxCores" =~ ^[0-9]+$ ]] && [ "$DayzPcCpuMaxCores" -ge 1 ] || error_exit "DayzPcCpuMaxCores deve ser um número inteiro maior ou igual a 1."
+
+# DayzPcCpuReservedcores deve ser número inteiro >= 0
+[[ "$DayzPcCpuReservedcores" =~ ^[0-9]+$ ]] || error_exit "DayzPcCpuReservedcores deve ser um número inteiro."
+
+# DayzMaxPing deve ser número inteiro >= 0
+[[ "$DayzMaxPing" =~ ^[0-9]+$ ]] || error_exit "DayzMaxPing deve ser um número inteiro."
+
+# DayzRestrictRCon deve ser 0 ou 1
+[[ "$DayzRestrictRCon" == "0" || "$DayzRestrictRCon" == "1" ]] || error_exit "DayzRestrictRCon deve ser '0' ou '1'."
+
+# DayzRConPort deve ser número de porta válido (1–65535)
+[[ "$DayzRConPort" =~ ^[0-9]+$ ]] && [ "$DayzRConPort" -ge 1 ] && [ "$DayzRConPort" -le 65535 ] || error_exit "DayzRConPort deve ser um número entre 1 e 65535."
+
+# DayzRConIP deve ser IPv4 válido
+[[ "$DayzRConIP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || error_exit "DayzRConIP deve ser um IPv4 válido (ex: 0.0.0.0)."
+
+# DayzMpmission deve ser um dos valores permitidos
+case "$DayzMpmission" in
+  "dayzOffline.chernarusplus"|"dayzOffline.enoch"|"dayzOffline.sakhal") ;;
+  *) error_exit "DayzMpmission deve ser 'dayzOffline.chernarusplus', 'dayzOffline.enoch' ou 'dayzOffline.sakhal'." ;;
+esac
+
+# DayzLimitFPS deve ser número inteiro > 0
+[[ "$DayzLimitFPS" =~ ^[0-9]+$ ]] && [ "$DayzLimitFPS" -ge 1 ] || error_exit "DayzLimitFPS deve ser um número inteiro maior que zero."
+
+# DayzDeathmatch deve ser "0" ou "1"
+[[ "$DayzDeathmatch" == "0" || "$DayzDeathmatch" == "1" ]] || error_exit "DayzDeathmatch deve ser '0' ou '1'."
+
+# DayzWipeOnRestart deve ser "0" ou "1"
+[[ "$DayzWipeOnRestart" == "0" || "$DayzWipeOnRestart" == "1" ]] || error_exit "DayzWipeOnRestart deve ser '0' ou '1'."
+
+# --- REGRA EXTRA DE INCOMPATIBILIDADE ---
+if [[ "$DayzMpmission" != "dayzOffline.chernarusplus" && "$DayzDeathmatch" == "1" ]]; then
+  error_exit "Erro: Somente a missão dayzOffline.chernarusplus é compatível com o modo deathmatch."
+fi

@@ -54,6 +54,26 @@ if [[ "$EUID" -ne 0 ]]; then
     exit 1
 fi
 
+# Define o timezone desejado
+TIMEZONE="America/Sao_Paulo"
+
+# Verifica se o timezone existe
+if [ -f "/usr/share/zoneinfo/$TIMEZONE" ]; then
+  # Remove o link simbólico atual, se existir
+  sudo rm -f /etc/localtime
+
+  # Cria um novo link simbólico para o timezone desejado
+  sudo ln -s "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+
+  # Grava o timezone no arquivo /etc/timezone (para algumas distros, como Debian/Ubuntu)
+  echo "$TIMEZONE" | sudo tee /etc/timezone
+
+  echo "Timezone configurado para $TIMEZONE com sucesso."
+else
+  echo "Timezone '$TIMEZONE' não encontrado."
+  exit 1
+fi
+
 # Atualiza pacotes e instala jq
 apt -y update
 apt -y install jq curl wget
@@ -72,6 +92,7 @@ export CONFIG_FILE
 
 # Executa config.sh
 source "$CONFIG_SCRIPT"
+
 
 # Verifica se o sistema é baseado em Debian
 if grep -qi 'debian' /etc/os-release; then
@@ -128,7 +149,7 @@ if [[ "$SKIP_STEAM" -eq 0 ]]; then
     cd "/home/$LinuxUserName"
     mkdir -p "servers/steamcmd" && cd servers/steamcmd
     curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -    
-    #chown -R "$LinuxUserName:$LinuxUserName" "/home/$LinuxUserName/servers"
+    chown -R "$LinuxUserName:$LinuxUserName" "/home/$LinuxUserName/servers"
     #su -c "./steamcmd.sh +force_install_dir "/home/$LinuxUserName/servers/dayz-server/" +login $SteamAccount +app_update 223350 +quit" $LinuxUserName
     sudo -u "$LinuxUserName" ./steamcmd.sh +force_install_dir "/home/$LinuxUserName/servers/dayz-server/" +login "$SteamAccount" +app_update 223350 +quit
 
@@ -185,7 +206,7 @@ sed -i "s#disable3rdPerson=0;#disable3rdPerson=1;#g" "$ServerDZFile"
 #disableCrosshair=0;         // Toggles the cross-hair (value 0-1)
 sed -i "s#disableCrosshair=0;#disableCrosshair=1;#g" "$ServerDZFile"
 #lightingConfig = 0;         // 0 for brighter night setup, 1 for darker night setup
-sed -i "s#lightingConfig=0;#lightingConfig=1;#g" "$ServerDZFile"
+sed -i "s#lightingConfig = 0;#lightingConfig = 1;#g" "$ServerDZFile"
 #serverTimeAcceleration=12;  // Accelerated Time (value 0-24)// This is a time multiplier for in-game time. In this case, the time would move 24 times faster than normal, so an entire day would pass in one hour.
 sed -i "s#serverTimeAcceleration=12;#serverTimeAcceleration=6;#g" "$ServerDZFile"
 #serverNightTimeAcceleration=1;  // Accelerated Nigh Time - The numerical value being a multiplier (0.1-64) and also multiplied by serverTimeAcceleration value. Thus, in case it is set to 4 and serverTimeAcceleration is set to 2, night time would move 8 times faster than normal. An entire night would pass in 3 hours.
@@ -252,51 +273,101 @@ awk '
 ' $DayzMpmissionMessagesXml > tmp.xml && mv tmp.xml $DayzMpmissionMessagesXml
 
 echo "Arquivo $DayzMpmissionMessagesXml editado com sucesso."
+
+if [[ $$DayzDeathmatch == "1" ]]; then
+    echo "Ativando o modo Deathmatch ..."
+    sleep $DELAY
+    cp -R mods/deathmatch/* $DayzFolder/mpmissions/$DayzMpmission/
+    chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/"
+fi
+
 DayzServerServiceFile="/etc/systemd/system/dayz-server.service"
 echo "Configurando serviço no systemd $DayzServerServiceFile ..."
 sleep $DELAY
 
-echo > "$DayzServerServiceFile"
+cat <<EOF > "$DayzServerServiceFile"
+[Unit]
+Description=DayZ Dedicated Server
+Wants=network-online.target
+After=syslog.target network.target nss-lookup.target network-online.target
 
-echo "[Unit]" >> "$DayzServerServiceFile"
-echo "Description=DayZ Dedicated Server" >> "$DayzServerServiceFile"
-echo "Wants=network-online.target" >> "$DayzServerServiceFile"
-echo "After=syslog.target network.target nss-lookup.target network-online.target" >> "$DayzServerServiceFile"
-echo "" >> "$DayzServerServiceFile"
-echo "[Service]" >> "$DayzServerServiceFile"
-echo "ExecStartPre=$DayzFolder/update.sh" >> "$DayzServerServiceFile"
-echo "ExecStart=$DayzFolder/DayZServer -config=serverDZ.cfg -port=2302 -BEpath=$DayzFolder/battleye -profiles=profiles -dologs -adminlog -netlog -freezecheck -cpuCount=$DayzPcCpuMaxCores -limitFPS=$DayzLimitFPS" >> "$DayzServerServiceFile"
-echo "ExecStartPost=+$DayzFolder/execute_script_pos.sh" >> "$DayzServerServiceFile"
-echo "WorkingDirectory=$DayzFolder/" >> "$DayzServerServiceFile"
-echo "LimitNOFILE=100000" >> "$DayzServerServiceFile"
-echo "ExecReload=/bin/kill -s HUP \$MAINPID" >> "$DayzServerServiceFile"
-echo "ExecStop=/bin/kill -s INT \$MAINPID" >> "$DayzServerServiceFile"
-echo "User=$LinuxUserName" >> "$DayzServerServiceFile"
-echo "Group=$LinuxUserName" >> "$DayzServerServiceFile"
-echo "Restart=on-failure" >> "$DayzServerServiceFile"
-echo "RestartSec=30s" >> "$DayzServerServiceFile"
-echo "" >> "$DayzServerServiceFile"
-echo "[Install]" >> "$DayzServerServiceFile"
-echo "WantedBy=multi-user.target" >> "$DayzServerServiceFile"
+[Service]
+ExecStartPre=$DayzFolder/scripts/update.sh
+ExecStart=$DayzFolder/DayZServer -config=serverDZ.cfg -port=2302 -BEpath=$DayzFolder/battleye -profiles=profiles -dologs -adminlog -netlog -freezecheck -cpuCount=$DayzPcCpuMaxCores -limitFPS=$DayzLimitFPS
+ExecStartPost=+$DayzFolder/scripts/execute_script_pos.sh
+WorkingDirectory=$DayzFolder/
+LimitNOFILE=100000
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s INT \$MAINPID
+User=$LinuxUserName
+Group=$LinuxUserName
+Restart=on-failure
+RestartSec=30s
 
-echo "Configurando script de update $DayzFolder/update.sh ..."
-echo "#!/bin/bash" > "$DayzFolder/update.sh"
-if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
-    echo "cd /home/dayzadmin/servers/dayz-server/scripts/ && ./wipe.sh" >> "$DayzFolder/update.sh"
+[Install]
+WantedBy=multi-user.target
+EOF
+
+mkdir -p "$DayzFolder/scripts"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/scripts"
+
+if [[ "$DayzWipeOnRestart" == "1" ]]; then
+
+echo "Criando script de wipe.sh ..."
+PROFILE_DIR="$DayzFolder/mpmissions/$DayzMpmission/storage_1"
+cat <<EOF > "$DayzFolder/scripts/wipe.sh"
+#!/bin/bash
+echo "=== Realizando wipe do servidor DayZ ==="
+echo "PROFILE_DIR: $PROFILE_DIR"
+rm -rf "$PROFILE_DIR"
+echo "Wipe completo!"
+sleep 10
+EOF
+chmod +x "$DayzFolder/scripts/wipe.sh"
+
 fi
-echo "/home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir $DayzFolder/ +login $SteamAccount +app_update 223350 +quit" >> "$DayzFolder/update.sh"
-chmod +x "$DayzFolder/update.sh"
 
-echo "Configurando script de pós inicialização $DayzFolder/execute_script_pos.sh ..."
-echo "#!/bin/bash" > "$DayzFolder/execute_script_pos.sh"
-echo "" >> "$DayzFolder/execute_script_pos.sh"
-chmod +x "$DayzFolder/execute_script_pos.sh"
+echo "Configurando script de update $DayzFolder/scripts/update.sh ..."
+echo "#!/bin/bash" > "$DayzFolder/scripts/update.sh"
+if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
+    echo "cd $DayzFolder/scripts && ./wipe.sh" >> "$DayzFolder/scripts/update.sh"
+fi
+echo "cd $DayzFolder/scripts && /home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir $DayzFolder/ +login $SteamAccount +app_update 223350 +quit" >> "$DayzFolder/scripts/update.sh"
+chmod +x "$DayzFolder/scripts/update.sh"
+
+echo "Configurando script de pós inicialização $DayzFolder/scripts/execute_script_pos.sh ..."
+echo "#!/bin/bash" > "$DayzFolder/scripts/execute_script_pos.sh"
+echo "" >> "$DayzFolder/scripts/execute_script_pos.sh"
+chmod +x "$DayzFolder/scripts/execute_script_pos.sh"
 
 chown -R "$LinuxUserName:$LinuxUserName" "/home/$LinuxUserName/servers"
 
 #sudo -u dayzadmin /home/dayzadmin/servers/steamcmd/steamcmd.sh +login $SteamAccount
 
 systemctl enable dayz-server.service
-systemctl restart dayz-server.service
-journalctl -f -u dayz-server.service
-echo "Serviço do DayZ configurado e iniciado com sucesso."
+
+echo "Realizando checagem de configuração..."
+
+echo "$DayzServerServiceFile ..."
+cat "$DayzServerServiceFile"
+echo ""
+
+if [[ "$DayzWipeOnRestart" == "1" ]]; then
+    echo "$DayzFolder/scripts/wipe.sh ..."
+    cat "$DayzFolder/scripts/wipe.sh"
+    echo ""
+fi
+
+echo "$DayzFolder/scripts/update.sh ..."
+cat "$DayzFolder/scripts/update.sh"
+echo ""
+
+echo "$DayzFolder/scripts/execute_script_pos.sh ..."
+cat "$DayzFolder/scripts/execute_script_pos.sh"
+echo ""
+
+sleep 10
+
+echo "Para iniciar o servidor digite o comando: systemctl start dayz-server.service"
+echo "Para visualizar os logs do servidor digite o comando: journalctl -f -u dayz-server.service"
+

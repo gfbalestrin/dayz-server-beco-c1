@@ -40,9 +40,7 @@ class CustomMission: MissionServer
 	float m_AdminCheckTimer = 0.0;
 	// Coordenadas do canto inferior esquerdo e superior direito do retângulo
 	vector areaMin = "2350 0 1000"; // inferior esquerdo
-	vector areaMax = "3000 0 1450"; // superior direito
-
-	
+	vector areaMax = "3000 0 1450"; // superior direito	
 
 	override void OnUpdate(float timeslice)
 	{
