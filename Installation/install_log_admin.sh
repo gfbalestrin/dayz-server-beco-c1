@@ -93,6 +93,7 @@ jq --arg v "captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config
 jq --arg v "$SKIP_DISCORD" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
 if [[ "$SKIP_DISCORD" == "0" ]]; then
+  jq --arg v "0" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
   jq --arg v "$DiscordWebhookLogs" '.Discord.WebhookLogs = $v' config.json > config_tmp.json && mv config_tmp.json config.json
   jq --arg v "$DiscordWebhookLogsAdmin" '.Discord.WebhookLogsAdmin = $v' config.json > config_tmp.json && mv config_tmp.json config.json
   jq --arg v "$DiscordChannelPlayersOnlineId" '.Discord.ChannelPlayersOnline.ChannelId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
@@ -212,11 +213,11 @@ systemctl daemon-reload
 systemctl enable dayz-logs-discord.service
 systemctl enable dayz-infos-logs-discord.service
 
-systemctl start dayz-logs-discord.service
-systemctl start dayz-infos-logs-discord.service
+# systemctl start dayz-logs-discord.service
+# systemctl start dayz-infos-logs-discord.service
 
-systemctl status dayz-logs-discord.service
-systemctl status dayz-infos-logs-discord.service
+# systemctl status dayz-logs-discord.service
+# systemctl status dayz-infos-logs-discord.service
 
 echo "Serviços criados e habilitados com sucesso."
 
@@ -231,4 +232,5 @@ chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
 curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c
 chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
 
-systemctl restart dayz-server.service
+echo "Para iniciar o servidor digite o comando: "
+echo "systemctl start dayz-server && systemctl start dayz-logs-discord.service && systemctl start dayz-infos-logs-discord.service"
