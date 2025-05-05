@@ -25,6 +25,20 @@
     },
     "App": {
     },
+    "Discord": {
+        "WebhookLogs": "https://discord.com/api/webhooks/1111111111111111111/abcdefghijklmnopqrstuvwxyz1234567890",
+        "WebhookLogsAdmin": "https://discord.com/api/webhooks/1111111111111111111/abcdefghijklmnopqrstuvwxyz1234567890",
+        "ChannelPlayersOnline": {
+            "ChannelId": "1111111111111111111",
+            "MessageId": "1111111111111111111",
+            "BotToken": "abcdefghijklmnopqrstuvwxyz1234567890"
+        },
+        "ChannelPlayersStats": {
+            "ChannelId": "1111111111111111111",
+            "MessageId": "1111111111111111111",
+            "BotToken": "abcdefghijklmnopqrstuvwxyz1234567890"
+        }
+    },   
     "Steam": {
         "Account": "contasteam"        
     }    

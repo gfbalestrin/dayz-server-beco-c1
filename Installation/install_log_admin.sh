@@ -47,7 +47,6 @@ if [[ "$EUID" -ne 0 ]]; then
     echo "Erro: este script deve ser executado como root." >&2
     exit 1
 fi
-
 # Atualiza pacotes e instala jq
 apt -y update
 apt -y install sqlite3
@@ -66,6 +65,10 @@ export CONFIG_FILE
 
 # Executa config.sh
 source "$CONFIG_SCRIPT"
+
+if [[ "$SKIP_DISCORD" == "0" ]]; then
+  
+fi
 
 DayzFolder="/home/$LinuxUserName/servers/dayz-server"
 echo "Diretório do servidor: $DayzFolder"
@@ -90,7 +93,9 @@ jq --arg v "atualiza_players_online.sh" '.App.ScriptUpdatePlayersOnlineFile = $v
 jq --arg v "extrai_players_stats.sh" '.App.ScriptExtractPlayersStatsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "monta_killfeed_geral.sh" '.App.ScriptUpdateGeneralKillfeed = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "captura_dano_player.sh" '.App.ScriptGetPlayerDamageFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
-jq --arg v "1" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
+
+jq --arg v "$SKIP_DISCORD" '.Discord.Desactive = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
 curl -o atualiza_players_online.sh https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/scripts/atualiza_players_online.sh
 chmod +x atualiza_players_online.sh
