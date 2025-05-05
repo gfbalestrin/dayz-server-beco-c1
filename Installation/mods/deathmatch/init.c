@@ -46,8 +46,10 @@ class SafeZoneData {
 
 class CustomMission: MissionServer
 {
-	float m_AdminCheckCooldown = 30.0;
-	float m_AdminCheckTimer = 0.0;
+	float m_AdminCheckCooldown30 = 30.0;
+	float m_AdminCheckTimer30 = 0.0;
+	float m_AdminCheckCooldown60 = 60.0;
+	float m_AdminCheckTimer60 = 0.0;
 	string FixedMessage1 = "Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade";
 	string FixedMessage2 = "O comando pode demorar até 30 segundos para ser executado";
 
@@ -77,13 +79,11 @@ class CustomMission: MissionServer
 	override void OnUpdate(float timeslice)
 	{
 		super.OnUpdate(timeslice);
-		m_AdminCheckTimer += timeslice;
-		if (m_AdminCheckTimer >= m_AdminCheckCooldown)
+		// A cada 30 segundos
+		m_AdminCheckTimer30 += timeslice;
+		if (m_AdminCheckTimer30 >= m_AdminCheckCooldown30)
 		{
-			AppendMessage(FixedMessage1);
-			AppendMessage(FixedMessage2);
-
-			m_AdminCheckTimer = 0.0;
+			m_AdminCheckTimer30 = 0.0;
 			CheckAdminCommands();
 
 			array<string> msgs = CheckMessages();
@@ -105,6 +105,19 @@ class CustomMission: MissionServer
 					}
 				}
 			}
+		}
+		// Cada 1 min
+		m_AdminCheckTimer60 += timeslice;
+		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
+		{
+			
+			if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
+			{
+				AppendMessage(FixedMessage1);
+				AppendMessage(FixedMessage2);
+			}			
+
+			m_AdminCheckTimer60 = 0.0;
 		}
 	}
 
