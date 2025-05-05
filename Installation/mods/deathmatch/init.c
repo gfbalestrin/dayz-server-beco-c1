@@ -34,6 +34,7 @@ void main()
 }
 
 class SafeZoneData {
+	string customMessage;
 	string regionStr;
     vector areaMin;
     vector areaMax;
@@ -54,6 +55,7 @@ class CustomMission: MissionServer
 	string FixedMessage2 = "O comando pode demorar até 30 segundos para ser executado";
 
 	string regionStr;
+	string customMessage;
 	vector areaMin;
     vector areaMax;
     ref array<vector> safeZones;	
@@ -64,6 +66,7 @@ class CustomMission: MissionServer
 		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
 		if (szData)
 		{
+			customMessage = szData.customMessage;
 			regionStr = szData.regionStr;
 			areaMin = szData.areaMin;
 			areaMax = szData.areaMax;
@@ -113,8 +116,9 @@ class CustomMission: MissionServer
 			
 			if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
 			{
+				AppendMessage(customMessage);
 				AppendMessage(FixedMessage1);
-				AppendMessage(FixedMessage2);
+				AppendMessage(FixedMessage2);				
 			}			
 
 			m_AdminCheckTimer60 = 0.0;
@@ -163,6 +167,18 @@ class CustomMission: MissionServer
 						int sRegion = idxRegion + 9 + sRelRegion;
 						int eRegion = sRegion + eRelRegion;
 						data.regionStr = objStr.Substring(sRegion, eRegion - sRegion);
+					}
+
+					// CustomMessage
+					int idxCustomMessage = objStr.IndexOf("\"CustomMessage\":");
+					if (idxCustomMessage != -1) {
+						string subCustomMessage = objStr.Substring(idxCustomMessage + 16, objStr.Length() - idxCustomMessage - 16);
+						int sRelCustomMessage = subCustomMessage.IndexOf("\"") + 1;
+						string subCustomMessage2 = subCustomMessage.Substring(sRelCustomMessage, subCustomMessage.Length() - sRelCustomMessage);
+						int eRelCustomMessage = subCustomMessage2.IndexOf("\"");
+						int sCustomMessage = idxCustomMessage + 16 + sRelCustomMessage;
+						int eCustomMessage = sCustomMessage + eRelCustomMessage;
+						data.customMessage = objStr.Substring(sCustomMessage, eCustomMessage - sCustomMessage);
 					}
 
 					// AreaMin
