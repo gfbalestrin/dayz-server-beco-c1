@@ -47,6 +47,9 @@ if [[ "$EUID" -ne 0 ]]; then
     echo "Erro: este script deve ser executado como root." >&2
     exit 1
 fi
+
+systemctl stop dayz-server
+
 # Atualiza pacotes e instala jq
 apt -y update
 apt -y install sqlite3
@@ -81,6 +84,9 @@ jq --arg v "$DayzFolder" '.Dayz.ServerFolder = $v' config.json > config_tmp.json
 jq --arg v "mpmissions/$DayzMpmission/storage_1/players.db" '.Dayz.PlayerDbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "mpmissions/$DayzMpmission/admin_ids.txt" '.Dayz.AdminIdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "mpmissions/$DayzMpmission/admin_cmds.txt" '.Dayz.AdminCmdsFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$DayzDeathmatch" '.Dayz.Deathmatch = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+jq --arg v "$DayzWipeOnRestart" '.Dayz.WipeOnRestart = $v' config.json > config_tmp.json && mv config_tmp.json config.json
+
 AppFolder="$DayzFolder/scripts"
 jq --arg v "$AppFolder" '.App.Folder = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 jq --arg v "databases/players_beco_c1.db" '.App.PlayerBecoC1DbFile = $v' config.json > config_tmp.json && mv config_tmp.json config.json
@@ -101,21 +107,23 @@ if [[ "$SKIP_DISCORD" == "0" ]]; then
   jq --arg v "$DiscordChannelPlayersStatsId" '.Discord.ChannelPlayersStats.ChannelId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
   jq --arg v "$DiscordChannelPlayersStatsBotToken" '.Discord.ChannelPlayersStats.BotToken = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
-  # Criando mensagem inicial no canal de jogadores online para capturar o id da mensagem
-  MESSAGE_CONTENT="Mensagem criada automaticamente via API."
+  echo "Criando mensagem inicial no canal de jogadores online para capturar o id da mensagem..."
+  MESSAGE_CONTENT="Mensagem criada automaticamente via API."  
   RESPONSE=$(curl -s -X POST "https://discord.com/api/v10/channels/$DiscordChannelPlayersOnlineId/messages" \
     -H "Authorization: Bot $DiscordChannelPlayersOnlineBotToken" \
     -H "Content-Type: application/json" \
     -d "{\"content\": \"$MESSAGE_CONTENT\"}")
+  echo $RESPONSE
   MESSAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
   jq --arg v "$MESSAGE_ID" '.Discord.ChannelPlayersOnline.MessageId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
-  # Criando mensagem inicial no canal de jogadores stats para capturar o id da mensagem
+  echo "Criando mensagem inicial no canal de jogadores stats para capturar o id da mensagem..."
   MESSAGE_CONTENT="Mensagem criada automaticamente via API."
   RESPONSE=$(curl -s -X POST "https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsId/messages" \
     -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
     -H "Content-Type: application/json" \
     -d "{\"content\": \"$MESSAGE_CONTENT\"}")
+  echo $RESPONSE
   MESSAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
   jq --arg v "$MESSAGE_ID" '.Discord.ChannelPlayersStats.MessageId = $v' config.json > config_tmp.json && mv config_tmp.json config.json
 
@@ -223,11 +231,24 @@ echo "Serviços criados e habilitados com sucesso."
 
 cd "$DayzFolder/mpmissions/$DayzMpmission/"
 rm init.c
-curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/init.c
+if [[ "$DayzDeathmatch" == "1" ]]; then
+  echo "Baixando init.c para Deathmatch..."
+  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/init.c
+else
+  echo "Baixando init.c..."
+  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/init.c
+fi
 chown "$LinuxUserName:$LinuxUserName" init.c
-mkdir admin
+mkdir -p admin
 cd admin
-curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/AdminLoadout.c
+if [[ "$DayzDeathmatch" == "1" ]]; then
+  echo "Baixando AdminLoadout.c para Deathmatch..."
+  curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/admin/AdminLoadout.c
+else
+  echo "Baixando AdminLoadout.c..."
+  curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/AdminLoadout.c
+fi
+
 chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
 curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c
 chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
