@@ -76,7 +76,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			INSERT_CUSTOM_LOG "Ignorando pois PlayerId está em branco" "INFO" "$ScriptName"
 			continue
 		fi
-		if [[ "$DayzDeathmatch" -eq "1" ]]; then
+		if [[ "$DayzDeathmatch" -eq "1" ]] && ! grep -q "$PlayerId" "$DayzServerFolder/$DayzAdminIdsFile"; then
 			if [[ "$Content" == *"teleport"* ]]; then
 				continue
 			elif [[ "$Content" == *"godmode"* ]]; then

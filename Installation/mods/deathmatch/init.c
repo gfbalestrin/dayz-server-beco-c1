@@ -504,27 +504,28 @@ class CustomMission: MissionServer
 		GetGame().SelectPlayer( identity, m_player );
 
 		array<string> adminIDs = LoadAdminIDs("$mission:admin_ids.txt");
-		if (adminIDs.Find(identity.GetId()) != -1 && identity.GetName() == "Admin")
+		if (adminIDs.Find(identity.GetId()) != -1)
 		{
 			m_player.SetAllowDamage(false);
 			GiveAdminLoadout(m_player);
+		} else {
+			m_player.SetAllowDamage(false);
+			GiveSurvivorLoadout(m_player);
+			m_player.SetHealth("", "", 100);
+			m_player.SetHealth("GlobalHealth", "Blood", 5000);
+			m_player.SetHealth("GlobalHealth", "Shock", 0);
+			m_player.GetStatEnergy().Set(4000);
+			m_player.GetStatWater().Set(4000);
+
+			// Obtenha uma posição aleatória da zona segura
+			vector safePosition = GetRandomSafeSpawnPosition();
+
+			// Define a posição do jogador para a coordenada da zona segura
+			m_player.SetPosition(safePosition);
+
+			m_player.SetAllowDamage(true);
 		}
-		m_player.SetAllowDamage(false);
-
-		GiveSurvivorLoadout(m_player);
-		m_player.SetHealth("", "", 100);
-		m_player.SetHealth("GlobalHealth", "Blood", 5000);
-		m_player.SetHealth("GlobalHealth", "Shock", 0);
-		m_player.GetStatEnergy().Set(4000);
-		m_player.GetStatWater().Set(4000);
-
-		// Obtenha uma posição aleatória da zona segura
-		vector safePosition = GetRandomSafeSpawnPosition();
-
-		// Define a posição do jogador para a coordenada da zona segura
-		m_player.SetPosition(safePosition);
-
-		m_player.SetAllowDamage(true);
+		
 
 		return m_player;
 	}
