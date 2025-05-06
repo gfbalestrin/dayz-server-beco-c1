@@ -127,6 +127,7 @@ function MonitorLog() {
 			PlayerName=$(echo $ContentPrev | grep -oP '(?<=Player ).*?(?= \(id=)')
 			PlayerName=$(echo $PlayerName | sed "s/;//g")
 			PlayerName=$(echo $PlayerName | sed "s/#//g")
+			PlayerName=$(echo $PlayerName | sed "s/\|//g")
 			INSERT_CUSTOM_LOG "PlayerId: $PlayerId" "INFO" "$ScriptName"
 			INSERT_CUSTOM_LOG "PlayerName: $PlayerName" "INFO" "$ScriptName"
 			if [[ "$PlayerId" == "" ]]; then
