@@ -13,7 +13,102 @@ response=$(curl -s -X PATCH \
 -H "Content-Type: application/json" \
 -d "{\"content\": \"$Content\"}" \
 "$URL")
-sleep 1
+sleep 5
+
+RESETA_KILLFEDD(){
+    Content="..."
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177068822204436"
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177069912723497"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177070839533700"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177072370712577"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")        
+    sleep 5
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177073721020570"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")        
+    sleep 5
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177209616465940"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5   
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177211139002419"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5    
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177212502151252"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5    
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177214196646020"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5  
+
+    URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177215740284990"
+    Content="..."
+    response=$(curl -s -X PATCH \
+    -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$Content\"}" \
+    "$URL")
+    sleep 5       
+}
+
+RESETA_KILLFEDD
+
 i=1
 while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDamage PreferredWeapon Damage_Head_Perc Damage_Torso_Perc Damage_LeftArm_Perc Damage_RightArm_Perc Damage_LeftLeg_Perc Damage_RightLeg_Perc LongestShotMeters WeaponLongestShot; do
 
@@ -28,106 +123,96 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
     player_info="**$PlayerName** ($link_steam)"
     metros=$(echo $LongestShotMeters | cut -d '.' -f 1)
 
-    if [ $i -eq 1 ]; then
+    if [ $i -eq 1 ]; then        
         Content="🥇 Top 1 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
-        Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177068822204436"
+        Content+="..."        
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 2 ]; then
+        sleep 5
+    elif [ $i -eq 2 ]; then        
         Content="🥈 Top 2 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
-        Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177069912723497"
+        Content+="..."        
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 3 ]; then
+        sleep 5
+    elif [ $i -eq 3 ]; then        
     	Content="🥉 Top 3 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177070839533700"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 4 ]; then
+        sleep 5
+    elif [ $i -eq 4 ]; then        
         Content="🏅 Top 4 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177072370712577"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 5 ]; then
+        sleep 5
+    elif [ $i -eq 5 ]; then        
         Content="🏅 Top 5 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177073721020570"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 6 ]; then
+        sleep 5
+    elif [ $i -eq 6 ]; then           
         Content="🏅 Top 6 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177209616465940"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 7 ]; then
+        sleep 5
+    elif [ $i -eq 7 ]; then           
         Content="🏅 Top 7 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177211139002419"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 8 ]; then
+        sleep 5
+    elif [ $i -eq 8 ]; then          
         Content="🏅 Top 8 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177212502151252"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 9 ]; then
+        sleep 5
+    elif [ $i -eq 9 ]; then             
         Content="🏅 Top 9 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177214196646020"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
-    elif [ $i -eq 10 ]; then
+        sleep 5
+    elif [ $i -eq 10 ]; then        
         Content="🏅 Top 10 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
-        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177215740284990"
         response=$(curl -s -X PATCH \
         -H "Authorization: Bot $DiscordChannelPlayersStatsBotToken" \
         -H "Content-Type: application/json" \
         -d "{\"content\": \"$Content\"}" \
         "$URL")
-        sleep 1
+        sleep 5
     fi
     i=$((i+1))    
 done < <(sqlite3 -separator '|' "$PLAYERS_BECO_C1_DB" "
@@ -257,12 +342,18 @@ LEFT JOIN TopWeapon tw ON p.PlayerID = tw.PlayerID
 LEFT JOIN DamagePivot dp ON p.PlayerID = dp.PlayerID
 LEFT JOIN LongestShot ls ON p.PlayerID = ls.PlayerID
 LEFT JOIN LongestShotWeapon lsw ON p.PlayerID = lsw.PlayerID
+WHERE COALESCE(k.TotalKills, 0) > 0 OR COALESCE(d.TotalDamage, 0) > 0
 ORDER BY TotalKills DESC, TotalDamage DESC
 LIMIT 10;
 ")
 
 FirstDate=$(sqlite3 "$PLAYERS_BECO_C1_DB" "SELECT Data FROM players_killfeed ORDER BY Data ASC LIMIT 1;")
-Content="\n Obs: Dados coletados a partir de $FirstDate"
+if [[ "$FirstDate" == "" ]]; then
+    Content="\n Sem dados coletados!"
+else
+    Content="\n Obs: Dados coletados a partir de $FirstDate"
+fi
+
 Content+="...\n"
 
 URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177217199902774"
@@ -271,3 +362,6 @@ response=$(curl -s -X PATCH \
 -H "Content-Type: application/json" \
 -d "{\"content\": \"$Content\"}" \
 "$URL")
+
+DELETE_KILLFEED 
+DELETE_PLAYER_DAMAGE

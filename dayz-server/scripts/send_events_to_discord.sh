@@ -226,10 +226,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			Content="Servidor reiniciado. Aguardando liberação de conexão..."
 		fi
 
-		if [[ "$DayzDeathmatch" -eq "1" ]]; then
-			DELETE_KILLFEED 
-			DELETE_PLAYER_DAMAGE
-		fi
+		# if [[ "$DayzDeathmatch" -eq "1" ]]; then
+		# 	DELETE_KILLFEED 
+		# 	DELETE_PLAYER_DAMAGE
+		# fi
 		sleep 1
 		# Configurar visudo
 		# <usuario> ALL=NOPASSWD: /bin/systemctl restart dayz-infos-logs-discord.service
