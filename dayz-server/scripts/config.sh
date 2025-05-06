@@ -198,7 +198,7 @@ INSERT_KILLFEED() {
     local PlayerIDKiller="$1"
     local PlayerIDKilled="$2"
     local Weapon="$3"
-    local DistanceMeter="$4:-0"
+    local DistanceMeter="$4"
     local Data="$5"
     local PosKiller="$6"
     local PosKilled="$7"
@@ -453,6 +453,38 @@ EOF
     done
 
     echo "Failed to insert after $max_retries attempts."
+    return 1
+}
+
+DELETE_KILLFEED() {    
+    while (( attempt <= max_retries )); do
+        sqlite3 "$AppFolder/$AppPlayerBecoC1DbFile" "DELETE FROM players_killfeed;"
+        if [[ $? -eq 0 ]]; then
+            return 0
+        else
+            echo "Attempt $attempt failed. Retrying in $retry_delay seconds..."
+            sleep "$retry_delay"
+            attempt=$((attempt + 1))
+        fi
+    done
+
+    echo "Failed to DELETE after $max_retries attempts."
+    return 1
+}
+
+DELETE_PLAYER_DAMAGE() {
+    while (( attempt <= max_retries )); do
+        sqlite3 "$AppFolder/$AppPlayerBecoC1DbFile" "DELETE FROM players_damage;"
+        if [[ $? -eq 0 ]]; then
+            return 0
+        else
+            echo "Attempt $attempt failed. Retrying in $retry_delay seconds..."
+            sleep "$retry_delay"
+            attempt=$((attempt + 1))
+        fi
+    done
+
+    echo "Failed to DELETE after $max_retries attempts."
     return 1
 }
 

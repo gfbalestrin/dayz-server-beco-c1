@@ -38,7 +38,7 @@ void GiveSurvivorLoadout(PlayerBase player)
     // Arma principal + miras + munição
     EntityAI m4 = player.GetInventory().CreateInInventory("M4A1");
     m4.GetInventory().CreateAttachment("ACOGOptic");
-    m4.GetInventory().CreateAttachment("M4_Suppressor");
+    //m4.GetInventory().CreateAttachment("M4_Suppressor");
     m4.GetInventory().CreateAttachment("M4_RISHndgrd_Black");
     m4.GetInventory().CreateAttachment("M4_MPBttstck_Black");
     m4.GetInventory().CreateAttachment("Mag_STANAG_30Rnd");
@@ -89,7 +89,7 @@ void GiveSurvivorLoadout(PlayerBase player)
 
     if (akm) {
         // Supressor
-        akm.GetInventory().CreateAttachment("AK_Suppressor");
+        //akm.GetInventory().CreateAttachment("AK_Suppressor");
 
         // Miras (coloque só uma das opções, ou troque conforme quiser)
         akm.GetInventory().CreateAttachment("KobraOptic");

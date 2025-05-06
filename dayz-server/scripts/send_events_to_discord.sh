@@ -176,7 +176,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		PlayerIdKiller=$(echo "$Content" | sed -n 's|.*id=\([^ ]*\) pos.*|\1|p')
 		Weapon=$(echo "$Content" | grep -oP 'with \K\w+')
 		Distance=$(echo "$Content" | grep -oP 'from \K\d+\.\d+')
-		Distance=$(echo $Distance | cut -d '.' -f 1)
+		Distance=$(echo $Distance | cut -d '.' -f 1 | cut -d ':' -f 1)
 		PostKilled=$(echo "$Content" | sed -n 's/.*pos=<\([^>]*\)>.*pos=<[^>]*>.*/\1/p')
 		PostKilled=$(echo "$PostKilled" | sed 's/, */,/g')
 		PosKiller=$(echo "$Content" | sed -n 's/.*pos=<[^>]*>.*pos=<\([^>]*\)>.*/\1/p')
@@ -220,17 +220,22 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 	# Eventos de restart do server
 	elif [[ "$Line" == *"AdminLog started on"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"		
-		if [[ "$DayzDayzWipeOnRestart" == "1" ]]; then
+		if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
 			Content="Wipe realizado e servidor reiniciado. Aguardando liberação de conexão..."
 		else
 			Content="Servidor reiniciado. Aguardando liberação de conexão..."
+		fi
+
+		if [[ "$DayzDeathmatch" -eq "1" ]]; then
+			DELETE_KILLFEED 
+			DELETE_PLAYER_DAMAGE
 		fi
 		sleep 1
 		# Configurar visudo
 		# <usuario> ALL=NOPASSWD: /bin/systemctl restart dayz-infos-logs-discord.service
 		sudo systemctl restart dayz-infos-logs-discord.service
 	else
-					
+		
 		Content="${Content//is unconscious/está inconsciente}"
 		Content="${Content//bled out/morreu por sangramento}"
 		Content="${Content//killed by/morto por}"
