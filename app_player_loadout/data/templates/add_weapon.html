@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adicionar Arma</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="mb-4">Adicionar Nova Arma</h1>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Nome da Arma</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de Alimentação</label>
+                <input type="text" name="feed_type" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Voltar</a>
+        </form>
+    </div>
+</body>
+</html>

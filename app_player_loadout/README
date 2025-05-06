@@ -25,3 +25,5 @@ systemctl daemon-reexec
 systemctl enable discordbot
 systemctl start discordbot
 systemctl status discordbot
+
+# https://dayz.fandom.com/wiki/Magazines?utm_source=chatgpt.com
