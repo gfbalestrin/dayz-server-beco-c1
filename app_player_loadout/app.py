@@ -25,8 +25,9 @@ class LoadoutView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-        self.armas = ["M4A1", "AK-74", "SVD", "Mosin"]
-        self.mochilas = ["Assault Bag", "Hunter Backpack", "Mountain Backpack"]
+        self.armas = ["AK101", "AK101_Black", "AK101_Green", "AK74"]
+        self.mochilas = ["Assault Bag"]
+        self.explosivos = ["ClaymoreMine", "FlashGrenade", "Grenade_ChemGas", "ImprovisedExplosive", "LandMineTrap", "M18SmokeGrenade_Green", "M18SmokeGrenade_Purple", "M18SmokeGrenade_Red", "M18SmokeGrenade_White", "M18SmokeGrenade_Yellow", "M67Grenade", "Plastic_Explosive", "RDG2SmokeGrenade_Black", "RDG2SmokeGrenade_White", "RGD5Grenade"]
 
         self.select_arma = discord.ui.Select(
             placeholder="Escolha sua arma",

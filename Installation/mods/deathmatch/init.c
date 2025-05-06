@@ -1,4 +1,4 @@
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/AdminLoadout.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 
 void main()
@@ -42,6 +42,16 @@ class SafeZoneData {
 
     void SafeZoneData() {
         safeZones = new array<vector>();
+    }
+}
+
+class LoadoutData {
+    ref array<string> clothes;
+    ref array<string> accessories;
+
+    void LoadoutData() {
+        clothes = new array<string>();
+        accessories = new array<string>();
     }
 }
 
@@ -510,7 +520,10 @@ class CustomMission: MissionServer
 			GiveAdminLoadout(m_player);
 		} else {
 			m_player.SetAllowDamage(false);
-			GiveSurvivorLoadout(m_player);
+
+			if (!GiveCustomLoadout(m_player, identity.GetId()))
+				GiveDefaultLoadout(m_player);
+
 			m_player.SetHealth("", "", 100);
 			m_player.SetHealth("GlobalHealth", "Blood", 5000);
 			m_player.SetHealth("GlobalHealth", "Shock", 0);
@@ -530,6 +543,40 @@ class CustomMission: MissionServer
 		return m_player;
 	}
 
+	bool GiveCustomLoadout(PlayerBase player, string playerId)
+	{
+		string jsonPath = "$mission:custom_loadouts.json";
+		string jsonContent;
+
+		ref map<string, ref LoadoutData> loadoutMap = new map<string, ref LoadoutData>;
+
+		// Carregar o JSON (sem verificar retorno, pois retorna void)
+		JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
+
+		if (!loadoutMap || !loadoutMap.Contains(playerId)) {
+			WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
+			return false;
+		}
+
+		if (!loadoutMap.Contains(playerId)) {
+			WriteToLog("No custom loadout for player: " + playerId);
+			return false;
+		}
+
+		LoadoutData data = loadoutMap.Get(playerId);
+
+		foreach (string item : data.clothes) {
+			player.GetInventory().CreateInInventory(item);
+		}
+
+		foreach (string item2 : data.accessories) {
+			player.GetInventory().CreateInInventory(item2);
+		}
+
+		WriteToLog("Loadout loaded successfully!");
+		return true;
+	}
+
 	void WriteToLog(string content, string logfile = "init.log")
 	{
 		string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
@@ -542,7 +589,7 @@ class CustomMission: MissionServer
 		}
 		else
 		{
-			WriteToLog("Erro ao abrir o arquivo para escrita.");
+			WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
 		}
 	}
 

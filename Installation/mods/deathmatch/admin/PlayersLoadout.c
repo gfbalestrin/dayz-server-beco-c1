@@ -1,4 +1,4 @@
-void GiveSurvivorLoadout(PlayerBase player)
+void GiveDefaultLoadout(PlayerBase player)
 {
     // Roupas e Proteção
     player.GetInventory().CreateInInventory("TacticalShirt_Black");
@@ -138,8 +138,3 @@ void GiveAdminLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("TacticalGoggles");
     player.GetInventory().CreateInInventory("BalaclavaMask_Black");
 }
-
-
-
-
-

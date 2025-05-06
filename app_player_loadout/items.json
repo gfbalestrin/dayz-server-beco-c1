@@ -1,0 +1,4722 @@
+[
+    {
+        "weapons": [
+            {
+                "name": "ACOGOptic"
+            },
+            {
+                "name": "ACOGOptic_6x"
+            },
+            {
+                "name": "AK101"
+            },
+            {
+                "name": "AK101_Black"
+            },
+            {
+                "name": "AK101_Green"
+            },
+            {
+                "name": "AK74"
+            },
+            {
+                "name": "AK74_Black"
+            },
+            {
+                "name": "AK74_Green"
+            },
+            {
+                "name": "AK74_Hndgrd"
+            },
+            {
+                "name": "AK74_WoodBttstck"
+            },
+            {
+                "name": "AKM"
+            },
+            {
+                "name": "AKS74U"
+            },
+            {
+                "name": "AKS74U_Black"
+            },
+            {
+                "name": "AKS74U_Bttstck"
+            },
+            {
+                "name": "AKS74U_Green"
+            },
+            {
+                "name": "AK_Bayonet"
+            },
+            {
+                "name": "AK_FoldingBttstck"
+            },
+            {
+                "name": "AK_FoldingBttstck_Black"
+            },
+            {
+                "name": "AK_FoldingBttstck_Green"
+            },
+            {
+                "name": "AK_PlasticBttstck"
+            },
+            {
+                "name": "AK_PlasticBttstck_Black"
+            },
+            {
+                "name": "AK_PlasticBttstck_Green"
+            },
+            {
+                "name": "AK_PlasticHndgrd"
+            },
+            {
+                "name": "AK_RailHndgrd"
+            },
+            {
+                "name": "AK_RailHndgrd_Black"
+            },
+            {
+                "name": "AK_RailHndgrd_Green"
+            },
+            {
+                "name": "AK_Suppressor"
+            },
+            {
+                "name": "AK_WoodBttstck"
+            },
+            {
+                "name": "AK_WoodBttstck_Black"
+            },
+            {
+                "name": "AK_WoodBttstck_Camo"
+            },
+            {
+                "name": "AK_WoodHndgrd"
+            },
+            {
+                "name": "AK_WoodHndgrd_Black"
+            },
+            {
+                "name": "AK_WoodHndgrd_Camo"
+            },
+            {
+                "name": "ASVAL"
+            },
+            {
+                "name": "AmmoBox_00buck_10rnd"
+            },
+            {
+                "name": "AmmoBox_12gaRubberSlug_10Rnd"
+            },
+            {
+                "name": "AmmoBox_12gaSlug_10Rnd"
+            },
+            {
+                "name": "AmmoBox_22_50Rnd"
+            },
+            {
+                "name": "AmmoBox_308WinTracer_20Rnd"
+            },
+            {
+                "name": "AmmoBox_308Win_20Rnd"
+            },
+            {
+                "name": "AmmoBox_357_20Rnd"
+            },
+            {
+                "name": "AmmoBox_380_35rnd"
+            },
+            {
+                "name": "AmmoBox_45ACP_25rnd"
+            },
+            {
+                "name": "AmmoBox_545x39Tracer_20Rnd"
+            },
+            {
+                "name": "AmmoBox_545x39_20Rnd"
+            },
+            {
+                "name": "AmmoBox_556x45Tracer_20Rnd"
+            },
+            {
+                "name": "AmmoBox_556x45_20Rnd"
+            },
+            {
+                "name": "AmmoBox_762x39Tracer_20Rnd"
+            },
+            {
+                "name": "AmmoBox_762x39_20Rnd"
+            },
+            {
+                "name": "AmmoBox_762x54Tracer_20Rnd"
+            },
+            {
+                "name": "AmmoBox_762x54_20Rnd"
+            },
+            {
+                "name": "AmmoBox_9x19_25rnd"
+            },
+            {
+                "name": "AmmoBox_9x39AP_20Rnd"
+            },
+            {
+                "name": "AmmoBox_9x39_20Rnd"
+            },
+            {
+                "name": "Ammo_12gaPellets"
+            },
+            {
+                "name": "Ammo_12gaRubberSlug"
+            },
+            {
+                "name": "Ammo_12gaSlug"
+            },
+            {
+                "name": "Ammo_22"
+            },
+            {
+                "name": "Ammo_308Win"
+            },
+            {
+                "name": "Ammo_308WinTracer"
+            },
+            {
+                "name": "Ammo_357"
+            },
+            {
+                "name": "Ammo_380"
+            },
+            {
+                "name": "Ammo_40mm_Chemgas"
+            },
+            {
+                "name": "Ammo_40mm_Explosive"
+            },
+            {
+                "name": "Ammo_40mm_Smoke_Black"
+            },
+            {
+                "name": "Ammo_40mm_Smoke_Green"
+            },
+            {
+                "name": "Ammo_40mm_Smoke_Red"
+            },
+            {
+                "name": "Ammo_40mm_Smoke_White"
+            },
+            {
+                "name": "Ammo_45ACP"
+            },
+            {
+                "name": "Ammo_545x39"
+            },
+            {
+                "name": "Ammo_545x39Tracer"
+            },
+            {
+                "name": "Ammo_556x45"
+            },
+            {
+                "name": "Ammo_556x45Tracer"
+            },
+            {
+                "name": "Ammo_762x39"
+            },
+            {
+                "name": "Ammo_762x39Tracer"
+            },
+            {
+                "name": "Ammo_762x54"
+            },
+            {
+                "name": "Ammo_762x54Tracer"
+            },
+            {
+                "name": "Ammo_9x19"
+            },
+            {
+                "name": "Ammo_9x39"
+            },
+            {
+                "name": "Ammo_9x39AP"
+            },
+            {
+                "name": "Ammo_CupidsBolt"
+            },
+            {
+                "name": "Ammo_Flare"
+            },
+            {
+                "name": "Ammo_FlareBlue"
+            },
+            {
+                "name": "Ammo_FlareGreen"
+            },
+            {
+                "name": "Ammo_FlareRed"
+            },
+            {
+                "name": "Ammo_HuntingBolt"
+            },
+            {
+                "name": "Ammo_ImprovisedBolt_1"
+            },
+            {
+                "name": "Ammo_ImprovisedBolt_2"
+            },
+            {
+                "name": "Aug"
+            },
+            {
+                "name": "AugShort"
+            },
+            {
+                "name": "B95"
+            },
+            {
+                "name": "BUISOptic"
+            },
+            {
+                "name": "CZ527"
+            },
+            {
+                "name": "CZ550"
+            },
+            {
+                "name": "CZ61"
+            },
+            {
+                "name": "CZ75"
+            },
+            {
+                "name": "Colt1911"
+            },
+            {
+                "name": "Crossbow_Autumn"
+            },
+            {
+                "name": "Crossbow_Black"
+            },
+            {
+                "name": "Crossbow_Summer"
+            },
+            {
+                "name": "Crossbow_Wood"
+            },
+            {
+                "name": "Deagle"
+            },
+            {
+                "name": "Deagle_Gold"
+            },
+            {
+                "name": "Derringer_Black"
+            },
+            {
+                "name": "Derringer_Grey"
+            },
+            {
+                "name": "Derringer_Pink"
+            },
+            {
+                "name": "Engraved1911"
+            },
+            {
+                "name": "FAL"
+            },
+            {
+                "name": "FAMAS"
+            },
+            {
+                "name": "FNP45_MRDSOptic"
+            },
+            {
+                "name": "FNX45"
+            },
+            {
+                "name": "Fal_FoldingBttstck"
+            },
+            {
+                "name": "Fal_OeBttstck"
+            },
+            {
+                "name": "Flaregun"
+            },
+            {
+                "name": "Glock19"
+            },
+            {
+                "name": "HuntingOptic"
+            },
+            {
+                "name": "Iceaxe"
+            },
+            {
+                "name": "ImprovisedSuppressor"
+            },
+            {
+                "name": "Izh18"
+            },
+            {
+                "name": "Izh18Shotgun"
+            },
+            {
+                "name": "Izh43Shotgun"
+            },
+            {
+                "name": "KashtanOptic"
+            },
+            {
+                "name": "KazuarOptic"
+            },
+            {
+                "name": "KobraOptic"
+            },
+            {
+                "name": "Longhorn"
+            },
+            {
+                "name": "M14"
+            },
+            {
+                "name": "M16A2"
+            },
+            {
+                "name": "M4A1"
+            },
+            {
+                "name": "M4A1_Black"
+            },
+            {
+                "name": "M4A1_Green"
+            },
+            {
+                "name": "M4_CQBBttstck"
+            },
+            {
+                "name": "M4_CarryHandleOptic"
+            },
+            {
+                "name": "M4_MPBttstck"
+            },
+            {
+                "name": "M4_MPHndgrd"
+            },
+            {
+                "name": "M4_OEBttstck"
+            },
+            {
+                "name": "M4_PlasticHndgrd"
+            },
+            {
+                "name": "M4_RISHndgrd"
+            },
+            {
+                "name": "M4_RISHndgrd_Black"
+            },
+            {
+                "name": "M4_RISHndgrd_Green"
+            },
+            {
+                "name": "M4_Suppressor"
+            },
+            {
+                "name": "M4_T3NRDSOptic"
+            },
+            {
+                "name": "M68Optic"
+            },
+            {
+                "name": "M79"
+            },
+            {
+                "name": "M9A1_Bayonet"
+            },
+            {
+                "name": "MKII"
+            },
+            {
+                "name": "MP5K"
+            },
+            {
+                "name": "MP5_Compensator"
+            },
+            {
+                "name": "MP5_PlasticHndgrd"
+            },
+            {
+                "name": "MP5_RailHndgrd"
+            },
+            {
+                "name": "MP5k_StockBttstck"
+            },
+            {
+                "name": "Mag_1911_7Rnd"
+            },
+            {
+                "name": "Mag_AK101_30Rnd"
+            },
+            {
+                "name": "Mag_AK74_30Rnd"
+            },
+            {
+                "name": "Mag_AK74_45Rnd"
+            },
+            {
+                "name": "Mag_AKM_30Rnd"
+            },
+            {
+                "name": "Mag_AKM_Drum75Rnd"
+            },
+            {
+                "name": "Mag_AKM_Palm30Rnd"
+            },
+            {
+                "name": "Mag_Aug_30Rnd"
+            },
+            {
+                "name": "Mag_CMAG_10Rnd"
+            },
+            {
+                "name": "Mag_CMAG_20Rnd"
+            },
+            {
+                "name": "Mag_CMAG_30Rnd"
+            },
+            {
+                "name": "Mag_CMAG_40Rnd"
+            },
+            {
+                "name": "Mag_CZ527_5rnd"
+            },
+            {
+                "name": "Mag_CZ550_10Rnd"
+            },
+            {
+                "name": "Mag_CZ61_20Rnd"
+            },
+            {
+                "name": "Mag_CZ75_15Rnd"
+            },
+            {
+                "name": "Mag_Deagle_9rnd"
+            },
+            {
+                "name": "Mag_FAL_20Rnd"
+            },
+            {
+                "name": "Mag_FAMAS_25Rnd"
+            },
+            {
+                "name": "Mag_FNX45_15Rnd"
+            },
+            {
+                "name": "Mag_Glock_15Rnd"
+            },
+            {
+                "name": "Mag_IJ70_8Rnd"
+            },
+            {
+                "name": "Mag_M14_10Rnd"
+            },
+            {
+                "name": "Mag_M14_20Rnd"
+            },
+            {
+                "name": "Mag_MKII_10Rnd"
+            },
+            {
+                "name": "Mag_MP5_15Rnd"
+            },
+            {
+                "name": "Mag_MP5_30Rnd"
+            },
+            {
+                "name": "Mag_P1_8Rnd"
+            },
+            {
+                "name": "Mag_PP19_64Rnd"
+            },
+            {
+                "name": "Mag_Ruger1022_15Rnd"
+            },
+            {
+                "name": "Mag_Ruger1022_30Rnd"
+            },
+            {
+                "name": "Mag_SSG82_5rnd"
+            },
+            {
+                "name": "Mag_STANAG_30Rnd"
+            },
+            {
+                "name": "Mag_STANAG_60Rnd"
+            },
+            {
+                "name": "Mag_SV98_10Rnd"
+            },
+            {
+                "name": "Mag_SVD_10Rnd"
+            },
+            {
+                "name": "Mag_Saiga_5Rnd"
+            },
+            {
+                "name": "Mag_Saiga_8Rnd"
+            },
+            {
+                "name": "Mag_Saiga_Drum20Rnd"
+            },
+            {
+                "name": "Mag_Scout_5Rnd"
+            },
+            {
+                "name": "Mag_UMP_25Rnd"
+            },
+            {
+                "name": "Mag_VAL_20Rnd"
+            },
+            {
+                "name": "Mag_VSS_10Rnd"
+            },
+            {
+                "name": "Mag_Vikhr_30Rnd"
+            },
+            {
+                "name": "Magnum"
+            },
+            {
+                "name": "MakarovIJ70"
+            },
+            {
+                "name": "Mosin9130"
+            },
+            {
+                "name": "Mosin9130_Black"
+            },
+            {
+                "name": "Mosin9130_Camo"
+            },
+            {
+                "name": "Mosin9130_Green"
+            },
+            {
+                "name": "Mosin_Bayonet"
+            },
+            {
+                "name": "Mosin_Compensator"
+            },
+            {
+                "name": "Mp133Shotgun"
+            },
+            {
+                "name": "NVGoggles"
+            },
+            {
+                "name": "P1"
+            },
+            {
+                "name": "PP19"
+            },
+            {
+                "name": "PP19_Bttstck"
+            },
+            {
+                "name": "PSO11Optic"
+            },
+            {
+                "name": "PSO1Optic"
+            },
+            {
+                "name": "PUScopeOptic"
+            },
+            {
+                "name": "PistolOptic"
+            },
+            {
+                "name": "PistolSuppressor"
+            },
+            {
+                "name": "ReflexOptic"
+            },
+            {
+                "name": "Repeater"
+            },
+            {
+                "name": "Ruger1022"
+            },
+            {
+                "name": "SKS"
+            },
+            {
+                "name": "SKS_Bayonet"
+            },
+            {
+                "name": "SSG82"
+            },
+            {
+                "name": "SV98"
+            },
+            {
+                "name": "SVD"
+            },
+            {
+                "name": "SVD_Wooden"
+            },
+            {
+                "name": "Saiga"
+            },
+            {
+                "name": "Saiga_Bttstck"
+            },
+            {
+                "name": "SawedoffB95"
+            },
+            {
+                "name": "SawedoffFAMAS"
+            },
+            {
+                "name": "SawedoffIzh18"
+            },
+            {
+                "name": "SawedoffIzh18Shotgun"
+            },
+            {
+                "name": "SawedoffIzh43Shotgun"
+            },
+            {
+                "name": "SawedoffMagnum"
+            },
+            {
+                "name": "SawedoffMosin9130"
+            },
+            {
+                "name": "SawedoffMosin9130_Black"
+            },
+            {
+                "name": "SawedoffMosin9130_Camo"
+            },
+            {
+                "name": "SawedoffMosin9130_Green"
+            },
+            {
+                "name": "Scout"
+            },
+            {
+                "name": "Scout_Chernarus"
+            },
+            {
+                "name": "Scout_Livonia"
+            },
+            {
+                "name": "StarlightOptic"
+            },
+            {
+                "name": "TLRLight"
+            },
+            {
+                "name": "UMP45"
+            },
+            {
+                "name": "UniversalLight"
+            },
+            {
+                "name": "VSS"
+            },
+            {
+                "name": "Vikhr"
+            },
+            {
+                "name": "Winchester70"
+            }
+        ]
+    },
+    {
+        "food": [
+            {
+                "name": "AgaricusMushroom"
+            },
+            {
+                "name": "Apple"
+            },
+            {
+                "name": "AuriculariaMushroom"
+            },
+            {
+                "name": "BakedBeansCan"
+            },
+            {
+                "name": "BakedBeansCan_Opened"
+            },
+            {
+                "name": "BearSteakMeat"
+            },
+            {
+                "name": "Bitterlings"
+            },
+            {
+                "name": "BoarSteakMeat"
+            },
+            {
+                "name": "BoletusMushroom"
+            },
+            {
+                "name": "BoxCerealCrunchin"
+            },
+            {
+                "name": "BrisketSpread"
+            },
+            {
+                "name": "BrisketSpread_Opened"
+            },
+            {
+                "name": "Candycane_Green"
+            },
+            {
+                "name": "Candycane_Red"
+            },
+            {
+                "name": "Candycane_RedGreen"
+            },
+            {
+                "name": "Candycane_Yellow"
+            },
+            {
+                "name": "Canteen"
+            },
+            {
+                "name": "Carp"
+            },
+            {
+                "name": "CarpFilletMeat"
+            },
+            {
+                "name": "CatFoodCan"
+            },
+            {
+                "name": "CatFoodCan_Opened"
+            },
+            {
+                "name": "ChickenBreastMeat"
+            },
+            {
+                "name": "Chips"
+            },
+            {
+                "name": "CowSteakMeat"
+            },
+            {
+                "name": "CrabCan"
+            },
+            {
+                "name": "CrabCan_Opened"
+            },
+            {
+                "name": "Crackers"
+            },
+            {
+                "name": "DeadChicken_Brown"
+            },
+            {
+                "name": "DeadChicken_Spotted"
+            },
+            {
+                "name": "DeadChicken_White"
+            },
+            {
+                "name": "DeadRabbit"
+            },
+            {
+                "name": "DeadRooster"
+            },
+            {
+                "name": "DeerSteakMeat"
+            },
+            {
+                "name": "DogFoodCan"
+            },
+            {
+                "name": "DogFoodCan_Opened"
+            },
+            {
+                "name": "GoatSteakMeat"
+            },
+            {
+                "name": "GreenBellPepper"
+            },
+            {
+                "name": "Honey"
+            },
+            {
+                "name": "HumanSteakMeat"
+            },
+            {
+                "name": "LactariusMushroom"
+            },
+            {
+                "name": "Lard"
+            },
+            {
+                "name": "Lunchmeat"
+            },
+            {
+                "name": "Lunchmeat_Opened"
+            },
+            {
+                "name": "Mackerel"
+            },
+            {
+                "name": "MackerelFilletMeat"
+            },
+            {
+                "name": "MacrolepiotaMushroom"
+            },
+            {
+                "name": "Marmalade"
+            },
+            {
+                "name": "Pajka"
+            },
+            {
+                "name": "Pajka_Opened"
+            },
+            {
+                "name": "Pate"
+            },
+            {
+                "name": "Pate_Opened"
+            },
+            {
+                "name": "PeachesCan"
+            },
+            {
+                "name": "PeachesCan_Opened"
+            },
+            {
+                "name": "Pear"
+            },
+            {
+                "name": "PepperSeedsPack"
+            },
+            {
+                "name": "PigSteakMeat"
+            },
+            {
+                "name": "PleurotusMushroom"
+            },
+            {
+                "name": "Plum"
+            },
+            {
+                "name": "PorkCan"
+            },
+            {
+                "name": "PorkCan_Opened"
+            },
+            {
+                "name": "Potato"
+            },
+            {
+                "name": "PotatoSeed"
+            },
+            {
+                "name": "PowderedMilk"
+            },
+            {
+                "name": "Pumpkin"
+            },
+            {
+                "name": "PumpkinSeedsPack"
+            },
+            {
+                "name": "RabbitLegMeat"
+            },
+            {
+                "name": "Rice"
+            },
+            {
+                "name": "SaltySticks"
+            },
+            {
+                "name": "Sardines"
+            },
+            {
+                "name": "SardinesCan"
+            },
+            {
+                "name": "SardinesCan_Opened"
+            },
+            {
+                "name": "SheepSteakMeat"
+            },
+            {
+                "name": "SlicedPumpkin"
+            },
+            {
+                "name": "SodaCan_Cola"
+            },
+            {
+                "name": "SodaCan_Fronta"
+            },
+            {
+                "name": "SodaCan_Kvass"
+            },
+            {
+                "name": "SodaCan_Pipsi"
+            },
+            {
+                "name": "SodaCan_Spite"
+            },
+            {
+                "name": "SpaghettiCan"
+            },
+            {
+                "name": "SpaghettiCan_Opened"
+            },
+            {
+                "name": "TacticalBaconCan"
+            },
+            {
+                "name": "TacticalBaconCan_Opened"
+            },
+            {
+                "name": "Tomato"
+            },
+            {
+                "name": "TomatoSeedsPack"
+            },
+            {
+                "name": "TunaCan"
+            },
+            {
+                "name": "TunaCan_Opened"
+            },
+            {
+                "name": "UnknownFoodCan"
+            },
+            {
+                "name": "UnknownFoodCan_Opened"
+            },
+            {
+                "name": "WolfSteakMeat"
+            },
+            {
+                "name": "Zagorky"
+            },
+            {
+                "name": "ZagorkyChocolate"
+            },
+            {
+                "name": "ZagorkyPeanuts"
+            },
+            {
+                "name": "Zucchini"
+            },
+            {
+                "name": "ZucchiniSeedsPack"
+            }
+        ]
+    },
+    {
+        "clothes": [
+            {
+                "name": "AirborneMask"
+            },
+            {
+                "name": "Armband_APA"
+            },
+            {
+                "name": "Armband_Altis"
+            },
+            {
+                "name": "Armband_BabyDeer"
+            },
+            {
+                "name": "Armband_Bear"
+            },
+            {
+                "name": "Armband_Black"
+            },
+            {
+                "name": "Armband_Blue"
+            },
+            {
+                "name": "Armband_Bohemia"
+            },
+            {
+                "name": "Armband_BrainZ"
+            },
+            {
+                "name": "Armband_CDF"
+            },
+            {
+                "name": "Armband_CHEL"
+            },
+            {
+                "name": "Armband_CMC"
+            },
+            {
+                "name": "Armband_Cannibals"
+            },
+            {
+                "name": "Armband_Chedaki"
+            },
+            {
+                "name": "Armband_Chernarus"
+            },
+            {
+                "name": "Armband_Crook"
+            },
+            {
+                "name": "Armband_DayZ"
+            },
+            {
+                "name": "Armband_Green"
+            },
+            {
+                "name": "Armband_HunterZ"
+            },
+            {
+                "name": "Armband_Livonia"
+            },
+            {
+                "name": "Armband_LivoniaArmy"
+            },
+            {
+                "name": "Armband_LivoniaPolice"
+            },
+            {
+                "name": "Armband_NAPA"
+            },
+            {
+                "name": "Armband_NSahrani"
+            },
+            {
+                "name": "Armband_Orange"
+            },
+            {
+                "name": "Armband_Pink"
+            },
+            {
+                "name": "Armband_Pirates"
+            },
+            {
+                "name": "Armband_RSTA"
+            },
+            {
+                "name": "Armband_Red"
+            },
+            {
+                "name": "Armband_Refuge"
+            },
+            {
+                "name": "Armband_Rex"
+            },
+            {
+                "name": "Armband_Rooster"
+            },
+            {
+                "name": "Armband_SSahrani"
+            },
+            {
+                "name": "Armband_Snake"
+            },
+            {
+                "name": "Armband_TEC"
+            },
+            {
+                "name": "Armband_UEC"
+            },
+            {
+                "name": "Armband_White"
+            },
+            {
+                "name": "Armband_Wolf"
+            },
+            {
+                "name": "Armband_Yellow"
+            },
+            {
+                "name": "Armband_Zagorky"
+            },
+            {
+                "name": "Armband_Zenit"
+            },
+            {
+                "name": "AthleticShoes_Black"
+            },
+            {
+                "name": "AthleticShoes_Blue"
+            },
+            {
+                "name": "AthleticShoes_Brown"
+            },
+            {
+                "name": "AthleticShoes_Green"
+            },
+            {
+                "name": "AthleticShoes_Grey"
+            },
+            {
+                "name": "AviatorGlasses"
+            },
+            {
+                "name": "BDUJacket"
+            },
+            {
+                "name": "BDUPants"
+            },
+            {
+                "name": "Balaclava3Holes_Beige"
+            },
+            {
+                "name": "Balaclava3Holes_Black"
+            },
+            {
+                "name": "Balaclava3Holes_Blue"
+            },
+            {
+                "name": "Balaclava3Holes_Green"
+            },
+            {
+                "name": "Balaclava3Holes_White"
+            },
+            {
+                "name": "BalaclavaMask_BDU"
+            },
+            {
+                "name": "BalaclavaMask_Beige"
+            },
+            {
+                "name": "BalaclavaMask_Black"
+            },
+            {
+                "name": "BalaclavaMask_Blackskull"
+            },
+            {
+                "name": "BalaclavaMask_Blue"
+            },
+            {
+                "name": "BalaclavaMask_Chain"
+            },
+            {
+                "name": "BalaclavaMask_Green"
+            },
+            {
+                "name": "BalaclavaMask_Pig"
+            },
+            {
+                "name": "BalaclavaMask_Pink"
+            },
+            {
+                "name": "BalaclavaMask_White"
+            },
+            {
+                "name": "BallisticHelmet_BDU"
+            },
+            {
+                "name": "BallisticHelmet_Black"
+            },
+            {
+                "name": "BallisticHelmet_Desert"
+            },
+            {
+                "name": "BallisticHelmet_Green"
+            },
+            {
+                "name": "BallisticHelmet_Navy"
+            },
+            {
+                "name": "BallisticHelmet_UN"
+            },
+            {
+                "name": "BallisticHelmet_Winter"
+            },
+            {
+                "name": "BallisticHelmet_Woodland"
+            },
+            {
+                "name": "Bandana_Blackpattern"
+            },
+            {
+                "name": "Bandana_Camopattern"
+            },
+            {
+                "name": "Bandana_Greenpattern"
+            },
+            {
+                "name": "Bandana_Polkapattern"
+            },
+            {
+                "name": "Bandana_Redpattern"
+            },
+            {
+                "name": "BaseballCap_Beige"
+            },
+            {
+                "name": "BaseballCap_Black"
+            },
+            {
+                "name": "BaseballCap_Blue"
+            },
+            {
+                "name": "BaseballCap_CMMG_Black"
+            },
+            {
+                "name": "BaseballCap_CMMG_Pink"
+            },
+            {
+                "name": "BaseballCap_Camo"
+            },
+            {
+                "name": "BaseballCap_Olive"
+            },
+            {
+                "name": "BaseballCap_Pink"
+            },
+            {
+                "name": "BaseballCap_Red"
+            },
+            {
+                "name": "BeanieHat_Beige"
+            },
+            {
+                "name": "BeanieHat_Black"
+            },
+            {
+                "name": "BeanieHat_Blue"
+            },
+            {
+                "name": "BeanieHat_Brown"
+            },
+            {
+                "name": "BeanieHat_Green"
+            },
+            {
+                "name": "BeanieHat_Grey"
+            },
+            {
+                "name": "BeanieHat_Pink"
+            },
+            {
+                "name": "BeanieHat_Red"
+            },
+            {
+                "name": "Blouse_Blue"
+            },
+            {
+                "name": "Blouse_Green"
+            },
+            {
+                "name": "Blouse_Violet"
+            },
+            {
+                "name": "Blouse_White"
+            },
+            {
+                "name": "BomberJacket_Black"
+            },
+            {
+                "name": "BomberJacket_Blue"
+            },
+            {
+                "name": "BomberJacket_Brown"
+            },
+            {
+                "name": "BomberJacket_Grey"
+            },
+            {
+                "name": "BomberJacket_Maroon"
+            },
+            {
+                "name": "BomberJacket_Olive"
+            },
+            {
+                "name": "BomberJacket_SkyBlue"
+            },
+            {
+                "name": "BoonieHat_Black"
+            },
+            {
+                "name": "BoonieHat_Blue"
+            },
+            {
+                "name": "BoonieHat_DPM"
+            },
+            {
+                "name": "BoonieHat_Dubok"
+            },
+            {
+                "name": "BoonieHat_Flecktran"
+            },
+            {
+                "name": "BoonieHat_NavyBlue"
+            },
+            {
+                "name": "BoonieHat_Olive"
+            },
+            {
+                "name": "BoonieHat_Orange"
+            },
+            {
+                "name": "BoonieHat_Red"
+            },
+            {
+                "name": "BoonieHat_Tan"
+            },
+            {
+                "name": "BoonieHat_Winter"
+            },
+            {
+                "name": "Breeches_Beetcheck"
+            },
+            {
+                "name": "Breeches_Beige"
+            },
+            {
+                "name": "Breeches_Black"
+            },
+            {
+                "name": "Breeches_Blackcheck"
+            },
+            {
+                "name": "Breeches_Blue"
+            },
+            {
+                "name": "Breeches_Browncheck"
+            },
+            {
+                "name": "Breeches_Green"
+            },
+            {
+                "name": "Breeches_Pink"
+            },
+            {
+                "name": "Breeches_Red"
+            },
+            {
+                "name": "Breeches_White"
+            },
+            {
+                "name": "BudenovkaHat_Gray"
+            },
+            {
+                "name": "BushlatPoliceJacket_Blue"
+            },
+            {
+                "name": "CanvasPantsMidi_Beige"
+            },
+            {
+                "name": "CanvasPantsMidi_Blue"
+            },
+            {
+                "name": "CanvasPantsMidi_Grey"
+            },
+            {
+                "name": "CanvasPantsMidi_Red"
+            },
+            {
+                "name": "CanvasPantsMidi_Violet"
+            },
+            {
+                "name": "CanvasPants_Beige"
+            },
+            {
+                "name": "CanvasPants_Blue"
+            },
+            {
+                "name": "CanvasPants_Grey"
+            },
+            {
+                "name": "CanvasPants_Red"
+            },
+            {
+                "name": "CanvasPants_Violet"
+            },
+            {
+                "name": "CargoPants_Beige"
+            },
+            {
+                "name": "CargoPants_Black"
+            },
+            {
+                "name": "CargoPants_Blue"
+            },
+            {
+                "name": "CargoPants_Green"
+            },
+            {
+                "name": "CargoPants_Grey"
+            },
+            {
+                "name": "Chainmail"
+            },
+            {
+                "name": "Chainmail_Coif"
+            },
+            {
+                "name": "Chainmail_Leggings"
+            },
+            {
+                "name": "ChernarusSportShirt"
+            },
+            {
+                "name": "ChestHolster"
+            },
+            {
+                "name": "Chestplate"
+            },
+            {
+                "name": "ChristmasHeadband_Antlers"
+            },
+            {
+                "name": "ChristmasHeadband_Gingerbread"
+            },
+            {
+                "name": "ChristmasHeadband_Trees"
+            },
+            {
+                "name": "CivilianBelt"
+            },
+            {
+                "name": "CombatBoots_Beige"
+            },
+            {
+                "name": "CombatBoots_Black"
+            },
+            {
+                "name": "CombatBoots_Brown"
+            },
+            {
+                "name": "CombatBoots_Green"
+            },
+            {
+                "name": "CombatBoots_Grey"
+            },
+            {
+                "name": "ConstructionHelmet_Blue"
+            },
+            {
+                "name": "ConstructionHelmet_Lime"
+            },
+            {
+                "name": "ConstructionHelmet_Orange"
+            },
+            {
+                "name": "ConstructionHelmet_Red"
+            },
+            {
+                "name": "ConstructionHelmet_White"
+            },
+            {
+                "name": "ConstructionHelmet_Yellow"
+            },
+            {
+                "name": "CowboyHat_Brown"
+            },
+            {
+                "name": "CowboyHat_black"
+            },
+            {
+                "name": "CowboyHat_darkBrown"
+            },
+            {
+                "name": "CowboyHat_green"
+            },
+            {
+                "name": "DarkMotoHelmet_Black"
+            },
+            {
+                "name": "DarkMotoHelmet_Blue"
+            },
+            {
+                "name": "DarkMotoHelmet_Green"
+            },
+            {
+                "name": "DarkMotoHelmet_Grey"
+            },
+            {
+                "name": "DarkMotoHelmet_Lime"
+            },
+            {
+                "name": "DarkMotoHelmet_Red"
+            },
+            {
+                "name": "DarkMotoHelmet_White"
+            },
+            {
+                "name": "DarkMotoHelmet_Yellow"
+            },
+            {
+                "name": "DarkMotoHelmet_YellowScarred"
+            },
+            {
+                "name": "DenimJacket"
+            },
+            {
+                "name": "DesignerGlasses"
+            },
+            {
+                "name": "DirtBikeHelmet_Black"
+            },
+            {
+                "name": "DirtBikeHelmet_Blue"
+            },
+            {
+                "name": "DirtBikeHelmet_Chernarus"
+            },
+            {
+                "name": "DirtBikeHelmet_Green"
+            },
+            {
+                "name": "DirtBikeHelmet_Khaki"
+            },
+            {
+                "name": "DirtBikeHelmet_Mouthguard"
+            },
+            {
+                "name": "DirtBikeHelmet_Police"
+            },
+            {
+                "name": "DirtBikeHelmet_Red"
+            },
+            {
+                "name": "DirtBikeHelmet_Visor"
+            },
+            {
+                "name": "DownJacket_Blue"
+            },
+            {
+                "name": "DownJacket_Green"
+            },
+            {
+                "name": "DownJacket_Orange"
+            },
+            {
+                "name": "DownJacket_Red"
+            },
+            {
+                "name": "DressShoes_Beige"
+            },
+            {
+                "name": "DressShoes_Black"
+            },
+            {
+                "name": "DressShoes_Brown"
+            },
+            {
+                "name": "DressShoes_Sunburst"
+            },
+            {
+                "name": "DressShoes_White"
+            },
+            {
+                "name": "EyeMask_Black"
+            },
+            {
+                "name": "EyeMask_Blue"
+            },
+            {
+                "name": "EyeMask_Christmas"
+            },
+            {
+                "name": "EyeMask_Dead"
+            },
+            {
+                "name": "EyeMask_NewYears"
+            },
+            {
+                "name": "EyeMask_Red"
+            },
+            {
+                "name": "EyeMask_Valentines"
+            },
+            {
+                "name": "EyeMask_Yellow"
+            },
+            {
+                "name": "EyePatch_Improvised"
+            },
+            {
+                "name": "FaceCover_Improvised"
+            },
+            {
+                "name": "FeetCover_Improvised"
+            },
+            {
+                "name": "FirefighterJacket_Beige"
+            },
+            {
+                "name": "FirefighterJacket_Black"
+            },
+            {
+                "name": "FirefightersHelmet_Red"
+            },
+            {
+                "name": "FirefightersHelmet_White"
+            },
+            {
+                "name": "FirefightersHelmet_Yellow"
+            },
+            {
+                "name": "FirefightersPants_Beige"
+            },
+            {
+                "name": "FirefightersPants_Black"
+            },
+            {
+                "name": "FlatCap_Black"
+            },
+            {
+                "name": "FlatCap_BlackCheck"
+            },
+            {
+                "name": "FlatCap_Blue"
+            },
+            {
+                "name": "FlatCap_Brown"
+            },
+            {
+                "name": "FlatCap_BrownCheck"
+            },
+            {
+                "name": "FlatCap_Grey"
+            },
+            {
+                "name": "FlatCap_GreyCheck"
+            },
+            {
+                "name": "FlatCap_Red"
+            },
+            {
+                "name": "GP5GasMask"
+            },
+            {
+                "name": "GasMask"
+            },
+            {
+                "name": "GasMask_Filter"
+            },
+            {
+                "name": "GasMask_Filter_Improvised"
+            },
+            {
+                "name": "GhillieAtt_Mossy"
+            },
+            {
+                "name": "GhillieAtt_Tan"
+            },
+            {
+                "name": "GhillieAtt_Woodland"
+            },
+            {
+                "name": "GhillieBushrag_Mossy"
+            },
+            {
+                "name": "GhillieBushrag_Tan"
+            },
+            {
+                "name": "GhillieBushrag_Winter"
+            },
+            {
+                "name": "GhillieBushrag_Woodland"
+            },
+            {
+                "name": "GhillieHood_Mossy"
+            },
+            {
+                "name": "GhillieHood_Tan"
+            },
+            {
+                "name": "GhillieHood_Winter"
+            },
+            {
+                "name": "GhillieHood_Woodland"
+            },
+            {
+                "name": "GhillieSuit_Mossy"
+            },
+            {
+                "name": "GhillieSuit_Winter"
+            },
+            {
+                "name": "GhillieSuit_Woodland"
+            },
+            {
+                "name": "GhillieTop_Mossy"
+            },
+            {
+                "name": "GhillieTop_Tan"
+            },
+            {
+                "name": "GhillieTop_Winter"
+            },
+            {
+                "name": "GhillieTop_Woodland"
+            },
+            {
+                "name": "GorkaEJacket_Autumn"
+            },
+            {
+                "name": "GorkaEJacket_Flat"
+            },
+            {
+                "name": "GorkaEJacket_PautRev"
+            },
+            {
+                "name": "GorkaEJacket_Summer"
+            },
+            {
+                "name": "GorkaEJacket_Winter"
+            },
+            {
+                "name": "GorkaHelmet"
+            },
+            {
+                "name": "GorkaHelmetVisor"
+            },
+            {
+                "name": "GorkaPants_Autumn"
+            },
+            {
+                "name": "GorkaPants_Flat"
+            },
+            {
+                "name": "GorkaPants_PautRev"
+            },
+            {
+                "name": "GorkaPants_Summer"
+            },
+            {
+                "name": "GorkaPants_Winter"
+            },
+            {
+                "name": "GreatHelm"
+            },
+            {
+                "name": "HandsCover_Improvised"
+            },
+            {
+                "name": "HeadCover_Improvised"
+            },
+            {
+                "name": "Headdress_Wolf"
+            },
+            {
+                "name": "HighCapacityVest_Black"
+            },
+            {
+                "name": "HighCapacityVest_Olive"
+            },
+            {
+                "name": "HikingBootsLow_Beige"
+            },
+            {
+                "name": "HikingBootsLow_Black"
+            },
+            {
+                "name": "HikingBootsLow_Blue"
+            },
+            {
+                "name": "HikingBootsLow_Grey"
+            },
+            {
+                "name": "HikingBoots_Black"
+            },
+            {
+                "name": "HikingBoots_Brown"
+            },
+            {
+                "name": "HikingJacket_Black"
+            },
+            {
+                "name": "HikingJacket_Blue"
+            },
+            {
+                "name": "HikingJacket_Green"
+            },
+            {
+                "name": "HikingJacket_Red"
+            },
+            {
+                "name": "HockeyHelmet_Black"
+            },
+            {
+                "name": "HockeyHelmet_Blue"
+            },
+            {
+                "name": "HockeyHelmet_Red"
+            },
+            {
+                "name": "HockeyHelmet_White"
+            },
+            {
+                "name": "HockeyMask"
+            },
+            {
+                "name": "Hoodie_Black"
+            },
+            {
+                "name": "Hoodie_Blue"
+            },
+            {
+                "name": "Hoodie_Brown"
+            },
+            {
+                "name": "Hoodie_Green"
+            },
+            {
+                "name": "Hoodie_Grey"
+            },
+            {
+                "name": "Hoodie_Red"
+            },
+            {
+                "name": "HunterPants_Autumn"
+            },
+            {
+                "name": "HunterPants_Brown"
+            },
+            {
+                "name": "HunterPants_Spring"
+            },
+            {
+                "name": "HunterPants_Summer"
+            },
+            {
+                "name": "HunterPants_Winter"
+            },
+            {
+                "name": "HuntingJacket_Autumn"
+            },
+            {
+                "name": "HuntingJacket_Brown"
+            },
+            {
+                "name": "HuntingJacket_Spring"
+            },
+            {
+                "name": "HuntingJacket_Summer"
+            },
+            {
+                "name": "HuntingJacket_Winter"
+            },
+            {
+                "name": "HuntingVest"
+            },
+            {
+                "name": "HuntingVest_Winter"
+            },
+            {
+                "name": "Jeans_Black"
+            },
+            {
+                "name": "Jeans_Blue"
+            },
+            {
+                "name": "Jeans_BlueDark"
+            },
+            {
+                "name": "Jeans_Brown"
+            },
+            {
+                "name": "Jeans_Green"
+            },
+            {
+                "name": "Jeans_Grey"
+            },
+            {
+                "name": "JoggingShoes_Black"
+            },
+            {
+                "name": "JoggingShoes_Blue"
+            },
+            {
+                "name": "JoggingShoes_Red"
+            },
+            {
+                "name": "JoggingShoes_Violet"
+            },
+            {
+                "name": "JoggingShoes_White"
+            },
+            {
+                "name": "JumpsuitJacket_Blue"
+            },
+            {
+                "name": "JumpsuitJacket_Gray"
+            },
+            {
+                "name": "JumpsuitJacket_Green"
+            },
+            {
+                "name": "JumpsuitJacket_Red"
+            },
+            {
+                "name": "JumpsuitPants_Blue"
+            },
+            {
+                "name": "JumpsuitPants_Green"
+            },
+            {
+                "name": "JumpsuitPants_Grey"
+            },
+            {
+                "name": "JumpsuitPants_Red"
+            },
+            {
+                "name": "JungleBoots_Beige"
+            },
+            {
+                "name": "JungleBoots_Black"
+            },
+            {
+                "name": "JungleBoots_Brown"
+            },
+            {
+                "name": "JungleBoots_Green"
+            },
+            {
+                "name": "JungleBoots_Olive"
+            },
+            {
+                "name": "LabCoat"
+            },
+            {
+                "name": "LeatherBelt_Beige"
+            },
+            {
+                "name": "LeatherBelt_Black"
+            },
+            {
+                "name": "LeatherBelt_Brown"
+            },
+            {
+                "name": "LeatherBelt_Natural"
+            },
+            {
+                "name": "LeatherGloves_Beige"
+            },
+            {
+                "name": "LeatherGloves_Black"
+            },
+            {
+                "name": "LeatherGloves_Brown"
+            },
+            {
+                "name": "LeatherGloves_Natural"
+            },
+            {
+                "name": "LeatherHat_Beige"
+            },
+            {
+                "name": "LeatherHat_Black"
+            },
+            {
+                "name": "LeatherHat_Brown"
+            },
+            {
+                "name": "LeatherHat_Natural"
+            },
+            {
+                "name": "LeatherJacket_Beige"
+            },
+            {
+                "name": "LeatherJacket_Black"
+            },
+            {
+                "name": "LeatherJacket_Brown"
+            },
+            {
+                "name": "LeatherJacket_Natural"
+            },
+            {
+                "name": "LeatherKnifeSheath"
+            },
+            {
+                "name": "LeatherPants_Beige"
+            },
+            {
+                "name": "LeatherPants_Black"
+            },
+            {
+                "name": "LeatherPants_Brown"
+            },
+            {
+                "name": "LeatherPants_Natural"
+            },
+            {
+                "name": "LeatherShirt_Natural"
+            },
+            {
+                "name": "LeatherShoes_Beige"
+            },
+            {
+                "name": "LeatherShoes_Black"
+            },
+            {
+                "name": "LeatherShoes_Brown"
+            },
+            {
+                "name": "LeatherShoes_Natural"
+            },
+            {
+                "name": "LeatherStorageVest_Beige"
+            },
+            {
+                "name": "LeatherStorageVest_Black"
+            },
+            {
+                "name": "LeatherStorageVest_Brown"
+            },
+            {
+                "name": "LeatherStorageVest_Natural"
+            },
+            {
+                "name": "LegsCover_Improvised"
+            },
+            {
+                "name": "M65Jacket_Black"
+            },
+            {
+                "name": "M65Jacket_Khaki"
+            },
+            {
+                "name": "M65Jacket_Olive"
+            },
+            {
+                "name": "M65Jacket_Tan"
+            },
+            {
+                "name": "Mace"
+            },
+            {
+                "name": "ManSuit_Beige"
+            },
+            {
+                "name": "ManSuit_Black"
+            },
+            {
+                "name": "ManSuit_Blue"
+            },
+            {
+                "name": "ManSuit_Brown"
+            },
+            {
+                "name": "ManSuit_DarkGrey"
+            },
+            {
+                "name": "ManSuit_Khaki"
+            },
+            {
+                "name": "ManSuit_LightGrey"
+            },
+            {
+                "name": "ManSuit_White"
+            },
+            {
+                "name": "MedicalScrubsHat_Blue"
+            },
+            {
+                "name": "MedicalScrubsHat_Green"
+            },
+            {
+                "name": "MedicalScrubsHat_White"
+            },
+            {
+                "name": "MedicalScrubsPants_Blue"
+            },
+            {
+                "name": "MedicalScrubsPants_Green"
+            },
+            {
+                "name": "MedicalScrubsPants_White"
+            },
+            {
+                "name": "MedicalScrubsShirt_Blue"
+            },
+            {
+                "name": "MedicalScrubsShirt_Green"
+            },
+            {
+                "name": "MedicalScrubsShirt_White"
+            },
+            {
+                "name": "MedievalBoots"
+            },
+            {
+                "name": "Mich2001Helmet"
+            },
+            {
+                "name": "MilitaryBelt"
+            },
+            {
+                "name": "MilitaryBeret_CDF"
+            },
+            {
+                "name": "MilitaryBeret_ChDKZ"
+            },
+            {
+                "name": "MilitaryBeret_NZ"
+            },
+            {
+                "name": "MilitaryBeret_Red"
+            },
+            {
+                "name": "MilitaryBeret_UN"
+            },
+            {
+                "name": "MilitaryBoots_Beige"
+            },
+            {
+                "name": "MilitaryBoots_Black"
+            },
+            {
+                "name": "MilitaryBoots_Bluerock"
+            },
+            {
+                "name": "MilitaryBoots_Brown"
+            },
+            {
+                "name": "MilitaryBoots_Redpunk"
+            },
+            {
+                "name": "MimeMask_Female"
+            },
+            {
+                "name": "MimeMask_Male"
+            },
+            {
+                "name": "MiniDress_BlueChecker"
+            },
+            {
+                "name": "MiniDress_BlueWithDots"
+            },
+            {
+                "name": "MiniDress_BrownChecker"
+            },
+            {
+                "name": "MiniDress_GreenChecker"
+            },
+            {
+                "name": "MiniDress_Pink"
+            },
+            {
+                "name": "MiniDress_PinkChecker"
+            },
+            {
+                "name": "MiniDress_RedChecker"
+            },
+            {
+                "name": "MiniDress_WhiteChecker"
+            },
+            {
+                "name": "MorozkoHat"
+            },
+            {
+                "name": "MotoHelmet_Black"
+            },
+            {
+                "name": "MotoHelmet_Blue"
+            },
+            {
+                "name": "MotoHelmet_Green"
+            },
+            {
+                "name": "MotoHelmet_Grey"
+            },
+            {
+                "name": "MotoHelmet_Lime"
+            },
+            {
+                "name": "MotoHelmet_Red"
+            },
+            {
+                "name": "MotoHelmet_White"
+            },
+            {
+                "name": "MotoHelmet_Yellow"
+            },
+            {
+                "name": "NBCBootsGray"
+            },
+            {
+                "name": "NBCBootsWhite"
+            },
+            {
+                "name": "NBCBootsYellow"
+            },
+            {
+                "name": "NBCGlovesGray"
+            },
+            {
+                "name": "NBCGlovesYellow"
+            },
+            {
+                "name": "NBCHoodGray"
+            },
+            {
+                "name": "NBCHoodWhite"
+            },
+            {
+                "name": "NBCHoodYellow"
+            },
+            {
+                "name": "NBCJacketGray"
+            },
+            {
+                "name": "NBCJacketWhite"
+            },
+            {
+                "name": "NBCJacketYellow"
+            },
+            {
+                "name": "NBCPantsGray"
+            },
+            {
+                "name": "NBCPantsWhite"
+            },
+            {
+                "name": "NBCPantsYellow"
+            },
+            {
+                "name": "NavyUniformJacket"
+            },
+            {
+                "name": "NavyUniformPants"
+            },
+            {
+                "name": "NioshFaceMask"
+            },
+            {
+                "name": "NorseHelm"
+            },
+            {
+                "name": "NurseDress_Blue"
+            },
+            {
+                "name": "NurseDress_White"
+            },
+            {
+                "name": "OKZKCap_Beige"
+            },
+            {
+                "name": "OKZKCap_Green"
+            },
+            {
+                "name": "OMNOGloves_Brown"
+            },
+            {
+                "name": "OMNOGloves_Gray"
+            },
+            {
+                "name": "OfficerHat"
+            },
+            {
+                "name": "PaddedGloves_Beige"
+            },
+            {
+                "name": "PaddedGloves_Brown"
+            },
+            {
+                "name": "PaddedGloves_Threat"
+            },
+            {
+                "name": "ParamedicJacket_Blue"
+            },
+            {
+                "name": "ParamedicJacket_Crimson"
+            },
+            {
+                "name": "ParamedicJacket_Green"
+            },
+            {
+                "name": "ParamedicPants_Blue"
+            },
+            {
+                "name": "ParamedicPants_Crimson"
+            },
+            {
+                "name": "ParamedicPants_Green"
+            },
+            {
+                "name": "PaydayMask_Chains"
+            },
+            {
+                "name": "PaydayMask_Dallas"
+            },
+            {
+                "name": "PaydayMask_Hoxton"
+            },
+            {
+                "name": "PaydayMask_Wolf"
+            },
+            {
+                "name": "PetushokHat_Black"
+            },
+            {
+                "name": "PetushokHat_Green"
+            },
+            {
+                "name": "PetushokHat_Yellow"
+            },
+            {
+                "name": "PilotkaCap"
+            },
+            {
+                "name": "PlateCarrierHolster"
+            },
+            {
+                "name": "PlateCarrierHolster_Black"
+            },
+            {
+                "name": "PlateCarrierHolster_Camo"
+            },
+            {
+                "name": "PlateCarrierHolster_Green"
+            },
+            {
+                "name": "PlateCarrierPouches"
+            },
+            {
+                "name": "PlateCarrierPouches_Black"
+            },
+            {
+                "name": "PlateCarrierPouches_Camo"
+            },
+            {
+                "name": "PlateCarrierPouches_Green"
+            },
+            {
+                "name": "PlateCarrierVest"
+            },
+            {
+                "name": "PlateCarrierVest_Black"
+            },
+            {
+                "name": "PlateCarrierVest_Camo"
+            },
+            {
+                "name": "PlateCarrierVest_Green"
+            },
+            {
+                "name": "PlateCarrierVest_Winter"
+            },
+            {
+                "name": "PoliceCap"
+            },
+            {
+                "name": "PoliceJacket"
+            },
+            {
+                "name": "PoliceJacketOrel"
+            },
+            {
+                "name": "PolicePants"
+            },
+            {
+                "name": "PolicePantsOrel"
+            },
+            {
+                "name": "PoliceVest"
+            },
+            {
+                "name": "PressVest_Blue"
+            },
+            {
+                "name": "PressVest_LightBlue"
+            },
+            {
+                "name": "PrisonUniformJacket"
+            },
+            {
+                "name": "PrisonUniformPants"
+            },
+            {
+                "name": "PrisonerCap"
+            },
+            {
+                "name": "PumpkinHelmet"
+            },
+            {
+                "name": "QuiltedJacket_Black"
+            },
+            {
+                "name": "QuiltedJacket_Blue"
+            },
+            {
+                "name": "QuiltedJacket_Green"
+            },
+            {
+                "name": "QuiltedJacket_Grey"
+            },
+            {
+                "name": "QuiltedJacket_Orange"
+            },
+            {
+                "name": "QuiltedJacket_Red"
+            },
+            {
+                "name": "QuiltedJacket_Violet"
+            },
+            {
+                "name": "QuiltedJacket_Yellow"
+            },
+            {
+                "name": "RadarCap_Black"
+            },
+            {
+                "name": "RadarCap_Blue"
+            },
+            {
+                "name": "RadarCap_Brown"
+            },
+            {
+                "name": "RadarCap_Green"
+            },
+            {
+                "name": "RadarCap_Red"
+            },
+            {
+                "name": "Raincoat_Black"
+            },
+            {
+                "name": "Raincoat_Blue"
+            },
+            {
+                "name": "Raincoat_Green"
+            },
+            {
+                "name": "Raincoat_Orange"
+            },
+            {
+                "name": "Raincoat_Pink"
+            },
+            {
+                "name": "Raincoat_Red"
+            },
+            {
+                "name": "Raincoat_Yellow"
+            },
+            {
+                "name": "ReflexVest"
+            },
+            {
+                "name": "RidersJacket_Black"
+            },
+            {
+                "name": "RopeBelt"
+            },
+            {
+                "name": "SantasBeard"
+            },
+            {
+                "name": "SantasHat"
+            },
+            {
+                "name": "Shemag_Brown"
+            },
+            {
+                "name": "Shemag_Green"
+            },
+            {
+                "name": "Shemag_Red"
+            },
+            {
+                "name": "Shemag_White"
+            },
+            {
+                "name": "SherpaHat_Black"
+            },
+            {
+                "name": "SherpaHat_Blue"
+            },
+            {
+                "name": "SherpaHat_Red"
+            },
+            {
+                "name": "Shirt_BlueCheck"
+            },
+            {
+                "name": "Shirt_BlueCheckBright"
+            },
+            {
+                "name": "Shirt_GreenCheck"
+            },
+            {
+                "name": "Shirt_PlaneBlack"
+            },
+            {
+                "name": "Shirt_RedCheck"
+            },
+            {
+                "name": "Shirt_WhiteCheck"
+            },
+            {
+                "name": "ShortJeans_Black"
+            },
+            {
+                "name": "ShortJeans_Blue"
+            },
+            {
+                "name": "ShortJeans_Brown"
+            },
+            {
+                "name": "ShortJeans_Darkblue"
+            },
+            {
+                "name": "ShortJeans_Green"
+            },
+            {
+                "name": "ShortJeans_Red"
+            },
+            {
+                "name": "SkateHelmet_Black"
+            },
+            {
+                "name": "SkateHelmet_Blue"
+            },
+            {
+                "name": "SkateHelmet_Gray"
+            },
+            {
+                "name": "SkateHelmet_Green"
+            },
+            {
+                "name": "SkateHelmet_Red"
+            },
+            {
+                "name": "SkiGloves_90s"
+            },
+            {
+                "name": "SkiGloves_Blue"
+            },
+            {
+                "name": "SkiGloves_Red"
+            },
+            {
+                "name": "SkiGoggles_BlackYellow"
+            },
+            {
+                "name": "SkiGoggles_WhiteClear"
+            },
+            {
+                "name": "SkiGoggles_WhiteDark"
+            },
+            {
+                "name": "Skirt_Blue"
+            },
+            {
+                "name": "Skirt_Red"
+            },
+            {
+                "name": "Skirt_White"
+            },
+            {
+                "name": "Skirt_Yellow"
+            },
+            {
+                "name": "SlacksPants_Beige"
+            },
+            {
+                "name": "SlacksPants_Black"
+            },
+            {
+                "name": "SlacksPants_Blue"
+            },
+            {
+                "name": "SlacksPants_Brown"
+            },
+            {
+                "name": "SlacksPants_DarkGrey"
+            },
+            {
+                "name": "SlacksPants_Khaki"
+            },
+            {
+                "name": "SlacksPants_LightGrey"
+            },
+            {
+                "name": "SlacksPants_White"
+            },
+            {
+                "name": "SmershVest"
+            },
+            {
+                "name": "Sneakers_Black"
+            },
+            {
+                "name": "Sneakers_Gray"
+            },
+            {
+                "name": "Sneakers_Green"
+            },
+            {
+                "name": "Sneakers_Red"
+            },
+            {
+                "name": "Sneakers_White"
+            },
+            {
+                "name": "SnowstormUshanka_Brown"
+            },
+            {
+                "name": "SnowstormUshanka_Navy"
+            },
+            {
+                "name": "SnowstormUshanka_Olive"
+            },
+            {
+                "name": "SnowstormUshanka_White"
+            },
+            {
+                "name": "Splint"
+            },
+            {
+                "name": "Splint_Applied"
+            },
+            {
+                "name": "SportGlasses_Black"
+            },
+            {
+                "name": "SportGlasses_Blue"
+            },
+            {
+                "name": "SportGlasses_Green"
+            },
+            {
+                "name": "SportGlasses_Orange"
+            },
+            {
+                "name": "Ssh68Helmet"
+            },
+            {
+                "name": "SurgicalGloves_Blue"
+            },
+            {
+                "name": "SurgicalGloves_Green"
+            },
+            {
+                "name": "SurgicalGloves_LightBlue"
+            },
+            {
+                "name": "SurgicalGloves_White"
+            },
+            {
+                "name": "SurgicalMask"
+            },
+            {
+                "name": "Sweater_Blue"
+            },
+            {
+                "name": "Sweater_ChristmasBlue"
+            },
+            {
+                "name": "Sweater_ChristmasGreen"
+            },
+            {
+                "name": "Sweater_ChristmasRed"
+            },
+            {
+                "name": "Sweater_Gray"
+            },
+            {
+                "name": "Sweater_Green"
+            },
+            {
+                "name": "Sweater_Red"
+            },
+            {
+                "name": "Sword"
+            },
+            {
+                "name": "TShirt_Beige"
+            },
+            {
+                "name": "TShirt_Black"
+            },
+            {
+                "name": "TShirt_Blue"
+            },
+            {
+                "name": "TShirt_Green"
+            },
+            {
+                "name": "TShirt_Grey"
+            },
+            {
+                "name": "TShirt_OrangeWhiteStripes"
+            },
+            {
+                "name": "TShirt_Red"
+            },
+            {
+                "name": "TShirt_RedBlackStripes"
+            },
+            {
+                "name": "TShirt_White"
+            },
+            {
+                "name": "TTSKOBoots"
+            },
+            {
+                "name": "TTSKOPants"
+            },
+            {
+                "name": "TTsKOJacket_Camo"
+            },
+            {
+                "name": "TacticalGloves_Beige"
+            },
+            {
+                "name": "TacticalGloves_Black"
+            },
+            {
+                "name": "TacticalGloves_Green"
+            },
+            {
+                "name": "TacticalGoggles"
+            },
+            {
+                "name": "TacticalShirt_Black"
+            },
+            {
+                "name": "TacticalShirt_Grey"
+            },
+            {
+                "name": "TacticalShirt_Olive"
+            },
+            {
+                "name": "TacticalShirt_Tan"
+            },
+            {
+                "name": "TankerHelmet"
+            },
+            {
+                "name": "TelnyashkaShirt"
+            },
+            {
+                "name": "ThickFramesGlasses"
+            },
+            {
+                "name": "ThinFramesGlasses"
+            },
+            {
+                "name": "TorsoCover_Improvised"
+            },
+            {
+                "name": "TrackSuitJacket_Black"
+            },
+            {
+                "name": "TrackSuitJacket_Blue"
+            },
+            {
+                "name": "TrackSuitJacket_Green"
+            },
+            {
+                "name": "TrackSuitJacket_LightBlue"
+            },
+            {
+                "name": "TrackSuitJacket_Red"
+            },
+            {
+                "name": "TrackSuitPants_Black"
+            },
+            {
+                "name": "TrackSuitPants_Blue"
+            },
+            {
+                "name": "TrackSuitPants_Green"
+            },
+            {
+                "name": "TrackSuitPants_LightBlue"
+            },
+            {
+                "name": "TrackSuitPants_Red"
+            },
+            {
+                "name": "Tshirt_10thAnniversary"
+            },
+            {
+                "name": "UKAssVest_Black"
+            },
+            {
+                "name": "UKAssVest_Camo"
+            },
+            {
+                "name": "UKAssVest_Khaki"
+            },
+            {
+                "name": "UKAssVest_Olive"
+            },
+            {
+                "name": "UKAssVest_Winter"
+            },
+            {
+                "name": "USMCJacket_Desert"
+            },
+            {
+                "name": "USMCJacket_Woodland"
+            },
+            {
+                "name": "USMCPants_Desert"
+            },
+            {
+                "name": "USMCPants_Woodland"
+            },
+            {
+                "name": "Ushanka_Black"
+            },
+            {
+                "name": "Ushanka_Blue"
+            },
+            {
+                "name": "Ushanka_Green"
+            },
+            {
+                "name": "WeldingMask"
+            },
+            {
+                "name": "Wellies_Black"
+            },
+            {
+                "name": "Wellies_Brown"
+            },
+            {
+                "name": "Wellies_Green"
+            },
+            {
+                "name": "Wellies_Grey"
+            },
+            {
+                "name": "WinterCoif_Black"
+            },
+            {
+                "name": "WinterCoif_Blue"
+            },
+            {
+                "name": "WinterCoif_Green"
+            },
+            {
+                "name": "WinterCoif_Skull"
+            },
+            {
+                "name": "WitchHoodCoif_Black"
+            },
+            {
+                "name": "WitchHoodCoif_Brown"
+            },
+            {
+                "name": "WitchHoodCoif_Red"
+            },
+            {
+                "name": "WomanSuit_Beige"
+            },
+            {
+                "name": "WomanSuit_Black"
+            },
+            {
+                "name": "WomanSuit_Blue"
+            },
+            {
+                "name": "WomanSuit_Brown"
+            },
+            {
+                "name": "WomanSuit_DarkGrey"
+            },
+            {
+                "name": "WomanSuit_Khaki"
+            },
+            {
+                "name": "WomanSuit_LightGrey"
+            },
+            {
+                "name": "WomanSuit_White"
+            },
+            {
+                "name": "WoolCoat_Beige"
+            },
+            {
+                "name": "WoolCoat_Black"
+            },
+            {
+                "name": "WoolCoat_BlackCheck"
+            },
+            {
+                "name": "WoolCoat_Blue"
+            },
+            {
+                "name": "WoolCoat_BlueCheck"
+            },
+            {
+                "name": "WoolCoat_BrownCheck"
+            },
+            {
+                "name": "WoolCoat_Green"
+            },
+            {
+                "name": "WoolCoat_GreyCheck"
+            },
+            {
+                "name": "WoolCoat_Red"
+            },
+            {
+                "name": "WoolCoat_RedCheck"
+            },
+            {
+                "name": "WoolGlovesFingerless_Black"
+            },
+            {
+                "name": "WoolGlovesFingerless_ChristmasBlue"
+            },
+            {
+                "name": "WoolGlovesFingerless_ChristmasRed"
+            },
+            {
+                "name": "WoolGlovesFingerless_Green"
+            },
+            {
+                "name": "WoolGlovesFingerless_Tan"
+            },
+            {
+                "name": "WoolGlovesFingerless_White"
+            },
+            {
+                "name": "WoolGloves_Black"
+            },
+            {
+                "name": "WoolGloves_ChristmasBlue"
+            },
+            {
+                "name": "WoolGloves_ChristmasRed"
+            },
+            {
+                "name": "WoolGloves_Green"
+            },
+            {
+                "name": "WoolGloves_Tan"
+            },
+            {
+                "name": "WoolGloves_White"
+            },
+            {
+                "name": "WorkingBoots_Beige"
+            },
+            {
+                "name": "WorkingBoots_Brown"
+            },
+            {
+                "name": "WorkingBoots_Green"
+            },
+            {
+                "name": "WorkingBoots_Grey"
+            },
+            {
+                "name": "WorkingBoots_Yellow"
+            },
+            {
+                "name": "WorkingGloves_Beige"
+            },
+            {
+                "name": "WorkingGloves_Black"
+            },
+            {
+                "name": "WorkingGloves_Brown"
+            },
+            {
+                "name": "WorkingGloves_Yellow"
+            },
+            {
+                "name": "ZSh3PilotHelmet"
+            },
+            {
+                "name": "ZmijovkaCap_Black"
+            },
+            {
+                "name": "ZmijovkaCap_Blue"
+            },
+            {
+                "name": "ZmijovkaCap_Brown"
+            },
+            {
+                "name": "ZmijovkaCap_Green"
+            },
+            {
+                "name": "ZmijovkaCap_Red"
+            }
+        ]
+    },
+    {
+        "tools": [
+            {
+                "name": "AlarmClock_Blue"
+            },
+            {
+                "name": "AlarmClock_Green"
+            },
+            {
+                "name": "AlarmClock_Red"
+            },
+            {
+                "name": "Anniversary_FireworksLauncher"
+            },
+            {
+                "name": "AntiChemInjector"
+            },
+            {
+                "name": "AntiPestsSpray"
+            },
+            {
+                "name": "Bait"
+            },
+            {
+                "name": "BandageDressing"
+            },
+            {
+                "name": "BarbedBaseballBat"
+            },
+            {
+                "name": "BarbedWire"
+            },
+            {
+                "name": "Bark_Birch"
+            },
+            {
+                "name": "Bark_Oak"
+            },
+            {
+                "name": "BarrelHoles_Blue"
+            },
+            {
+                "name": "BarrelHoles_Green"
+            },
+            {
+                "name": "BarrelHoles_Red"
+            },
+            {
+                "name": "BarrelHoles_Yellow"
+            },
+            {
+                "name": "Barrel_Blue"
+            },
+            {
+                "name": "Barrel_Green"
+            },
+            {
+                "name": "Barrel_Red"
+            },
+            {
+                "name": "Barrel_Yellow"
+            },
+            {
+                "name": "BaseRadio"
+            },
+            {
+                "name": "BaseballBat"
+            },
+            {
+                "name": "Battery9V"
+            },
+            {
+                "name": "BatteryCharger"
+            },
+            {
+                "name": "BearPelt"
+            },
+            {
+                "name": "BearTrap"
+            },
+            {
+                "name": "Binoculars"
+            },
+            {
+                "name": "BloodBagEmpty"
+            },
+            {
+                "name": "BloodBagFull"
+            },
+            {
+                "name": "BloodBagIV"
+            },
+            {
+                "name": "BloodTestKit"
+            },
+            {
+                "name": "Blowtorch"
+            },
+            {
+                "name": "Bone"
+            },
+            {
+                "name": "BoneBait"
+            },
+            {
+                "name": "BoneHook"
+            },
+            {
+                "name": "BoneKnife"
+            },
+            {
+                "name": "BrassKnuckles_Dull"
+            },
+            {
+                "name": "BrassKnuckles_Shiny"
+            },
+            {
+                "name": "Broom"
+            },
+            {
+                "name": "BurlapSack"
+            },
+            {
+                "name": "BurlapSackCover"
+            },
+            {
+                "name": "BurlapStrip"
+            },
+            {
+                "name": "CableReel"
+            },
+            {
+                "name": "Camonet"
+            },
+            {
+                "name": "CanOpener"
+            },
+            {
+                "name": "CaninaBerry"
+            },
+            {
+                "name": "CanisterGasoline"
+            },
+            {
+                "name": "CarBattery"
+            },
+            {
+                "name": "CarRadiator"
+            },
+            {
+                "name": "CharcoalTablets"
+            },
+            {
+                "name": "ChelatingTablets"
+            },
+            {
+                "name": "Chemlight_Blue"
+            },
+            {
+                "name": "Chemlight_Green"
+            },
+            {
+                "name": "Chemlight_Red"
+            },
+            {
+                "name": "Chemlight_White"
+            },
+            {
+                "name": "Chemlight_Yellow"
+            },
+            {
+                "name": "ChernarusMap"
+            },
+            {
+                "name": "ChernarusMap_Open"
+            },
+            {
+                "name": "ChickenFeather"
+            },
+            {
+                "name": "Cleaver"
+            },
+            {
+                "name": "CombatKnife"
+            },
+            {
+                "name": "CombinationLock"
+            },
+            {
+                "name": "CombinationLock4"
+            },
+            {
+                "name": "Compass"
+            },
+            {
+                "name": "CookingStand"
+            },
+            {
+                "name": "CowPelt"
+            },
+            {
+                "name": "Crowbar"
+            },
+            {
+                "name": "CrudeMachete"
+            },
+            {
+                "name": "DeerPelt"
+            },
+            {
+                "name": "DisinfectantAlcohol"
+            },
+            {
+                "name": "DisinfectantSpray"
+            },
+            {
+                "name": "DuctTape"
+            },
+            {
+                "name": "ElectronicRepairKit"
+            },
+            {
+                "name": "Epinephrine"
+            },
+            {
+                "name": "EpoxyPutty"
+            },
+            {
+                "name": "Fabric"
+            },
+            {
+                "name": "FangeKnife"
+            },
+            {
+                "name": "FarmingHoe"
+            },
+            {
+                "name": "FenceKit"
+            },
+            {
+                "name": "FieldShovel"
+            },
+            {
+                "name": "FirefighterAxe"
+            },
+            {
+                "name": "FirefighterAxe_Black"
+            },
+            {
+                "name": "FirefighterAxe_Green"
+            },
+            {
+                "name": "Fireplace"
+            },
+            {
+                "name": "FireplaceIndoor"
+            },
+            {
+                "name": "Firewood"
+            },
+            {
+                "name": "FireworksLauncher"
+            },
+            {
+                "name": "FishNetTrap"
+            },
+            {
+                "name": "FishingRod"
+            },
+            {
+                "name": "Flag_APA"
+            },
+            {
+                "name": "Flag_Altis"
+            },
+            {
+                "name": "Flag_BabyDeer"
+            },
+            {
+                "name": "Flag_Bear"
+            },
+            {
+                "name": "Flag_Bohemia"
+            },
+            {
+                "name": "Flag_BrainZ"
+            },
+            {
+                "name": "Flag_CDF"
+            },
+            {
+                "name": "Flag_CHEL"
+            },
+            {
+                "name": "Flag_CMC"
+            },
+            {
+                "name": "Flag_Cannibals"
+            },
+            {
+                "name": "Flag_Chedaki"
+            },
+            {
+                "name": "Flag_Chernarus"
+            },
+            {
+                "name": "Flag_Crook"
+            },
+            {
+                "name": "Flag_DayZ"
+            },
+            {
+                "name": "Flag_HunterZ"
+            },
+            {
+                "name": "Flag_Livonia"
+            },
+            {
+                "name": "Flag_LivoniaArmy"
+            },
+            {
+                "name": "Flag_LivoniaPolice"
+            },
+            {
+                "name": "Flag_NAPA"
+            },
+            {
+                "name": "Flag_NSahrani"
+            },
+            {
+                "name": "Flag_Pirates"
+            },
+            {
+                "name": "Flag_RSTA"
+            },
+            {
+                "name": "Flag_Refuge"
+            },
+            {
+                "name": "Flag_Rex"
+            },
+            {
+                "name": "Flag_Rooster"
+            },
+            {
+                "name": "Flag_SSahrani"
+            },
+            {
+                "name": "Flag_Snake"
+            },
+            {
+                "name": "Flag_TEC"
+            },
+            {
+                "name": "Flag_UEC"
+            },
+            {
+                "name": "Flag_White"
+            },
+            {
+                "name": "Flag_Wolf"
+            },
+            {
+                "name": "Flag_Zagorky"
+            },
+            {
+                "name": "Flag_Zenit"
+            },
+            {
+                "name": "Flashlight"
+            },
+            {
+                "name": "FryingPan"
+            },
+            {
+                "name": "GPSReceiver"
+            },
+            {
+                "name": "GardenLime"
+            },
+            {
+                "name": "GardenPlot"
+            },
+            {
+                "name": "GardenPlotGreenhouse"
+            },
+            {
+                "name": "GardenPlotPolytunnel"
+            },
+            {
+                "name": "GhillieSuit_Tan"
+            },
+            {
+                "name": "GiftWrapPaper"
+            },
+            {
+                "name": "GlowPlug"
+            },
+            {
+                "name": "GoatPelt"
+            },
+            {
+                "name": "Guts"
+            },
+            {
+                "name": "Hacksaw"
+            },
+            {
+                "name": "Hammer"
+            },
+            {
+                "name": "HandDrillKit"
+            },
+            {
+                "name": "HandSaw"
+            },
+            {
+                "name": "HandcuffKeys"
+            },
+            {
+                "name": "Handcuffs"
+            },
+            {
+                "name": "HandcuffsLocked"
+            },
+            {
+                "name": "Hatchet"
+            },
+            {
+                "name": "HeadlightH7"
+            },
+            {
+                "name": "HeadlightH7_Box"
+            },
+            {
+                "name": "Headtorch_Black"
+            },
+            {
+                "name": "Headtorch_Grey"
+            },
+            {
+                "name": "Heatpack"
+            },
+            {
+                "name": "Hook"
+            },
+            {
+                "name": "HuntingKnife"
+            },
+            {
+                "name": "ImprovisedFishingRod"
+            },
+            {
+                "name": "IodineTincture"
+            },
+            {
+                "name": "Jig"
+            },
+            {
+                "name": "KitchenKnife"
+            },
+            {
+                "name": "KitchenTimer"
+            },
+            {
+                "name": "KukriKnife"
+            },
+            {
+                "name": "LargeGasCanister"
+            },
+            {
+                "name": "LeatherSewingKit"
+            },
+            {
+                "name": "Lockpick"
+            },
+            {
+                "name": "LongTorch"
+            },
+            {
+                "name": "LongWoodenStick"
+            },
+            {
+                "name": "LugWrench"
+            },
+            {
+                "name": "Machete"
+            },
+            {
+                "name": "Matchbox"
+            },
+            {
+                "name": "MeatTenderizer"
+            },
+            {
+                "name": "MediumGasCanister"
+            },
+            {
+                "name": "Megaphone"
+            },
+            {
+                "name": "MetalPlate"
+            },
+            {
+                "name": "MetalWire"
+            },
+            {
+                "name": "Morphine"
+            },
+            {
+                "name": "MouthRag"
+            },
+            {
+                "name": "NVGHeadstrap"
+            },
+            {
+                "name": "Nail"
+            },
+            {
+                "name": "NailBox"
+            },
+            {
+                "name": "NailedBaseballBat"
+            },
+            {
+                "name": "Netting"
+            },
+            {
+                "name": "NylonKnifeSheath"
+            },
+            {
+                "name": "OrientalMachete"
+            },
+            {
+                "name": "OrienteeringCompass"
+            },
+            {
+                "name": "OvenIndoor"
+            },
+            {
+                "name": "PainkillerTablets"
+            },
+            {
+                "name": "Paper"
+            },
+            {
+                "name": "Pen_Black"
+            },
+            {
+                "name": "Pen_Blue"
+            },
+            {
+                "name": "Pen_Green"
+            },
+            {
+                "name": "Pen_Red"
+            },
+            {
+                "name": "PepperSeeds"
+            },
+            {
+                "name": "PersonalRadio"
+            },
+            {
+                "name": "PetrolLighter"
+            },
+            {
+                "name": "Pickaxe"
+            },
+            {
+                "name": "PigPelt"
+            },
+            {
+                "name": "PileOfWoodenPlanks"
+            },
+            {
+                "name": "Pipe"
+            },
+            {
+                "name": "PipeWrench"
+            },
+            {
+                "name": "Pitchfork"
+            },
+            {
+                "name": "PlantMaterial"
+            },
+            {
+                "name": "Plant_Pepper"
+            },
+            {
+                "name": "Plant_Potato"
+            },
+            {
+                "name": "Plant_Pumpkin"
+            },
+            {
+                "name": "Plant_Tomato"
+            },
+            {
+                "name": "Plant_Zucchini"
+            },
+            {
+                "name": "Pliers"
+            },
+            {
+                "name": "PortableGasLamp"
+            },
+            {
+                "name": "PortableGasStove"
+            },
+            {
+                "name": "Pot"
+            },
+            {
+                "name": "PowerGenerator"
+            },
+            {
+                "name": "PumpkinSeeds"
+            },
+            {
+                "name": "PurificationTablets"
+            },
+            {
+                "name": "RabbitPelt"
+            },
+            {
+                "name": "RabbitSnareTrap"
+            },
+            {
+                "name": "Rag"
+            },
+            {
+                "name": "Rangefinder"
+            },
+            {
+                "name": "RemoteDetonator"
+            },
+            {
+                "name": "RemoteDetonatorReceiver"
+            },
+            {
+                "name": "RemoteDetonatorTrigger"
+            },
+            {
+                "name": "Roadflare"
+            },
+            {
+                "name": "Rope"
+            },
+            {
+                "name": "SalineBag"
+            },
+            {
+                "name": "SalineBagIV"
+            },
+            {
+                "name": "SambucusBerry"
+            },
+            {
+                "name": "Screwdriver"
+            },
+            {
+                "name": "SeaChest"
+            },
+            {
+                "name": "SewingKit"
+            },
+            {
+                "name": "SharpWoodenStick"
+            },
+            {
+                "name": "SheepPelt"
+            },
+            {
+                "name": "ShelterKit"
+            },
+            {
+                "name": "ShelterSite"
+            },
+            {
+                "name": "Shovel"
+            },
+            {
+                "name": "Sickle"
+            },
+            {
+                "name": "SledgeHammer"
+            },
+            {
+                "name": "SmallFishTrap"
+            },
+            {
+                "name": "SmallGasCanister"
+            },
+            {
+                "name": "SmallGuts"
+            },
+            {
+                "name": "SmallStone"
+            },
+            {
+                "name": "SparkPlug"
+            },
+            {
+                "name": "SpearBone"
+            },
+            {
+                "name": "SpearStone"
+            },
+            {
+                "name": "Spotlight"
+            },
+            {
+                "name": "StartKitIV"
+            },
+            {
+                "name": "SteakKnife"
+            },
+            {
+                "name": "Stone"
+            },
+            {
+                "name": "StoneKnife"
+            },
+            {
+                "name": "TannedLeather"
+            },
+            {
+                "name": "TerritoryFlag"
+            },
+            {
+                "name": "TerritoryFlagKit"
+            },
+            {
+                "name": "TetracyclineAntibiotics"
+            },
+            {
+                "name": "Thermometer"
+            },
+            {
+                "name": "TireRepairKit"
+            },
+            {
+                "name": "TomatoSeeds"
+            },
+            {
+                "name": "Torch"
+            },
+            {
+                "name": "Tripod"
+            },
+            {
+                "name": "TripwireTrap"
+            },
+            {
+                "name": "TruckBattery"
+            },
+            {
+                "name": "VitaminBottle"
+            },
+            {
+                "name": "WatchtowerKit"
+            },
+            {
+                "name": "WeaponCleaningKit"
+            },
+            {
+                "name": "Whetstone"
+            },
+            {
+                "name": "WildboarPelt"
+            },
+            {
+                "name": "WolfPelt"
+            },
+            {
+                "name": "WoodAxe"
+            },
+            {
+                "name": "WoodenHook"
+            },
+            {
+                "name": "WoodenLog"
+            },
+            {
+                "name": "WoodenPlank"
+            },
+            {
+                "name": "WoodenStick"
+            },
+            {
+                "name": "Wrench"
+            },
+            {
+                "name": "XmasLights"
+            },
+            {
+                "name": "ZucchiniSeeds"
+            }
+        ]
+    },
+    {
+        "containers": [
+            {
+                "name": "AliceBag_Black"
+            },
+            {
+                "name": "AliceBag_Camo"
+            },
+            {
+                "name": "AliceBag_Green"
+            },
+            {
+                "name": "AmmoBox"
+            },
+            {
+                "name": "AnniversaryBox"
+            },
+            {
+                "name": "ArmyPouch_Beige"
+            },
+            {
+                "name": "ArmyPouch_Black"
+            },
+            {
+                "name": "ArmyPouch_Camo"
+            },
+            {
+                "name": "ArmyPouch_Green"
+            },
+            {
+                "name": "AssaultBag_Black"
+            },
+            {
+                "name": "AssaultBag_Green"
+            },
+            {
+                "name": "AssaultBag_Ttsko"
+            },
+            {
+                "name": "AssaultBag_Winter"
+            },
+            {
+                "name": "Bear_Beige"
+            },
+            {
+                "name": "Bear_Dark"
+            },
+            {
+                "name": "Bear_Pink"
+            },
+            {
+                "name": "Bear_White"
+            },
+            {
+                "name": "CanvasBag_Medical"
+            },
+            {
+                "name": "CanvasBag_Olive"
+            },
+            {
+                "name": "CarTent"
+            },
+            {
+                "name": "ChildBag_Blue"
+            },
+            {
+                "name": "ChildBag_Green"
+            },
+            {
+                "name": "ChildBag_Red"
+            },
+            {
+                "name": "CourierBag"
+            },
+            {
+                "name": "CoyoteBag_Brown"
+            },
+            {
+                "name": "CoyoteBag_Green"
+            },
+            {
+                "name": "CoyoteBag_Winter"
+            },
+            {
+                "name": "DryBag_Black"
+            },
+            {
+                "name": "DryBag_Blue"
+            },
+            {
+                "name": "DryBag_Green"
+            },
+            {
+                "name": "DryBag_Orange"
+            },
+            {
+                "name": "DryBag_Red"
+            },
+            {
+                "name": "DryBag_Yellow"
+            },
+            {
+                "name": "DrysackBag_Green"
+            },
+            {
+                "name": "DrysackBag_Orange"
+            },
+            {
+                "name": "DrysackBag_Yellow"
+            },
+            {
+                "name": "DuffelBagSmall_Camo"
+            },
+            {
+                "name": "DuffelBagSmall_Green"
+            },
+            {
+                "name": "DuffelBagSmall_Medical"
+            },
+            {
+                "name": "FirstAidKit"
+            },
+            {
+                "name": "FurCourierBag"
+            },
+            {
+                "name": "FurImprovisedBag"
+            },
+            {
+                "name": "GiftBox_Large_1"
+            },
+            {
+                "name": "GiftBox_Large_2"
+            },
+            {
+                "name": "GiftBox_Large_3"
+            },
+            {
+                "name": "GiftBox_Large_4"
+            },
+            {
+                "name": "GiftBox_Medium_1"
+            },
+            {
+                "name": "GiftBox_Medium_2"
+            },
+            {
+                "name": "GiftBox_Medium_3"
+            },
+            {
+                "name": "GiftBox_Medium_4"
+            },
+            {
+                "name": "GiftBox_Small_1"
+            },
+            {
+                "name": "GiftBox_Small_2"
+            },
+            {
+                "name": "GiftBox_Small_3"
+            },
+            {
+                "name": "GiftBox_Small_4"
+            },
+            {
+                "name": "HipPack_Black"
+            },
+            {
+                "name": "HipPack_Green"
+            },
+            {
+                "name": "HipPack_Medical"
+            },
+            {
+                "name": "HipPack_Party"
+            },
+            {
+                "name": "HuntingBag"
+            },
+            {
+                "name": "HuntingBag_Hannah"
+            },
+            {
+                "name": "ImprovisedBag"
+            },
+            {
+                "name": "LargeTent"
+            },
+            {
+                "name": "LeatherSack_Beige"
+            },
+            {
+                "name": "LeatherSack_Black"
+            },
+            {
+                "name": "LeatherSack_Brown"
+            },
+            {
+                "name": "LeatherSack_Natural"
+            },
+            {
+                "name": "MediumTent"
+            },
+            {
+                "name": "MediumTent_Green"
+            },
+            {
+                "name": "MediumTent_Orange"
+            },
+            {
+                "name": "MountainBag_Blue"
+            },
+            {
+                "name": "MountainBag_Green"
+            },
+            {
+                "name": "MountainBag_Orange"
+            },
+            {
+                "name": "MountainBag_Red"
+            },
+            {
+                "name": "PartyTent"
+            },
+            {
+                "name": "PartyTent_Blue"
+            },
+            {
+                "name": "PartyTent_Brown"
+            },
+            {
+                "name": "PartyTent_Lunapark"
+            },
+            {
+                "name": "PlateCarrierPouches_Winter"
+            },
+            {
+                "name": "ShelterFabric"
+            },
+            {
+                "name": "ShelterLeather"
+            },
+            {
+                "name": "ShelterStick"
+            },
+            {
+                "name": "Slingbag_Black"
+            },
+            {
+                "name": "Slingbag_Brown"
+            },
+            {
+                "name": "Slingbag_Gray"
+            },
+            {
+                "name": "SmallProtectorCase"
+            },
+            {
+                "name": "SmershBag"
+            },
+            {
+                "name": "TaloonBag_Blue"
+            },
+            {
+                "name": "TaloonBag_Green"
+            },
+            {
+                "name": "TaloonBag_Orange"
+            },
+            {
+                "name": "TaloonBag_Violet"
+            },
+            {
+                "name": "TortillaBag"
+            },
+            {
+                "name": "TortillaBag_Winter"
+            },
+            {
+                "name": "UndergroundStash"
+            },
+            {
+                "name": "WaterproofBag_Green"
+            },
+            {
+                "name": "WaterproofBag_Orange"
+            },
+            {
+                "name": "WaterproofBag_Yellow"
+            },
+            {
+                "name": "WoodenCrate"
+            }
+        ]
+    },
+    {
+        "lootdispatch": [
+            {
+                "name": "CivSedanDoors_BackLeft"
+            },
+            {
+                "name": "CivSedanDoors_BackLeft_Black"
+            },
+            {
+                "name": "CivSedanDoors_BackLeft_BlackRust"
+            },
+            {
+                "name": "CivSedanDoors_BackLeft_WhiteRust"
+            },
+            {
+                "name": "CivSedanDoors_BackLeft_Wine"
+            },
+            {
+                "name": "CivSedanDoors_BackLeft_WineRust"
+            },
+            {
+                "name": "CivSedanDoors_BackRight"
+            },
+            {
+                "name": "CivSedanDoors_BackRight_Black"
+            },
+            {
+                "name": "CivSedanDoors_BackRight_BlackRust"
+            },
+            {
+                "name": "CivSedanDoors_BackRight_WhiteRust"
+            },
+            {
+                "name": "CivSedanDoors_BackRight_Wine"
+            },
+            {
+                "name": "CivSedanDoors_BackRight_WineRust"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver_Black"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver_BlackRust"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver_WhiteRust"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver_Wine"
+            },
+            {
+                "name": "CivSedanDoors_CoDriver_WineRust"
+            },
+            {
+                "name": "CivSedanDoors_Driver"
+            },
+            {
+                "name": "CivSedanDoors_Driver_Black"
+            },
+            {
+                "name": "CivSedanDoors_Driver_BlackRust"
+            },
+            {
+                "name": "CivSedanDoors_Driver_WhiteRust"
+            },
+            {
+                "name": "CivSedanDoors_Driver_Wine"
+            },
+            {
+                "name": "CivSedanDoors_Driver_WineRust"
+            },
+            {
+                "name": "CivSedanHood"
+            },
+            {
+                "name": "CivSedanHood_Black"
+            },
+            {
+                "name": "CivSedanHood_BlackRust"
+            },
+            {
+                "name": "CivSedanHood_WhiteRust"
+            },
+            {
+                "name": "CivSedanHood_Wine"
+            },
+            {
+                "name": "CivSedanHood_WineRust"
+            },
+            {
+                "name": "CivSedanTrunk"
+            },
+            {
+                "name": "CivSedanTrunk_Black"
+            },
+            {
+                "name": "CivSedanTrunk_BlackRust"
+            },
+            {
+                "name": "CivSedanTrunk_WhiteRust"
+            },
+            {
+                "name": "CivSedanTrunk_Wine"
+            },
+            {
+                "name": "CivSedanTrunk_WineRust"
+            },
+            {
+                "name": "CivSedanWheel"
+            },
+            {
+                "name": "CivSedanWheel_Ruined"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver_Blue"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver_BlueRust"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver_GreenRust"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver_White"
+            },
+            {
+                "name": "HatchbackDoors_CoDriver_WhiteRust"
+            },
+            {
+                "name": "HatchbackDoors_Driver"
+            },
+            {
+                "name": "HatchbackDoors_Driver_Blue"
+            },
+            {
+                "name": "HatchbackDoors_Driver_BlueRust"
+            },
+            {
+                "name": "HatchbackDoors_Driver_GreenRust"
+            },
+            {
+                "name": "HatchbackDoors_Driver_White"
+            },
+            {
+                "name": "HatchbackDoors_Driver_WhiteRust"
+            },
+            {
+                "name": "HatchbackHood"
+            },
+            {
+                "name": "HatchbackHood_Blue"
+            },
+            {
+                "name": "HatchbackHood_BlueRust"
+            },
+            {
+                "name": "HatchbackHood_GreenRust"
+            },
+            {
+                "name": "HatchbackHood_White"
+            },
+            {
+                "name": "HatchbackHood_WhiteRust"
+            },
+            {
+                "name": "HatchbackTrunk"
+            },
+            {
+                "name": "HatchbackTrunk_Blue"
+            },
+            {
+                "name": "HatchbackTrunk_BlueRust"
+            },
+            {
+                "name": "HatchbackTrunk_GreenRust"
+            },
+            {
+                "name": "HatchbackTrunk_White"
+            },
+            {
+                "name": "HatchbackTrunk_WhiteRust"
+            },
+            {
+                "name": "HatchbackWheel"
+            },
+            {
+                "name": "HatchbackWheel_Ruined"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1_Black"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1_Blue"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Door_1_1_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2_Black"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2_Blue"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Door_1_2_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1_Black"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1_Blue"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_1_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2_Black"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2_Blue"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Door_2_2_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Hood"
+            },
+            {
+                "name": "Hatchback_02_Hood_Black"
+            },
+            {
+                "name": "Hatchback_02_Hood_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Hood_Blue"
+            },
+            {
+                "name": "Hatchback_02_Hood_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Hood_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Trunk"
+            },
+            {
+                "name": "Hatchback_02_Trunk_Black"
+            },
+            {
+                "name": "Hatchback_02_Trunk_BlackRust"
+            },
+            {
+                "name": "Hatchback_02_Trunk_Blue"
+            },
+            {
+                "name": "Hatchback_02_Trunk_BlueRust"
+            },
+            {
+                "name": "Hatchback_02_Trunk_RedRust"
+            },
+            {
+                "name": "Hatchback_02_Wheel"
+            },
+            {
+                "name": "Hatchback_02_Wheel_Ruined"
+            },
+            {
+                "name": "Offroad_02_Door_1_1"
+            },
+            {
+                "name": "Offroad_02_Door_1_1_Rust"
+            },
+            {
+                "name": "Offroad_02_Door_1_2"
+            },
+            {
+                "name": "Offroad_02_Door_1_2_Rust"
+            },
+            {
+                "name": "Offroad_02_Door_2_1"
+            },
+            {
+                "name": "Offroad_02_Door_2_1_Rust"
+            },
+            {
+                "name": "Offroad_02_Door_2_2"
+            },
+            {
+                "name": "Offroad_02_Door_2_2_Rust"
+            },
+            {
+                "name": "Offroad_02_Hood"
+            },
+            {
+                "name": "Offroad_02_Trunk"
+            },
+            {
+                "name": "Offroad_02_Trunk_Rust"
+            },
+            {
+                "name": "Offroad_02_Wheel"
+            },
+            {
+                "name": "Sedan_02_Door_1_1"
+            },
+            {
+                "name": "Sedan_02_Door_1_1_Grey"
+            },
+            {
+                "name": "Sedan_02_Door_1_1_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Door_1_1_Red"
+            },
+            {
+                "name": "Sedan_02_Door_1_1_RedRust"
+            },
+            {
+                "name": "Sedan_02_Door_1_1_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Door_1_2"
+            },
+            {
+                "name": "Sedan_02_Door_1_2_Grey"
+            },
+            {
+                "name": "Sedan_02_Door_1_2_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Door_1_2_Red"
+            },
+            {
+                "name": "Sedan_02_Door_1_2_RedRust"
+            },
+            {
+                "name": "Sedan_02_Door_1_2_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_1"
+            },
+            {
+                "name": "Sedan_02_Door_2_1_Grey"
+            },
+            {
+                "name": "Sedan_02_Door_2_1_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_1_Red"
+            },
+            {
+                "name": "Sedan_02_Door_2_1_RedRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_1_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_2"
+            },
+            {
+                "name": "Sedan_02_Door_2_2_Grey"
+            },
+            {
+                "name": "Sedan_02_Door_2_2_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_2_Red"
+            },
+            {
+                "name": "Sedan_02_Door_2_2_RedRust"
+            },
+            {
+                "name": "Sedan_02_Door_2_2_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Hood"
+            },
+            {
+                "name": "Sedan_02_Hood_Grey"
+            },
+            {
+                "name": "Sedan_02_Hood_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Hood_Red"
+            },
+            {
+                "name": "Sedan_02_Hood_RedRust"
+            },
+            {
+                "name": "Sedan_02_Hood_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Trunk"
+            },
+            {
+                "name": "Sedan_02_Trunk_Grey"
+            },
+            {
+                "name": "Sedan_02_Trunk_GreyRust"
+            },
+            {
+                "name": "Sedan_02_Trunk_Red"
+            },
+            {
+                "name": "Sedan_02_Trunk_RedRust"
+            },
+            {
+                "name": "Sedan_02_Trunk_YellowRust"
+            },
+            {
+                "name": "Sedan_02_Wheel"
+            },
+            {
+                "name": "Sedan_02_Wheel_Ruined"
+            },
+            {
+                "name": "Truck_01_Door_1_1"
+            },
+            {
+                "name": "Truck_01_Door_1_1_Blue"
+            },
+            {
+                "name": "Truck_01_Door_1_1_BlueRust"
+            },
+            {
+                "name": "Truck_01_Door_1_1_GreenRust"
+            },
+            {
+                "name": "Truck_01_Door_1_1_Orange"
+            },
+            {
+                "name": "Truck_01_Door_1_1_OrangeRust"
+            },
+            {
+                "name": "Truck_01_Door_2_1"
+            },
+            {
+                "name": "Truck_01_Door_2_1_Blue"
+            },
+            {
+                "name": "Truck_01_Door_2_1_BlueRust"
+            },
+            {
+                "name": "Truck_01_Door_2_1_GreenRust"
+            },
+            {
+                "name": "Truck_01_Door_2_1_Orange"
+            },
+            {
+                "name": "Truck_01_Door_2_1_OrangeRust"
+            },
+            {
+                "name": "Truck_01_Hood"
+            },
+            {
+                "name": "Truck_01_Hood_Blue"
+            },
+            {
+                "name": "Truck_01_Hood_BlueRust"
+            },
+            {
+                "name": "Truck_01_Hood_GreenRust"
+            },
+            {
+                "name": "Truck_01_Hood_Orange"
+            },
+            {
+                "name": "Truck_01_Hood_OrangeRust"
+            },
+            {
+                "name": "Truck_01_Wheel"
+            },
+            {
+                "name": "Truck_01_WheelDouble"
+            },
+            {
+                "name": "Truck_01_WheelDouble_Ruined"
+            },
+            {
+                "name": "Truck_01_Wheel_Ruined"
+            }
+        ]
+    },
+    {
+        "explosives": [
+            {
+                "name": "ClaymoreMine"
+            },
+            {
+                "name": "FlashGrenade"
+            },
+            {
+                "name": "Grenade_ChemGas"
+            },
+            {
+                "name": "ImprovisedExplosive"
+            },
+            {
+                "name": "LandMineTrap"
+            },
+            {
+                "name": "M18SmokeGrenade_Green"
+            },
+            {
+                "name": "M18SmokeGrenade_Purple"
+            },
+            {
+                "name": "M18SmokeGrenade_Red"
+            },
+            {
+                "name": "M18SmokeGrenade_White"
+            },
+            {
+                "name": "M18SmokeGrenade_Yellow"
+            },
+            {
+                "name": "M67Grenade"
+            },
+            {
+                "name": "Plastic_Explosive"
+            },
+            {
+                "name": "RDG2SmokeGrenade_Black"
+            },
+            {
+                "name": "RDG2SmokeGrenade_White"
+            },
+            {
+                "name": "RGD5Grenade"
+            }
+        ]
+    }
+]
