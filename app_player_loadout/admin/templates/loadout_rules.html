@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Regras Globais de Loadout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Gerenciamento de items </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/loadout_rules">Regras Globais de Loadout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/loadout_players">Players Loadout</a>
+                </li>
+            </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container py-5">
+        <h2>Definir Regras de Loadout para Armas</h2>
+            <form method="post" class="mb-4" id="form">
+                <div class="mb-3">
+                    <label for="weapon_id" class="form-label">Arma</label>
+                    <select name="weapon_id" class="form-select" required>
+                        {% for weapon in weapons %}
+                        <option value="{{ weapon.id }}">{{ weapon.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="allowed_primary" value="1" class="form-check-input" id="primaryCheck" checked>
+                    <label class="form-check-label" for="primaryCheck">Permitido como primária</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="allowed_secondary" value="1" class="form-check-input" id="secondaryCheck" checked>
+                    <label class="form-check-label" for="secondaryCheck">Permitido como secundária</label>
+                </div>
+                <div class="form-check">
+                    <input type="hidden" name="allowed_small" value="0" id="allowed_small_hidden">
+                    <input type="checkbox" name="allowed_small" value="1" class="form-check-input" id="allowed_small" checked>
+                    <label class="form-check-label" for="allowed_small">Permitido como arma pequena (&lt; 12 slots)</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="is_banned" value="1" class="form-check-input" id="banCheck">
+                    <label class="form-check-label text-danger" for="banCheck">Banir arma</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Salvar Regra</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Voltar</a>
+            </form>
+
+            <h3>Regras Existentes</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Arma</th>
+                        <th>Primária</th>
+                        <th>Secundária</th>
+                        <th>Pequena</th>
+                        <th>Banida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rule in rules %}
+                    <tr>
+                        <td>{{ rule.name }}</td>
+                        <td>{{ 'Sim' if rule.allowed_primary else 'Não' }}</td>
+                        <td>{{ 'Sim' if rule.allowed_secondary else 'Não' }}</td>
+                        <td>{{ 'Sim' if rule.allowed_small else 'Não' }}</td>
+                        <td class="{{ 'text-danger' if rule.is_banned else '' }}">{{ 'Sim' if rule.is_banned else 'Não' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div>
+                <a href="{{ url_for('delete_loadout_rules') }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir todas as regras?');">Excluir</a>
+            </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('form');
+            const AllowedSmall = document.getElementById('allowed_small');
+            const AllowedSmallHidden = document.getElementById('allowed_small_hidden');
+            
+
+            // Função que atualiza o valor do campo hidden
+            function updateAllowedSmall() {
+                // Atualiza o campo hidden com base no estado do checkbox
+                if (AllowedSmall.checked) {
+                    AllowedSmallHidden.value = '1'; // Se marcado, 1
+                } else {
+                    AllowedSmallHidden.value = '0'; // Se desmarcado, 0
+                }
+            }
+
+            // Quando o checkbox for alterado, atualiza o valor do campo hidden
+            AllowedSmall.addEventListener('change', updateAllowedSmall);
+
+            // Atualizar o valor do campo hidden na primeira carga
+            updateAllowedSmall();
+
+            // Quando o formulário for enviado, garantimos que o valor do campo hidden é o mais atualizado
+            form.addEventListener('submit', function(event) {
+                updateAllowedSmall();
+            });
+        });
+    </script>
+</body>
+</html>

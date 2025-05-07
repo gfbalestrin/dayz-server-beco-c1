@@ -5,30 +5,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
 
 USERS = {
-    "admin": generate_password_hash("xxxxxxxxxxxxxxx")
+    "admin": generate_password_hash("tH987c2d#$67")
 }
 
 app = Flask(__name__)
-app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
-
-# Carrega o XML e extrai os nomes uma vez ao iniciar
-def load_type_names():
-    url = "https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/db/types.xml"
-    response = requests.get(url)
-    response.raise_for_status()
-    root = ET.fromstring(response.content)
-    return [elem.get("name") for elem in root.findall("type")]
-
-# Armazena em memória
-type_names = load_type_names()
+app.secret_key = 'd,bw:#.cvH](,9Yi;@+#3u.-50%:7(£91ND4#5Ps'  # Altere para uma chave forte na produção
 
 def get_db_connection():
     conn = sqlite3.connect('../databases/dayz_items.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def get_db_connection_players_beco_c1():
-    conn = sqlite3.connect('../databases/players_beco_c1.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -938,98 +922,6 @@ def delete_weapon_attachments(attachment_id, weapon_id):
     
     return redirect(request.referrer or url_for('home'))
 
-@app.route('/loadout_rules', methods=['GET', 'POST'])
-def loadout_rules():
-    conn = get_db_connection()
-    weapons = conn.execute('SELECT * FROM weapons').fetchall()
-    if request.method == 'POST':
-        data = request.form
-        weapon_id = data['weapon_id']
-        allowed_primary = int(data.get('allowed_primary', 1))
-        allowed_secondary = int(data.get('allowed_secondary', 1))
-        allowed_small = int(data.get('allowed_small', 1))
-        is_banned = int(data.get('is_banned', 0))
-        
-        conn.execute('''
-            INSERT INTO loadout_rules (weapon_id, allowed_primary, allowed_secondary, allowed_small, is_banned)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(weapon_id) DO UPDATE SET
-                allowed_primary = excluded.allowed_primary,
-                allowed_secondary = excluded.allowed_secondary,
-                allowed_small = excluded.allowed_small,
-                is_banned = excluded.is_banned;
-        ''', (weapon_id, allowed_primary, allowed_secondary, allowed_small, is_banned))
-        conn.commit()
-        conn.close()
-        return redirect('/loadout_rules')
-
-    # Método GET
-    rules = conn.execute('''
-        SELECT r.*, w.name FROM loadout_rules r
-        JOIN weapons w ON r.weapon_id = w.id
-    ''').fetchall()
-    conn.close()
-    return render_template('loadout_rules.html', rules=rules, weapons=weapons)
-
-@app.route('/delete_loadout_rules', methods=['GET'])
-def delete_loadout_rules():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    
-    conn = get_db_connection()
-    
-    try:
-        # Realiza a exclusão do anexo
-        conn.execute('DELETE FROM loadout_rules')
-        conn.commit()
-        flash("Anexo excluído com sucesso!", "success")
-    except Exception as e:
-        flash(f"Ocorreu um erro ao excluir o anexo: {str(e)}", "danger")
-    
-    conn.close()
-    return redirect(request.referrer or url_for('index'))  # Redireciona para a página anterior ou página inicial
-
-
-@app.route('/player_loadout/<player_id>', methods=['GET', 'POST'])
-def player_loadout(player_id):
-    conn = get_db_connection()
-    conn2 = get_db_connection_players_beco_c1()
-
-    if request.method == 'POST':
-        primary = request.form.get('primary_weapon_id')
-        secondary = request.form.get('secondary_weapon_id')
-        small = request.form.get('small_weapon_id')
-
-        conn.execute('''
-            INSERT INTO player_loadouts (player_id, primary_weapon_id, secondary_weapon_id, small_weapon_id)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(player_id) DO UPDATE SET
-                primary_weapon_id = excluded.primary_weapon_id,
-                secondary_weapon_id = excluded.secondary_weapon_id,
-                small_weapon_id = excluded.small_weapon_id;
-        ''', (player_id, primary, secondary, small))
-        conn.commit()
-        conn.close()
-        flash("Loadout atualizado com sucesso!", "success")
-        return redirect(url_for('player_loadout', player_id=player_id))
-
-    weapons = conn.execute('SELECT w.*, r.allowed_primary, r.allowed_secondary, r.allowed_small, r.is_banned FROM weapons w LEFT JOIN loadout_rules r ON w.id = r.weapon_id').fetchall()
-    loadout = conn.execute('SELECT * FROM player_loadouts WHERE player_id = ?', (player_id,)).fetchone()
-    player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
-    rules = conn.execute('''
-        SELECT r.*, w.name FROM loadout_rules r
-        JOIN weapons w ON r.weapon_id = w.id
-    ''').fetchall()
-    conn.close()
-
-    return render_template('player_loadout.html', player=player, weapons=weapons, loadout=loadout, rules=rules)
-
-@app.route('/loadout_players', methods=['GET'])
-def loadout_players():
-    conn = get_db_connection_players_beco_c1()
-    players = conn.execute('SELECT * FROM players_database').fetchall()
-    conn.close()
-    return render_template('loadout_players.html', players=players)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1053,4 +945,4 @@ def logout():
 
 # ✅ ESSENCIAL PARA INICIAR O SERVIDOR
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=54321, debug=True)
+    app.run(host='0.0.0.0', port=54322, debug=True)

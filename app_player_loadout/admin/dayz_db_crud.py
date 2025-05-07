@@ -81,6 +81,26 @@ def criar_tabelas():
         FOREIGN KEY (weapon_id) REFERENCES weapons(id),
         FOREIGN KEY (ammo_id) REFERENCES ammunitions(id)
     );
+    
+    CREATE TABLE IF NOT EXISTS loadout_rules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weapon_id INTEGER UNIQUE NOT NULL,
+        allowed_primary BOOLEAN NOT NULL DEFAULT 1,
+        allowed_secondary BOOLEAN NOT NULL DEFAULT 1,
+        allowed_small BOOLEAN NOT NULL DEFAULT 1,
+        is_banned BOOLEAN NOT NULL DEFAULT 0,
+        FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS player_loadouts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_id TEXT UNIQUE NOT NULL,
+        primary_weapon_id INTEGER,
+        secondary_weapon_id INTEGER,
+        small_weapon_id INTEGER,
+        FOREIGN KEY (primary_weapon_id) REFERENCES weapons(id),
+        FOREIGN KEY (secondary_weapon_id) REFERENCES weapons(id),
+        FOREIGN KEY (small_weapon_id) REFERENCES weapons(id)
+    );
     """)
     conn.commit()
     print("Tabelas criadas com sucesso.")

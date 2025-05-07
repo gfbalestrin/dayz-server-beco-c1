@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Carregador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="mb-4">Editar Carregador</h1>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Nome do Carregador</label>
+                <input type="text" name="name" class="form-control" value="{{ magazine.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nome do Carregador (types.xml)</label>
+                <input type="text" name="name_type" class="form-control" value="{{ magazine.name_type }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Capacidade</label>
+                <input type="number" class="form-control" name="capacity" value="{{ magazine.capacity }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Largura</label>
+                <input type="number" class="form-control" name="width" id="width" value="{{ magazine.width }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Altura</label>
+                <input type="number" class="form-control" name="height" id="height" value="{{ magazine.height }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Slots</label>
+                <input type="number" class="form-control" name="slots" id="slots" value="{{ magazine.slots }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">URL da imagem</label>
+                <input type="text" name="img" class="form-control" value="{{ magazine.img }}">
+                <img src="{{ magazine.img }}" alt="" class="img-thumbnail">
+            </div>
+            <button type="submit" class="btn btn-primary">Atualizar</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Voltar</a>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const slotsInput = document.getElementById('slots');
+    
+            function updateSlots() {
+                const width = parseInt(widthInput.value);
+                const height = parseInt(heightInput.value);
+    
+                if (!isNaN(width) && !isNaN(height)) {
+                    slotsInput.value = width * height;
+                } else {
+                    slotsInput.value = '';
+                }
+            }
+    
+            widthInput.addEventListener('input', updateSlots);
+            heightInput.addEventListener('input', updateSlots);
+        });
+    </script>
+</body>
+</html>
