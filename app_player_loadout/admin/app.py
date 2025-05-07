@@ -23,7 +23,7 @@ def load_type_names():
 type_names = load_type_names()
 
 def get_db_connection():
-    conn = sqlite3.connect('dayz_items.db')
+    conn = sqlite3.connect('../databases/dayz_items.db')
     conn.row_factory = sqlite3.Row
     return conn
 
