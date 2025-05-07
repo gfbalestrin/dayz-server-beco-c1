@@ -11,7 +11,8 @@
         <ul class="list-group">
         {% for weapon in weapons %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ weapon.name }} <small class="text-muted">({{ weapon.feed_type }})</small></span>
+                <img src="{{ weapon.img }}" alt="" class="img-thumbnail" style="height: 75px">
+                <span>{{ weapon.name }} <small class="text-muted">({{ weapon.name_type }})</small> <small class="text-muted">- Tipo de alimentação: {{ weapon.feed_type }}, slots: {{ weapon.width }}x{{ weapon.height }}({{ weapon.slots }})</small></span>
                 <span>
                     <a href="{{ url_for('edit_weapon', id=weapon.id) }}" class="btn btn-sm btn-primary">Editar</a>
                     <a href="{{ url_for('delete_weapon', id=weapon.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
@@ -19,6 +20,73 @@
             </li>
         {% endfor %}
         </ul>
+    </div>
+    <div class="container py-5">
+        <h1 class="mb-4">Lista de Calibres</h1>
+        <a href="{{ url_for('add_caliber') }}" class="btn btn-success mb-3">Adicionar Novo Calibre</a>
+        <ul class="list-group">
+        {% for caliber in calibers %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ caliber.name }}</span>
+                <span>
+                    <a href="{{ url_for('edit_caliber', id=caliber.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('delete_caliber', id=caliber.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="container py-5">
+        <h1 class="mb-4">Lista de Munições</h1>
+        <a href="{{ url_for('add_ammo') }}" class="btn btn-success mb-3">Adicionar Nova Munição</a>
+        <ul class="list-group">
+        {% for ammo in ammunitions %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <img src="{{ ammo.img }}" alt="" class="img-thumbnail" style="height: 75px">
+                <span>{{ ammo.name }} <small class="text-muted">({{ ammo.name_type }})</small> <small class="text-muted">- Calibre: {{ ammo.caliber_name }}, slots: {{ ammo.width }}x{{ ammo.height }}({{ ammo.slots }})</small></span>
+                <span>
+                    <a href="{{ url_for('edit_ammo', id=ammo.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('delete_ammo', id=ammo.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="container py-5">
+        <h1 class="mb-4">Lista de Carregadores</h1>
+        <a href="{{ url_for('add_magazine') }}" class="btn btn-success mb-3">Adicionar Novo Carregador</a>
+        <ul class="list-group">
+        {% for magazine in magazines %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <img src="{{ magazine.img }}" alt="" class="img-thumbnail" style="height: 75px">
+                <span>{{ magazine.name }} <small class="text-muted">({{ magazine.name_type }})</small> <small class="text-muted">Capacidade: {{ magazine.capacity }}, slots: {{ magazine.width }}x{{ magazine.height }}({{ magazine.slots }})</small></span>
+                <span>
+                    <a href="{{ url_for('edit_magazine', id=magazine.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('delete_magazine', id=magazine.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="container py-5">
+        <h1 class="mb-4">Lista de Acessórios</h1>
+        <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
+        <ul class="list-group">
+        {% for attachment in attachments %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <img src="{{ attachment.img }}" alt="" class="img-thumbnail" style="height: 75px">
+                <span>{{ attachment.name }} <small class="text-muted">({{ attachment.name_type }})</small> <small class="text-muted">Tipo: {{ attachment.capacity }}, slots: {{ attachment.width }}x{{ attachment.height }}({{ attachment.slots }})</small></span>
+                <span>
+                    <a href="{{ url_for('edit_attachment', id=attachment.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ url_for('delete_attachment', id=attachment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div class="container">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary float-end">Logout</a>
     </div>
 </body>
 </html>

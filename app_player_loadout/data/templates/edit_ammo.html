@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Adicionar Arma</title>
+    <title>Editar Munição</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <h1 class="mb-4">Adicionar Nova Arma</h1>
+        <h1 class="mb-4">Editar Munição</h1>
         <form method="post">
             <div class="mb-3">
-                <label class="form-label">Nome da Arma</label>
-                <input type="text" name="name" class="form-control" required>
+                <label class="form-label">Nome da Munição</label>
+                <input type="text" name="name" class="form-control" value="{{ ammo.name }}" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Nome da Arma (types.xml)</label>
-                <input type="text" name="name_type" class="form-control" required>
+                <label class="form-label">Nome da Munição (types.xml)</label>
+                <input type="text" name="name_type" class="form-control" value="{{ ammo.name_type }}" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Tipo de Alimentação</label>
-                <select class="form-control" name="feed_type" required>
-                    <option value="magazine">magazine</option>
-                    <option value="internal">internal</option>
-                    <option value="manual">manual</option>
+                <label class="form-label">Calibre</label>
+                <select class="form-control" name="caliber_id" required>
+                {% for caliber in calibers %}
+                    <option value="{{ caliber.id }}" {% if caliber.id == ammo.caliber_id %}selected{% endif %}>
+                        {{ caliber.name }}
+                    </option>
+                {% endfor %}
                 </select>
             </div>
             <div class="mb-3">
                 <label class="form-label">Largura</label>
-                <input type="number" class="form-control" name="width" id="width" required>
+                <input type="number" class="form-control" name="width" id="width" value="{{ ammo.width }}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Altura</label>
-                <input type="number" class="form-control" name="height" id="height" required>
+                <input type="number" class="form-control" name="height" id="height" value="{{ ammo.height }}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Slots</label>
-                <input type="number" class="form-control" name="slots" id="slots" readonly required>
+                <input type="number" class="form-control" name="slots" id="slots" value="{{ ammo.slots }}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">URL da imagem</label>
-                <input type="text" name="img" class="form-control" value="https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png">
+                <input type="text" name="img" class="form-control" value="{{ ammo.img }}">
+                <img src="{{ ammo.img }}" alt="" class="img-thumbnail">
             </div>
-            <button type="submit" class="btn btn-success">Salvar</button>
+            <button type="submit" class="btn btn-primary">Atualizar</button>
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Voltar</a>
         </form>
     </div>
@@ -63,6 +66,8 @@
     
             widthInput.addEventListener('input', updateSlots);
             heightInput.addEventListener('input', updateSlots);
+
+
         });
     </script>
 </body>

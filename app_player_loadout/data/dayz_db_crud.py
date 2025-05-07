@@ -10,26 +10,51 @@ def criar_tabelas():
     CREATE TABLE IF NOT EXISTS weapons (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
-        feed_type TEXT
+        name_type TEXT UNIQUE NOT NULL,
+        feed_type TEXT NOT NULL,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL
+    );
+    
+    CREATE TABLE IF NOT EXISTS calibers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL        
     );
 
     CREATE TABLE IF NOT EXISTS ammunitions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
-        caliber TEXT NOT NULL
+        name_type TEXT UNIQUE NOT NULL,
+        caliber_id INTEGER NOT NULL,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL,
+        FOREIGN KEY (caliber_id) REFERENCES weapons(id)
     );
 
     CREATE TABLE IF NOT EXISTS magazines (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
-        ammo_type TEXT NOT NULL,
-        capacity INTEGER
+        name_type TEXT UNIQUE NOT NULL,
+        capacity INTEGER,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS attachments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
-        type TEXT NOT NULL
+        name_type TEXT UNIQUE NOT NULL,
+        type TEXT NOT NULL,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS weapon_attachments (
@@ -59,60 +84,6 @@ def criar_tabelas():
     conn.commit()
     print("Tabelas criadas com sucesso.")
 
-# === FUNÇÕES DE CRUD SIMPLES ===
-
-def adicionar_arma(nome, feed_type):
-    cursor.execute("INSERT OR IGNORE INTO weapons (name, feed_type) VALUES (?, ?)", (nome, feed_type))
-    conn.commit()
-
-def adicionar_municao(nome, caliber):
-    cursor.execute("INSERT OR IGNORE INTO ammunitions (name, caliber) VALUES (?, ?)", (nome, caliber))
-    conn.commit()
-
-def adicionar_carregador(nome, ammo_type, capacidade):
-    cursor.execute("INSERT OR IGNORE INTO magazines (name, ammo_type, capacity) VALUES (?, ?, ?)", (nome, ammo_type, capacidade))
-    conn.commit()
-
-def adicionar_acessorio(nome, tipo):
-    cursor.execute("INSERT OR IGNORE INTO attachments (name, type) VALUES (?, ?)", (nome, tipo))
-    conn.commit()
-
-def vincular_arma_municao(arma_nome, municao_nome):
-    cursor.execute("SELECT id FROM weapons WHERE name = ?", (arma_nome,))
-    arma_id = cursor.fetchone()
-    cursor.execute("SELECT id FROM ammunitions WHERE name = ?", (municao_nome,))
-    muni_id = cursor.fetchone()
-    if arma_id and muni_id:
-        cursor.execute("INSERT OR IGNORE INTO weapon_ammunitions (weapon_id, ammo_id) VALUES (?, ?)", (arma_id[0], muni_id[0]))
-        conn.commit()
-
-def vincular_arma_carregador(arma_nome, mag_nome):
-    cursor.execute("SELECT id FROM weapons WHERE name = ?", (arma_nome,))
-    arma_id = cursor.fetchone()
-    cursor.execute("SELECT id FROM magazines WHERE name = ?", (mag_nome,))
-    mag_id = cursor.fetchone()
-    if arma_id and mag_id:
-        cursor.execute("INSERT OR IGNORE INTO weapon_magazines (weapon_id, magazine_id) VALUES (?, ?)", (arma_id[0], mag_id[0]))
-        conn.commit()
-
-def listar_armas():
-    cursor.execute("SELECT * FROM weapons")
-    armas = cursor.fetchall()
-    for arma in armas:
-        print(f"ID: {arma[0]} | Nome: {arma[1]} | Feed: {arma[2]}")
-
-# === EXEMPLO DE USO ===
-
 if __name__ == "__main__":
     criar_tabelas()
 
-    adicionar_arma("M4A1", "magazine")
-    adicionar_municao("5.56x45mm", "5.56")
-    adicionar_carregador("STANAG 30Rnd", "5.56x45mm", 30)
-    adicionar_acessorio("ACOG Scope", "optic")
-
-    vincular_arma_municao("M4A1", "5.56x45mm")
-    vincular_arma_carregador("M4A1", "STANAG 30Rnd")
-
-    print("\n--- Armas cadastradas ---")
-    listar_armas()

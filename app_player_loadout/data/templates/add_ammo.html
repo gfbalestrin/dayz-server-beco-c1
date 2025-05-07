@@ -6,23 +6,23 @@
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <h1 class="mb-4">Adicionar Nova Arma</h1>
+        <h1 class="mb-4">Adicionar Nova Munição</h1>
         <form method="post">
             <div class="mb-3">
-                <label class="form-label">Nome da Arma</label>
+                <label class="form-label">Nome da Munição</label>
                 <input type="text" name="name" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Nome da Arma (types.xml)</label>
+                <label class="form-label">Nome da Munição (types.xml)</label>
                 <input type="text" name="name_type" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Tipo de Alimentação</label>
-                <select class="form-control" name="feed_type" required>
-                    <option value="magazine">magazine</option>
-                    <option value="internal">internal</option>
-                    <option value="manual">manual</option>
-                </select>
+                <label class="form-label">Calibre</label>       
+                <select class="form-control" name="caliber_id" required></select>         
+                {% for caliber in calibers %}                
+                    <option value="{{ caliber.id }}">{{ caliber.name }}</option>                
+                {% endfor %}
+            </select>
             </div>
             <div class="mb-3">
                 <label class="form-label">Largura</label>
