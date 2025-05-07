@@ -196,7 +196,8 @@ def edit_weapon(id):
                 attachments.slots,
                 attachments.width,
                 attachments.height,
-                attachments.img
+                attachments.img,
+                attachments.battery
             FROM 
                 weapon_attachments
             JOIN 
@@ -627,15 +628,16 @@ def add_attachment():
             width = request.form['width']
             height = request.form['height']
             img = request.form['img']
+            battery = request.form.get('battery')
             
             # Validação de campos obrigatórios
-            if not all([name, name_type, type, slots, width, height, img]):
+            if not all([name, name_type, type, slots, width, height, img, battery]):
                 flash("Todos os campos devem ser preenchidos.", "danger")
                 return redirect(request.referrer)
 
             # Inserção no banco de dados
-            conn.execute('INSERT INTO attachments (name, name_type, type, slots, width, height, img) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                         (name, name_type, type, slots, width, height, img))
+            conn.execute('INSERT INTO attachments (name, name_type, type, slots, width, height, img, battery) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                         (name, name_type, type, slots, width, height, img, battery))
             conn.commit()
             flash("Anexo adicionado com sucesso!", "success")
         except Exception as e:
@@ -678,10 +680,12 @@ def edit_attachment(id):
             width = request.form['width']
             height = request.form['height']
             img = request.form['img']
+            battery = request.form.get('battery')
+            
             
             # Atualizar o anexo no banco de dados
-            conn.execute('UPDATE attachments SET name = ?, name_type = ?, type = ?, slots = ?, width = ?, height = ?, img = ? WHERE id = ?',
-                         (name, name_type, type, slots, width, height, img, id))
+            conn.execute('UPDATE attachments SET name = ?, name_type = ?, type = ?, slots = ?, width = ?, height = ?, img = ?, battery = ? WHERE id = ?',
+                         (name, name_type, type, slots, width, height, img, battery, id))
             conn.commit()
             flash("Anexo atualizado com sucesso!", "success")
         except Exception as e:
@@ -694,6 +698,7 @@ def edit_attachment(id):
     # Se a requisição for GET, exibe o formulário com os dados do anexo
     conn.close()
     return render_template('edit_attachment.html', attachment=attachment)
+
 
 
 @app.route('/delete_attachment/<int:id>', methods=['GET', 'POST'])

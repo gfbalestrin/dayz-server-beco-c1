@@ -7,7 +7,7 @@
 <body class="bg-light">
     <div class="container py-5">
         <h1 class="mb-4">Editar Acessório</h1>
-        <form method="post">
+        <form method="post" id="edit_form">
             <div class="mb-3">
                 <label class="form-label">Nome do Acessório</label>
                 <input type="text" name="name" class="form-control" value="{{ attachment.name }}" required>
@@ -18,14 +18,15 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Tipo</label>
-                <select name="type" class="form-control" value="{{ attachment.type }}" required>
-                    <option value="scope">Mira</option>
-                    <option value="compensator">Compensador</option>
-                    <option value="suppressor">Silenciador</option>
-                    <option value="flashlight">Lanterna</option>
-                    <option value="handguard">Protetor de mão</option>
-                    <option value="buttstock">Coronha</option>
-                    <option value="ghillie">Ghillie</option>
+                <select name="type" class="form-control" required>
+                    <option value="compensator" {% if attachment.type == 'compensator' %}selected{% endif %}>Baioneta</option>
+                    <option value="compensator" {% if attachment.type == 'compensator' %}selected{% endif %}>Compensador</option>
+                    <option value="buttstock" {% if attachment.type == 'buttstock' %}selected{% endif %}>Coronha</option>
+                    <option value="ghillie" {% if attachment.type == 'ghillie' %}selected{% endif %}>Ghillie</option>
+                    <option value="flashlight" {% if attachment.type == 'flashlight' %}selected{% endif %}>Lanterna</option>
+                    <option value="scope" {% if attachment.type == 'scope' %}selected{% endif %}>Mira</option>
+                    <option value="handguard" {% if attachment.type == 'handguard' %}selected{% endif %}>Protetor de mão</option>
+                    <option value="suppressor" {% if attachment.type == 'suppressor' %}selected{% endif %}>Silenciador</option>  
                 </select>
             </div>
             <div class="mb-3">
@@ -45,6 +46,26 @@
                 <input type="text" name="img" class="form-control" value="{{ attachment.img }}">
                 <img src="{{ attachment.img }}" alt="" class="img-thumbnail">
             </div>
+            <div class="mb-3">
+                <div class="form-check">
+                    <div class="form-check">
+                        <!-- Campo hidden com o valor 0 -->
+                        <input type="hidden" name="battery" value="0" id="battery_hidden">
+                        
+                        <!-- Envia "1" se marcado -->
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            name="battery" 
+                            id="battery" 
+                            value="1" 
+                            {% if attachment.battery == 1 %}checked{% endif %}>
+                        <label class="form-check-label" for="battery">
+                            Suporta bateria
+                        </label>
+                    </div>
+
+                </div>
             <button type="submit" class="btn btn-primary">Atualizar</button>
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Voltar</a>
         </form>
@@ -68,6 +89,31 @@
     
             widthInput.addEventListener('input', updateSlots);
             heightInput.addEventListener('input', updateSlots);
+
+            const batteryCheckbox = document.getElementById('battery');
+            const batteryHidden = document.getElementById('battery_hidden');
+            const form = document.getElementById('edit_form');
+
+            // Função que atualiza o valor do campo hidden
+            function updateBatteryValue() {
+                // Atualiza o campo hidden com base no estado do checkbox
+                if (batteryCheckbox.checked) {
+                    batteryHidden.value = '1'; // Se marcado, 1
+                } else {
+                    batteryHidden.value = '0'; // Se desmarcado, 0
+                }
+            }
+
+            // Quando o checkbox for alterado, atualiza o valor do campo hidden
+            batteryCheckbox.addEventListener('change', updateBatteryValue);
+
+            // Atualizar o valor do campo hidden na primeira carga
+            updateBatteryValue();
+
+            // Quando o formulário for enviado, garantimos que o valor do campo hidden é o mais atualizado
+            form.addEventListener('submit', function(event) {
+                updateBatteryValue();
+            });
         });
     </script>
 </body>

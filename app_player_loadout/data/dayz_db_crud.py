@@ -54,7 +54,8 @@ def criar_tabelas():
         slots INTEGER NOT NULL,
         width INTEGER NOT NULL,
         height INTEGER NOT NULL,
-        img TEXT NOT NULL
+        img TEXT NOT NULL,
+        battery INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS weapon_attachments (
