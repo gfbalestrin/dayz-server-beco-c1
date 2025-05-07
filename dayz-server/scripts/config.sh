@@ -23,6 +23,7 @@ export DayzDeathmatchCoords=$(jq -r '.Dayz.DeathmatchCoords' "$CONFIG_FILE")
 export DayzMessagesXmlFile=$(jq -r '.Dayz.MessagesXmlFile' "$CONFIG_FILE")
 export DayzDeathmatch=$(jq -r '.Dayz.Deathmatch' "$CONFIG_FILE")
 export DayzWipeOnRestart=$(jq -r '.Dayz.WipeOnRestart' "$CONFIG_FILE")
+export DayzCloseTestPassword=$(jq -r '.Dayz.CloseTestPassword' "$CONFIG_FILE")
 
 export AppFolder=$(jq -r '.App.Folder' "$CONFIG_FILE")
 export AppPlayerBecoC1DbFile=$(jq -r '.App.PlayerBecoC1DbFile' "$CONFIG_FILE")

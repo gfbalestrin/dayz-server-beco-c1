@@ -32,7 +32,7 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ player.PlayerName }} (<a href="https://steamcommunity.com/profiles/{{ player.SteamID }}">{{ player.SteamName }}</a>)</span>
                 <span>
-                    <a href="{{ url_for('player_loadout', player_id=player.PlayerID) }}" class="btn btn-sm btn-primary">Editar loadout</a>
+                    <a href="{{ url_for('player_loadout_weapons', player_id=player.PlayerID) }}" class="btn btn-sm btn-primary">Loadout de armas</a>
                 </span>
             </li>
         {% endfor %}

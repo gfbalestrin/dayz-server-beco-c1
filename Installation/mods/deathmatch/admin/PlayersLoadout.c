@@ -138,3 +138,100 @@ void GiveAdminLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("TacticalGoggles");
     player.GetInventory().CreateInInventory("BalaclavaMask_Black");
 }
+
+
+class WeaponAttachment {
+	string name_type;
+	string type;
+	int slots;
+	int width;
+	int height;
+	bool battery;
+}
+
+class WeaponMagazine {
+	string name_type;
+	int capacity;
+	int slots;
+	int width;
+	int height;
+}
+
+class WeaponAmmunition {
+	string name_type;
+	int slots;
+	int width;
+	int height;
+}
+
+class WeaponData {
+	string name_type;
+	string feed_type;
+	int slots;
+	int width;
+	int height;
+	ref WeaponAmmunition ammunitions;
+	ref WeaponMagazine magazine;
+	ref array<ref WeaponAttachment> attachments;
+}
+
+class Weapons {
+	ref WeaponData primary_weapon;
+}
+
+class LoadoutData {
+	ref array<string> clothes;
+	ref array<string> accessories;
+	ref Weapons weapons;
+}
+
+bool GiveCustomLoadout(PlayerBase player, string playerId)
+{
+	string jsonPath = "$mission:custom_loadouts.json";
+	ref map<string, ref LoadoutData> loadoutMap = new map<string, ref LoadoutData>;
+
+	// Carregar JSON
+	JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
+
+	if (!loadoutMap || !loadoutMap.Contains(playerId)) {
+		WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
+		return false;
+	}
+
+	LoadoutData data = loadoutMap.Get(playerId);
+
+	// Arma primária
+	if (data.weapons && data.weapons.primary_weapon) {
+		WeaponData weapon = data.weapons.primary_weapon;
+		EntityAI weaponPrimaryEntity = player.GetInventory().CreateInInventory(weapon.name_type);
+
+		if (weaponPrimaryEntity) {
+			// Acessórios
+			if (weapon.attachments) {
+				foreach (WeaponAttachment att : weapon.attachments) {
+					EntityAI attachmentPrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(att.name_type);
+					if (att.battery && attachmentPrimary) {
+						attachmentPrimary.GetInventory().CreateAttachment("Battery9V");
+					}
+				}
+			}
+
+			// Carregador
+			if (weapon.magazine) {				
+                EntityAI magazinePrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(weapon.magazine.name_type);              
+				if (magazinePrimary && weapon.ammunitions) {
+					for (int i = 0; i < weapon.magazine.capacity; i++) {
+						magazinePrimary.GetInventory().CreateInInventory(weapon.ammunitions.name_type);
+					}
+                    weaponPrimaryEntity.PushCartridgeToChamberFromMagazine(weapon.ammunitions.name_type);
+				}                         
+			}
+		}
+
+        player.SetQuickBarEntityShortcut(weaponPrimaryEntity, 0, true);
+	}
+
+	WriteToLog("Loadout carregado com sucesso para o jogador: " + playerId);
+	return true;
+}
+

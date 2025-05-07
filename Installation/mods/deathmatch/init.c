@@ -1,3 +1,20 @@
+
+void WriteToLog(string content, string logfile = "init.log")
+{
+	string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
+	FileHandle file = OpenFile(fileName, FileMode.APPEND);
+
+	if (file != 0)
+	{
+		FPrintln(file, content); // Escreve a string com quebra de linha
+		CloseFile(file);
+	}
+	else
+	{
+		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
+	}
+}
+
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 
@@ -45,24 +62,15 @@ class SafeZoneData {
     }
 }
 
-class LoadoutData {
-    ref array<string> clothes;
-    ref array<string> accessories;
-
-    void LoadoutData() {
-        clothes = new array<string>();
-        accessories = new array<string>();
-    }
-}
 
 class CustomMission: MissionServer
 {
-	float m_AdminCheckCooldown30 = 30.0;
-	float m_AdminCheckTimer30 = 0.0;
+	float m_AdminCheckCooldown10 = 10.0;
+	float m_AdminCheckTimer10 = 0.0;
 	float m_AdminCheckCooldown60 = 60.0;
 	float m_AdminCheckTimer60 = 0.0;
 	string FixedMessage1 = "Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade";
-	string FixedMessage2 = "O comando pode demorar até 30 segundos para ser executado";
+	string FixedMessage2 = "Acesse o discord para personalizar seu loadout";
 
 	string regionStr;
 	string customMessage;
@@ -93,10 +101,10 @@ class CustomMission: MissionServer
 	{
 		super.OnUpdate(timeslice);
 		// A cada 30 segundos
-		m_AdminCheckTimer30 += timeslice;
-		if (m_AdminCheckTimer30 >= m_AdminCheckCooldown30)
+		m_AdminCheckTimer10 += timeslice;
+		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
-			m_AdminCheckTimer30 = 0.0;
+			m_AdminCheckTimer10 = 0.0;
 			CheckAdminCommands();
 
 			array<string> msgs = CheckMessages();
@@ -543,55 +551,7 @@ class CustomMission: MissionServer
 		return m_player;
 	}
 
-	bool GiveCustomLoadout(PlayerBase player, string playerId)
-	{
-		string jsonPath = "$mission:custom_loadouts.json";
-		string jsonContent;
 
-		ref map<string, ref LoadoutData> loadoutMap = new map<string, ref LoadoutData>;
-
-		// Carregar o JSON (sem verificar retorno, pois retorna void)
-		JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
-
-		if (!loadoutMap || !loadoutMap.Contains(playerId)) {
-			WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
-			return false;
-		}
-
-		if (!loadoutMap.Contains(playerId)) {
-			WriteToLog("No custom loadout for player: " + playerId);
-			return false;
-		}
-
-		LoadoutData data = loadoutMap.Get(playerId);
-
-		foreach (string item : data.clothes) {
-			player.GetInventory().CreateInInventory(item);
-		}
-
-		foreach (string item2 : data.accessories) {
-			player.GetInventory().CreateInInventory(item2);
-		}
-
-		WriteToLog("Loadout loaded successfully!");
-		return true;
-	}
-
-	void WriteToLog(string content, string logfile = "init.log")
-	{
-		string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
-		FileHandle file = OpenFile(fileName, FileMode.APPEND);
-
-		if (file != 0)
-		{
-			FPrintln(file, content); // Escreve a string com quebra de linha
-			CloseFile(file);
-		}
-		else
-		{
-			WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
-		}
-	}
 
 	override void StartingEquipSetup(PlayerBase player, bool clothesChosen)
 	{

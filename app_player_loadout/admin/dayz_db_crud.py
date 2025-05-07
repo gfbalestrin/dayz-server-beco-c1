@@ -82,7 +82,7 @@ def criar_tabelas():
         FOREIGN KEY (ammo_id) REFERENCES ammunitions(id)
     );
     
-    CREATE TABLE IF NOT EXISTS loadout_rules (
+    CREATE TABLE IF NOT EXISTS loadout_rules_weapons (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         weapon_id INTEGER UNIQUE NOT NULL,
         allowed_primary BOOLEAN NOT NULL DEFAULT 1,
@@ -91,15 +91,42 @@ def criar_tabelas():
         is_banned BOOLEAN NOT NULL DEFAULT 0,
         FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE
     );
-    CREATE TABLE IF NOT EXISTS player_loadouts (
+    CREATE TABLE IF NOT EXISTS player_loadouts_weapons (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         player_id TEXT UNIQUE NOT NULL,
+        
         primary_weapon_id INTEGER,
+        primary_magazine_id INTEGER,
+        primary_ammo_id INTEGER,
+        
         secondary_weapon_id INTEGER,
+        secondary_magazine_id INTEGER,
+        secondary_ammo_id INTEGER,
+        
         small_weapon_id INTEGER,
+        small_magazine_id INTEGER,
+        small_ammo_id INTEGER,
+        
         FOREIGN KEY (primary_weapon_id) REFERENCES weapons(id),
+        FOREIGN KEY (primary_magazine_id) REFERENCES magazines(id),
+        FOREIGN KEY (primary_ammo_id) REFERENCES ammunitions(id),
+        
         FOREIGN KEY (secondary_weapon_id) REFERENCES weapons(id),
-        FOREIGN KEY (small_weapon_id) REFERENCES weapons(id)
+        FOREIGN KEY (secondary_magazine_id) REFERENCES magazines(id),
+        FOREIGN KEY (secondary_ammo_id) REFERENCES ammunitions(id),
+        
+        FOREIGN KEY (small_weapon_id) REFERENCES weapons(id),
+        FOREIGN KEY (small_magazine_id) REFERENCES magazines(id),
+        FOREIGN KEY (small_ammo_id) REFERENCES ammunitions(id)
+    );
+    
+    CREATE TABLE IF NOT EXISTS player_loadouts_weapon_attachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_loadouts_weapons_id INTEGER NOT NULL,
+        attachment_id INTEGER NOT NULL,
+        weapon_slot TEXT CHECK(weapon_slot IN ('primary', 'secondary', 'small')),
+        FOREIGN KEY (player_loadouts_weapons_id) REFERENCES player_loadouts_weapons(id),
+        FOREIGN KEY (attachment_id) REFERENCES attachments(id)
     );
     """)
     conn.commit()

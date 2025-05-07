@@ -10,7 +10,8 @@
         "DeathmatchCoords": "mpmissions/dayzOffline.chernarusplus/deathmatch_config.json",
         "MessagesXmlFile": "mpmissions/dayzOffline.chernarusplus/db/messages.xml",
         "Deathmatch": "0",
-        "WipeOnRestart": "0"
+        "WipeOnRestart": "0",
+        "CloseTestPassword": "BECOTESTE"
     },
     "App": {
         "Folder": "/etc/servers/dayz-server/scripts",

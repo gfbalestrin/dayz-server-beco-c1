@@ -30,6 +30,10 @@ function MonitorLog() {
 			ProximoRestart=$(awk -F'[><]' '/<deadline>/ { print $3 }' "$MessagesXmlFile" | tail -n1 | xargs)
 			Segundos=$(( $ProximoRestart * 60 ))
 			ProximoHorario=$(TZ="America/Sao_Paulo" date -d "+$Segundos seconds" +"%d/%m/%Y %H:%M:%S")
+			if [[ "$DayzCloseTestPassword" != "" ]]; then
+				SEND_DISCORD_WEBHOOK "Servidor em teste, não liberado para players..." "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+				continue
+			fi
 			SEND_DISCORD_WEBHOOK "Servidor liberado para conexão de jogadores. Horário do próximo restart: $ProximoHorario (daqui $ProximoRestart minutos)" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
 			continue
 		elif [[ "$Content" == *"Mission script has no main function"* ]]; then

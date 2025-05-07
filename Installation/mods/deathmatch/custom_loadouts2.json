@@ -1,44 +1,52 @@
 {
-  "76561198000000001": {
-    "primary_weapon": {
-      "name_type": "",
-      "feed_type": "",
-      "slots": 24,
-      "width": 3,
-      "height": 8,
-      "ammunitions": {
-        "name_type": "",
-        "slots": 1,
-        "width": 1,
-        "height": 1
-      },
-      "magazine": {
-        "name_type": "",
-        "capacity": 30,
-        "slots": 3,
-        "width": 1,
-        "height": 3
-      },
-      "attachments": [
-        {
-          "name_type": "",
-          "type": "",
-          "slots": 3,
+  "PLAYERID_XXXXXXX": {
+    "weapons": {
+      "primary_weapon": {
+        "name_type": "M4A1",
+        "feed_type": "magazine",
+        "slots": 9,
+        "width": 3,
+        "height": 27,
+        "ammunitions": {
+          "name_type": "Ammo_556x45",
+          "slots": 1,
           "width": 1,
-          "height": 3,
-          "battery": false
-        }
-      ]
-    },
-    "extras": [
-      {
-        "name_type": "",
-        "type": "",
-        "slots": 3,
-        "width": 1,
-        "height": 3,
-        "battery": false
+          "height": 1
+        },
+        "magazine": {
+          "name_type": "Mag_STANAG_30Rnd",
+          "capacity": 60,
+          "slots": 6,
+          "width": 2,
+          "height": 3
+        },
+        "attachments": [
+          {
+            "name_type": "M4_MPBttstck",
+            "type": "buttstock",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_MPHndgrd",
+            "type": "handguard",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "ACOGOptic",
+            "type": "scope",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          }
+        ]
       }
-    ]
+    }
   }
 }

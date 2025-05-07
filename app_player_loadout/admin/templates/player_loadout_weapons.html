@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Loadout do Jogador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .weapon-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+
+        .weapon-card.selected {
+            border: 2px solid #198754;
+            /* verde Bootstrap */
+            box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+        }
+
+        .magazine-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+
+        .magazine-card.selected {
+            border: 2px solid #198754;
+            /* verde Bootstrap */
+            box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+        }
+
+        .ammo-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+
+        .ammo-card.selected {
+            border: 2px solid #198754;
+            /* verde Bootstrap */
+            box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+        }
+
+        .attachment-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+
+        .attachment-card.selected {
+            border: 2px solid #198754;
+            /* verde Bootstrap */
+            box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+        }
+
+        #attachments-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .attachment-card {
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+            background-color: #fff;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .attachment-card img {
+            width: 100%;
+            height: 90px;
+            object-fit: contain;
+        }
+
+        .attachment-card.selected {
+            border-color: #198754;
+            box-shadow: 0 0 6px #198754;
+        }
+
+        .attachment-name {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+
+<body class="container py-4">
+    <h2>Loadout de {{ player.PlayerName or player.PlayerID }}</h2>
+
+    <div class="mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="text-success mb-4 text-center">Loadout salvo</h4>
+                <hr>
+                {% for label, prefix in [('Arma primária', 'primary'), ('Arma secundária', 'secondary'), ('Arma pequena', 'small')] %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="text-primary">{{ label }}</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card h-100 text-center">
+                                    <div class="card-body">
+                                        <p><strong>Arma</strong></p>
+                                        {% if loadout[prefix + '_weapon_img'] %}
+                                            <img src="{{ loadout[prefix + '_weapon_img'] }}" class="card-img-top" alt="arma" style="max-height: 120px; object-fit: contain;">
+                                        {% endif %}
+                                        <p>{{ loadout[prefix + '_weapon_name'] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 text-center">
+                                    <div class="card-body">
+                                        <p><strong>Pente</strong></p>
+                                        {% if loadout[prefix + '_magazine_img'] %}
+                                            <img src="{{ loadout[prefix + '_magazine_img'] }}" class="card-img-top" alt="pente" style="max-height: 120px; object-fit: contain;">
+                                        {% endif %}
+                                        <p>{{ loadout[prefix + '_magazine_name'] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 text-center">
+                                    <div class="card-body">
+                                        <p><strong>Munição</strong></p>
+                                        {% if loadout[prefix + '_ammo_img'] %}
+                                            <img src="{{ loadout[prefix + '_ammo_img'] }}" class="card-img-top" alt="munição" style="max-height: 120px; object-fit: contain;">
+                                        {% endif %}
+                                        <p>{{ loadout[prefix + '_ammo_name'] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if attachments[prefix] %}
+                            <div class="mt-4">
+                                <h6 class="text-secondary">Acessórios</h6>
+                                <div class="row g-3">
+                                    {% for att in attachments[prefix] %}
+                                        <div class="col-md-3">
+                                            <div class="card h-100 text-center">
+                                                <div class="card-body">
+                                                    <img src="{{ att.img }}" class="card-img-top" alt="{{ att.name }}" style="max-height: 120px; object-fit: contain;">
+                                                    <p class="mb-0">{{ att.name }}</p>
+                                                    <small class="text-muted">{{ att.type }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+
+    <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
+        <div class="mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-primary mb-4 text-center">Arma Primária</h4>
+                    <hr>
+                    <div class="row" id="primary-weapon-list">
+                        {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                        <div class="col-md-3">
+                            <div class="card weapon-card" data-weapon-id="{{ weapon.id }}">
+                                <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                <div class="card-body text-center">
+                                    <p class="card-text">{{ weapon.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3 d-none" id="div-carregadores">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-primary mb-4 text-center">Carregador Compatível</h4>
+                    <hr>
+                    <div class="d-flex flex-wrap" id="magazine-list">
+                        <p>Selecione uma arma primeiro</p>
+                    </div>
+                    <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3 d-none" id="div-municoes">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-primary mb-4 text-center">Munição Compatível</h4>
+                    <hr>
+                    <div class="d-flex flex-wrap" id="ammo-list">
+                        <p>Selecione uma arma primeiro</p>
+                    </div>
+                    <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3 d-none" id="div-acessorios">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-primary mb-4 text-center">Acessórios Compatíveis</h4>
+                    <hr>
+                    <div id="attachments-section" class="row">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- <div class="mb-3">
+            <label class="form-label">Arma Secundária</label>
+            <select name="secondary_weapon_id" class="form-select">
+                <option value="">Nenhuma</option>
+                {% for weapon in weapons if weapon.slots >= 12 %}
+                <option value="{{ weapon.id }}" {% if loadout and loadout.secondary_weapon_id==weapon.id %}selected{%
+                    endif %} {% if weapon.is_banned==1 %}disabled{% endif %}>
+                    {{ weapon.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arma Pequena (&lt; 12 slots)</label>
+            <select name="small_weapon_id" class="form-select">
+                <option value="">Nenhuma</option>
+                {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) %} <option
+                    value="{{ weapon.id }}" {% if loadout and loadout.small_weapon_id==weapon.id %}selected{% endif %}
+                    {% if weapon.is_banned==1 %}disabled{% endif %}>
+                    {{ weapon.name }}
+                    </option>
+                    {% endfor %}
+            </select>
+        </div> -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <button type="submit" class="btn btn-success">Salvar Loadout</button>
+        <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const weaponCards = document.querySelectorAll('.weapon-card');
+            const weaponInput = document.getElementById('primary_weapon_id');
+
+            const divCarregadores = document.getElementById('div-carregadores');
+
+            const magazineList = document.getElementById('magazine-list');
+            const divMunicoes = document.getElementById('div-municoes');
+
+            const magazineInput = document.getElementById('primary_magazine_id');
+            const ammoList = document.getElementById('ammo-list');
+            const divAcessorios = document.getElementById('div-acessorios');
+
+            const ammoInput = document.getElementById('primary_ammo_id');
+
+            weaponCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    divCarregadores.classList.add("d-none");
+                    divMunicoes.classList.add("d-none");
+                    divAcessorios.classList.add("d-none");
+                    // Marca como selecionado
+                    weaponCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    const weaponId = this.dataset.weaponId;
+                    weaponInput.value = weaponId;
+
+                    // Buscar magazines compatíveis
+                    fetch(`/get_magazines/${weaponId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            magazineList.innerHTML = '';
+                            if (data.length === 0) {
+                                magazineList.innerHTML = '<p>Nenhum carregador compatível.</p>';
+                                magazineInput.value = '';
+                            } else {
+                                divCarregadores.classList.remove("d-none");
+                                data.forEach(mag => {
+                                    const card = document.createElement('div');
+                                    card.className = 'card m-2 magazine-card';
+                                    card.style.width = '100px';
+                                    card.dataset.magazineId = mag.id;
+
+                                    card.innerHTML = `
+                                    <img src="${mag.img}" class="card-img-top" alt="${mag.name}">
+                                    <div class="card-body text-center p-1">
+                                        <small>${mag.name}</small>
+                                    </div>
+                                `;
+
+                                    card.addEventListener('click', function () {
+                                        document.querySelectorAll('.magazine-card').forEach(c => c.classList.remove('selected'));
+                                        card.classList.add('selected');
+                                        magazineInput.value = mag.id;
+                                    });
+
+                                    magazineList.appendChild(card);
+                                });
+                            }
+                        });
+
+                    // Buscar munições compatíveis
+                    fetch(`/get_ammos/${weaponId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            ammoList.innerHTML = '';
+                            if (data.length === 0) {
+                                ammoList.innerHTML = '<p>Nenhuma munição compatível.</p>';
+                                ammoInput.value = '';
+                            } else {
+                                divMunicoes.classList.remove("d-none");
+                                data.forEach(ammo => {
+                                    const card = document.createElement('div');
+                                    card.className = 'card m-2 ammo-card';
+                                    card.style.width = '100px';
+                                    card.dataset.ammoId = ammo.id;
+
+                                    card.innerHTML = `
+                                    <img src="${ammo.img}" class="card-img-top" alt="${ammo.name}">
+                                    <div class="card-body text-center p-1">
+                                        <small>${ammo.name}</small>
+                                    </div>
+                                `;
+
+                                    card.addEventListener('click', function () {
+                                        document.querySelectorAll('.ammo-card').forEach(c => c.classList.remove('selected'));
+                                        card.classList.add('selected');
+                                        ammoInput.value = ammo.id;
+                                    });
+
+                                    ammoList.appendChild(card);
+                                });
+                            }
+                        });
+
+                    loadAttachments(weaponId);
+
+                });
+            });
+
+            function loadAttachments(weaponId) {
+                const section = document.getElementById('attachments-section');
+                section.innerHTML = ''; // Limpa os attachments
+
+                if (!weaponId) return;
+
+                fetch(`/get_attachments/${weaponId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            divAcessorios.classList.remove("d-none");
+                        }
+                        data.forEach(att => {
+                            const card = document.createElement('div');
+                            card.className = 'attachment-card';
+                            card.setAttribute('data-id', att.id);
+                            card.setAttribute('data-type', att.type);
+                            card.setAttribute('title', att.name);
+                            card.onclick = () => toggleAttachment(card);
+
+                            card.innerHTML = `
+                        <img src="${att.img}" alt="${att.name}">
+                        <div class="attachment-name">${att.name}</div>
+                        `;
+
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'primary_attachments';
+                            checkbox.value = att.id;
+                            checkbox.id = `attachment-${att.id}`;
+                            checkbox.classList.add('d-none');
+
+                            section.appendChild(card);
+                            section.appendChild(checkbox);
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Erro ao carregar attachments:', err);
+                        section.innerHTML = '<p class="text-danger">Erro ao carregar attachments.</p>';
+                    });
+            }
+
+            function toggleAttachment(card) {
+                const type = card.getAttribute('data-type');
+                const id = card.getAttribute('data-id');
+                const checkbox = document.getElementById(`attachment-${id}`);
+
+                if (!card.classList.contains('selected')) {
+                    // Verifica se já existe um attachment selecionado com o mesmo tipo
+                    const alreadySelected = document.querySelector(`.attachment-card.selected[data-type="${type}"]`);
+                    if (alreadySelected) {
+                        const name = alreadySelected.querySelector('.attachment-name').textContent;
+                        alert(`Você já selecionou um attachment do tipo "${type}" (${name}).`);
+                        return;
+                    }
+                }
+
+                checkbox.checked = !checkbox.checked;
+                card.classList.toggle('selected');
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
