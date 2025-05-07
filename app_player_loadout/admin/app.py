@@ -1070,43 +1070,68 @@ def player_loadout_weapons(player_id):
         LEFT JOIN loadout_rules_weapons r ON w.id = r.weapon_id
     ''').fetchall()
 
-    loadout = conn.execute("""
+    # Criar um dicionário de loadout padrão
+    default_loadout = {
+        'loadout_id': None,
+        'player_id': player_id,
+        'primary_weapon_id': None,
+        'primary_weapon_name': None,
+        'primary_weapon_img': None,
+        'primary_magazine_id': None,
+        'primary_magazine_name': None,
+        'primary_magazine_img': None,
+        'primary_ammo_id': None,
+        'primary_ammo_name': None,
+        'primary_ammo_img': None,
+        'secondary_weapon_id': None,
+        'secondary_weapon_name': None,
+        'secondary_weapon_img': None,
+        'secondary_magazine_id': None,
+        'secondary_magazine_name': None,
+        'secondary_magazine_img': None,
+        'secondary_ammo_id': None,
+        'secondary_ammo_name': None,
+        'secondary_ammo_img': None,
+        'small_weapon_id': None,
+        'small_weapon_name': None,
+        'small_weapon_img': None,
+        'small_magazine_id': None,
+        'small_magazine_name': None,
+        'small_magazine_img': None,
+        'small_ammo_id': None,
+        'small_ammo_name': None,
+        'small_ammo_img': None
+    }
+
+    # Buscar loadout do banco de dados
+    db_loadout = conn.execute("""
         SELECT 
             plw.id AS loadout_id,
             plw.player_id,
-
             wp_primary.id AS primary_weapon_id,
             wp_primary.name AS primary_weapon_name,
             wp_primary.img AS primary_weapon_img,
-
             mag_primary.id AS primary_magazine_id,
             mag_primary.name AS primary_magazine_name,
             mag_primary.img AS primary_magazine_img,
-
             ammo_primary.id AS primary_ammo_id,
             ammo_primary.name AS primary_ammo_name,
             ammo_primary.img AS primary_ammo_img,
-
             wp_secondary.id AS secondary_weapon_id,
             wp_secondary.name AS secondary_weapon_name,
             wp_secondary.img AS secondary_weapon_img,
-
             mag_secondary.id AS secondary_magazine_id,
             mag_secondary.name AS secondary_magazine_name,
             mag_secondary.img AS secondary_magazine_img,
-
             ammo_secondary.id AS secondary_ammo_id,
             ammo_secondary.name AS secondary_ammo_name,
             ammo_secondary.img AS secondary_ammo_img,
-
             wp_small.id AS small_weapon_id,
             wp_small.name AS small_weapon_name,
             wp_small.img AS small_weapon_img,
-
             mag_small.id AS small_magazine_id,
             mag_small.name AS small_magazine_name,
             mag_small.img AS small_magazine_img,
-
             ammo_small.id AS small_ammo_id,
             ammo_small.name AS small_ammo_name,
             ammo_small.img AS small_ammo_img
@@ -1122,21 +1147,27 @@ def player_loadout_weapons(player_id):
         LEFT JOIN ammunitions ammo_small ON plw.small_ammo_id = ammo_small.id
         WHERE plw.player_id = ?
     """, (player_id,)).fetchone()
-    
-    # Buscar os attachments já com slot definido
-    attachments_raw = conn.execute('''
-        SELECT a.*, plwa.weapon_slot
-        FROM player_loadouts_weapon_attachments plwa
-        JOIN attachments a ON plwa.attachment_id = a.id
-        WHERE plwa.player_loadouts_weapons_id = ?
-    ''', (loadout['loadout_id'],)).fetchall()
 
-    # Agrupar attachments por slot
+    # Combinar o loadout padrão com os dados do banco (se existirem)
+    loadout = default_loadout
+    if db_loadout:
+        loadout.update(db_loadout)
+
+    # Buscar attachments apenas se houver um loadout_id
     attachments_by_slot = {'primary': [], 'secondary': [], 'small': []}
-    for att in attachments_raw:
-        slot = att['weapon_slot']
-        if slot in attachments_by_slot:
-            attachments_by_slot[slot].append(att)
+    if loadout['loadout_id'] is not None:
+        attachments_raw = conn.execute('''
+            SELECT a.*, plwa.weapon_slot
+            FROM player_loadouts_weapon_attachments plwa
+            JOIN attachments a ON plwa.attachment_id = a.id
+            WHERE plwa.player_loadouts_weapons_id = ?
+        ''', (loadout['loadout_id'],)).fetchall()
+        
+        # Agrupar attachments por slot
+        for att in attachments_raw:
+            slot = att['weapon_slot']
+            if slot in attachments_by_slot:
+                attachments_by_slot[slot].append(att)
 
     player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
     rules = conn.execute('''
@@ -1147,7 +1178,14 @@ def player_loadout_weapons(player_id):
     conn.close()
     conn2.close()
 
-    return render_template('player_loadout_weapons.html', player=player, weapons=weapons, loadout=loadout, rules=rules, attachments=attachments_by_slot)
+    return render_template(
+        'player_loadout_weapons.html',
+        player=player,
+        weapons=weapons,
+        loadout=loadout,
+        rules=rules,
+        attachments=attachments_by_slot
+    )
 
 @app.route('/loadout_players', methods=['GET'])
 def loadout_players():

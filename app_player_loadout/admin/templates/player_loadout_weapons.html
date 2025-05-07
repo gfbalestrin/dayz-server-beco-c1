@@ -99,7 +99,8 @@
             <div class="card-body">
                 <h4 class="text-success mb-4 text-center">Loadout salvo</h4>
                 <hr>
-                {% for label, prefix in [('Arma primária', 'primary'), ('Arma secundária', 'secondary'), ('Arma pequena', 'small')] %}
+                {% for label, prefix in [('Arma primária', 'primary'), ('Arma secundária', 'secondary'), ('Arma
+                pequena', 'small')] %}
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="text-primary">{{ label }}</h5>
@@ -109,7 +110,8 @@
                                     <div class="card-body">
                                         <p><strong>Arma</strong></p>
                                         {% if loadout[prefix + '_weapon_img'] %}
-                                            <img src="{{ loadout[prefix + '_weapon_img'] }}" class="card-img-top" alt="arma" style="max-height: 120px; object-fit: contain;">
+                                        <img src="{{ loadout[prefix + '_weapon_img'] }}" class="card-img-top" alt="arma"
+                                            style="max-height: 120px; object-fit: contain;">
                                         {% endif %}
                                         <p>{{ loadout[prefix + '_weapon_name'] }}</p>
                                     </div>
@@ -120,7 +122,8 @@
                                     <div class="card-body">
                                         <p><strong>Pente</strong></p>
                                         {% if loadout[prefix + '_magazine_img'] %}
-                                            <img src="{{ loadout[prefix + '_magazine_img'] }}" class="card-img-top" alt="pente" style="max-height: 120px; object-fit: contain;">
+                                        <img src="{{ loadout[prefix + '_magazine_img'] }}" class="card-img-top"
+                                            alt="pente" style="max-height: 120px; object-fit: contain;">
                                         {% endif %}
                                         <p>{{ loadout[prefix + '_magazine_name'] }}</p>
                                     </div>
@@ -131,7 +134,8 @@
                                     <div class="card-body">
                                         <p><strong>Munição</strong></p>
                                         {% if loadout[prefix + '_ammo_img'] %}
-                                            <img src="{{ loadout[prefix + '_ammo_img'] }}" class="card-img-top" alt="munição" style="max-height: 120px; object-fit: contain;">
+                                        <img src="{{ loadout[prefix + '_ammo_img'] }}" class="card-img-top"
+                                            alt="munição" style="max-height: 120px; object-fit: contain;">
                                         {% endif %}
                                         <p>{{ loadout[prefix + '_ammo_name'] }}</p>
                                     </div>
@@ -140,30 +144,31 @@
                         </div>
 
                         {% if attachments[prefix] %}
-                            <div class="mt-4">
-                                <h6 class="text-secondary">Acessórios</h6>
-                                <div class="row g-3">
-                                    {% for att in attachments[prefix] %}
-                                        <div class="col-md-3">
-                                            <div class="card h-100 text-center">
-                                                <div class="card-body">
-                                                    <img src="{{ att.img }}" class="card-img-top" alt="{{ att.name }}" style="max-height: 120px; object-fit: contain;">
-                                                    <p class="mb-0">{{ att.name }}</p>
-                                                    <small class="text-muted">{{ att.type }}</small>
-                                                </div>
-                                            </div>
+                        <div class="mt-4">
+                            <h6 class="text-secondary">Acessórios</h6>
+                            <div class="row g-3">
+                                {% for att in attachments[prefix] %}
+                                <div class="col-md-3">
+                                    <div class="card h-100 text-center">
+                                        <div class="card-body">
+                                            <img src="{{ att.img }}" class="card-img-top" alt="{{ att.name }}"
+                                                style="max-height: 120px; object-fit: contain;">
+                                            <p class="mb-0">{{ att.name }}</p>
+                                            <small class="text-muted">{{ att.type }}</small>
                                         </div>
-                                    {% endfor %}
+                                    </div>
                                 </div>
+                                {% endfor %}
                             </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
-            {% endfor %}
+                {% endfor %}
             </div>
         </div>
     </div>
-    
+
 
     <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
         <div class="mb-3">
