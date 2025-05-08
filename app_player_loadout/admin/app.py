@@ -1981,9 +1981,10 @@ def get_player_items(player_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT i.*, pi.quantity
+        SELECT i.*, pi.quantity, it.name as type_name
         FROM player_items pi
         JOIN item i ON pi.item_id = i.id
+        JOIN item_types it ON i.type_id = it.id
         WHERE pi.player_id = ?
     """, (player_id,))
     items = cursor.fetchall()

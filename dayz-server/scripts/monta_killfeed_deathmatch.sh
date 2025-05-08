@@ -124,6 +124,7 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
     metros=$(echo $LongestShotMeters | cut -d '.' -f 1)
 
     if [ $i -eq 1 ]; then        
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177068822204436"
         Content="🥇 Top 1 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."        
         response=$(curl -s -X PATCH \
@@ -132,7 +133,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 2 ]; then        
+    elif [ $i -eq 2 ]; then  
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177069912723497"      
         Content="🥈 Top 2 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."        
         response=$(curl -s -X PATCH \
@@ -141,7 +143,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 3 ]; then        
+    elif [ $i -eq 3 ]; then    
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177070839533700"    
     	Content="🥉 Top 3 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -151,6 +154,7 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         "$URL")
         sleep 5
     elif [ $i -eq 4 ]; then        
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177072370712577"
         Content="🏅 Top 4 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -159,7 +163,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 5 ]; then        
+    elif [ $i -eq 5 ]; then     
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177073721020570"   
         Content="🏅 Top 5 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -168,7 +173,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 6 ]; then           
+    elif [ $i -eq 6 ]; then     
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177209616465940"      
         Content="🏅 Top 6 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -177,7 +183,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 7 ]; then           
+    elif [ $i -eq 7 ]; then   
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177211139002419"        
         Content="🏅 Top 7 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -187,6 +194,7 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         "$URL")
         sleep 5
     elif [ $i -eq 8 ]; then          
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177212502151252"
         Content="🏅 Top 8 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -195,7 +203,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 9 ]; then             
+    elif [ $i -eq 9 ]; then    
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177214196646020"         
         Content="🏅 Top 9 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -204,7 +213,8 @@ while IFS='|' read -r PlayerID PlayerName SteamID SteamName TotalKills TotalDama
         -d "{\"content\": \"$Content\"}" \
         "$URL")
         sleep 5
-    elif [ $i -eq 10 ]; then        
+    elif [ $i -eq 10 ]; then     
+        URL="https://discord.com/api/v10/channels/$DiscordChannelPlayersStatsChannelId/messages/1369177215740284990"   
         Content="🏅 Top 10 - $player_info matou $TotalKills jogadores \n 🔫 Arma preferida: $PreferredWeapon \n 🎯 Tiro de maior distância: $metros metros ($WeaponLongestShot) \n 💥 Dano total causado: $TotalDamage \n 🤕 Tiros na cabeça: $Damage_Head_Perc% \n 🦺 Tiros no corpo: $Damage_Torso_Perc% \n 💪 Tiros no braço esquerdo: $Damage_LeftArm_Perc% \n 💪 Tiros no braço direito: $Damage_RightArm_Perc% \n 🦵 Tiros na perna esquerda: $Damage_LeftLeg_Perc% \n 🦵 Tiros na perna direita: $Damage_RightLeg_Perc% \n"
         Content+="..."
         response=$(curl -s -X PATCH \
@@ -363,5 +373,5 @@ response=$(curl -s -X PATCH \
 -d "{\"content\": \"$Content\"}" \
 "$URL")
 
-DELETE_KILLFEED 
-DELETE_PLAYER_DAMAGE
+#DELETE_KILLFEED 
+#DELETE_PLAYER_DAMAGE
