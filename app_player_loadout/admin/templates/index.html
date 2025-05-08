@@ -229,10 +229,14 @@
                 <select id="itemLocalization" class="form-select mb-2">
                     <option value="">Não possui</option>
                     <option value="head">Cabeça</option>
-                    <option value="eyes">Olhos</option>
+                    <option value="waist">Cintura</option>
+                    <option value="back">Costas</option>
+                    <option value="hands">Mãoes</option>
+                    <option value="eyes">Olhos</option>                    
+                    <option value="foot">Pés</option>
                     <option value="face">Rosto</option>
                     <option value="torso">Torso</option>
-                    <option value="foot">Pés</option>
+                    
                 </select>
                 <div class="card">
                     <div class="card-body">
@@ -615,6 +619,12 @@
                     return "Torso";
                 case "foot":
                     return "Pés";
+                case "back":
+                    return "Costas";
+                case "waist":
+                    return "Cintura";
+                case "hands":
+                    return "Mãos";
                 case "":
                 case null:
                 case undefined:
