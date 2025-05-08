@@ -134,100 +134,83 @@
         }
 
         async function loadAvailableItemsGrouped() {
-            const searchTerm = document.getElementById('itemSearchInput').value.trim().toLowerCase();
-            const allItems = await fetchJSON('/items');
-            const playerItems = await fetchJSON(`/players/${playerId}/items`);
-            const countMap = {};
+    const searchTerm = document.getElementById('itemSearchInput').value.trim().toLowerCase();
+    const allItems = await fetchJSON('/items');
+    const playerItems = await fetchJSON(`/players/${playerId}/items`);
+    const countMap = {};
 
-            for (const item of playerItems) {
-                countMap[item.id] = (countMap[item.id] || 0) + 1;
-            }
+    for (const item of playerItems) {
+        countMap[item.id] = (countMap[item.id] || 0) + 1;
+    }
 
-            const grouped = {};
-            for (const item of allItems) {
-                if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) continue;
-                if (!grouped[item.type_name]) grouped[item.type_name] = [];
-                grouped[item.type_name].push(item);
-            }
+    const grouped = {};
+    for (const item of allItems) {
+        if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) continue;
 
-            const container = document.getElementById('availableItemsContainer');
-            container.innerHTML = '';
+        if (!grouped[item.type_name]) grouped[item.type_name] = {};
+        const loc = item.localization || 'outros';
 
-            for (const [typeName, items] of Object.entries(grouped)) {
-                const currentPage = groupPageState[typeName] || 1;
-                const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-                const pageItems = items.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+        if (!grouped[item.type_name][loc]) grouped[item.type_name][loc] = [];
+        grouped[item.type_name][loc].push(item);
+    }
 
-                const card = document.createElement('div');
-                card.className = 'card mb-4 shadow-sm';
-                
-                const cardHeader = document.createElement('div');
-                cardHeader.className = 'card-header bg-primary text-white d-flex justify-content-between align-items-center';
-                cardHeader.innerHTML = `
-                    <h6 class="mb-0">${typeName}</h6>
+    const container = document.getElementById('availableItemsContainer');
+    container.innerHTML = '';
+
+    for (const [typeName, locGroups] of Object.entries(grouped)) {
+        const card = document.createElement('div');
+        card.className = 'card mb-4 shadow-sm';
+
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header bg-primary text-white d-flex justify-content-between align-items-center';
+        cardHeader.innerHTML = `<h6 class="mb-0">${typeName}</h6>`;
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+
+        for (const [locKey, items] of Object.entries(locGroups)) {
+            const locLabel = localizationParse(locKey);
+
+            const locSection = document.createElement('div');
+            locSection.className = 'mb-4';
+
+            const locTitle = document.createElement('h6');
+            locTitle.className = 'mb-2 text-secondary border-bottom pb-1';
+            locTitle.textContent = locLabel;
+            locSection.appendChild(locTitle);
+
+            const row = document.createElement('div');
+            row.className = 'd-flex flex-row flex-wrap gap-3';
+
+            for (const item of items) {
+                const count = countMap[item.id] || 0;
+
+                const itemCard = document.createElement('div');
+                itemCard.className = 'card p-2 text-center';
+                itemCard.style.minWidth = '160px';
+
+                itemCard.innerHTML = `
+                    <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small">${item.name}</h6>
+                        ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
+                        <button class="btn btn-sm btn-primary mt-1" onclick="addItemToPlayerDirect(${item.id})" ${count > 0 ? 'disabled' : ''}>
+                            Adicionar
+                        </button>
+                    </div>
                 `;
-
-                const cardBody = document.createElement('div');
-                cardBody.className = 'card-body';
-
-                const row = document.createElement('div');
-                row.className = 'd-flex flex-row flex-wrap gap-3';
-
-                for (const item of pageItems) {
-                    const count = countMap[item.id] || 0;
-                    const cardItem = document.createElement('div');
-                    cardItem.className = 'card p-2 text-center';
-                    cardItem.style.minWidth = '160px';
-
-                    cardItem.innerHTML = `
-                        <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
-                        <div class="card-body p-2">
-                            <h6 class="card-title small">${item.name}</h6>
-                            ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
-                            <button class="btn btn-sm btn-primary mt-1" onclick="addItemToPlayerDirect(${item.id})" ${count > 0 ? 'disabled' : ''}>
-                                Adicionar
-                            </button>
-                        </div>
-                    `;
-                    row.appendChild(cardItem);
-                }
-
-                cardBody.appendChild(row);
-
-                // Paginação
-                if (totalPages > 1) {
-                    const pagination = document.createElement('div');
-                    pagination.className = 'mt-3 d-flex justify-content-center gap-2';
-
-                    const prev = document.createElement('button');
-                    prev.className = 'btn btn-sm btn-outline-secondary';
-                    prev.textContent = 'Anterior';
-                    prev.disabled = currentPage === 1;
-                    prev.onclick = () => {
-                        groupPageState[typeName] = currentPage - 1;
-                        loadAvailableItemsGrouped();
-                    };
-
-                    const next = document.createElement('button');
-                    next.className = 'btn btn-sm btn-outline-secondary';
-                    next.textContent = 'Próxima';
-                    next.disabled = currentPage === totalPages;
-                    next.onclick = () => {
-                        groupPageState[typeName] = currentPage + 1;
-                        loadAvailableItemsGrouped();
-                    };
-
-                    pagination.appendChild(prev);
-                    pagination.appendChild(document.createTextNode(` Página ${currentPage} de ${totalPages} `));
-                    pagination.appendChild(next);
-                    cardBody.appendChild(pagination);
-                }
-
-                card.appendChild(cardHeader);
-                card.appendChild(cardBody);
-                container.appendChild(card);
+                row.appendChild(itemCard);
             }
+
+            locSection.appendChild(row);
+            cardBody.appendChild(locSection);
         }
+
+        card.appendChild(cardHeader);
+        card.appendChild(cardBody);
+        container.appendChild(card);
+    }
+}
 
         async function addItemToPlayerDirect(itemId) {
             try {
