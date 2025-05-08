@@ -48,79 +48,72 @@
         }
 
         async function loadPlayerItems() {
-            const container = document.getElementById('groupedItemsGrid');
-            const msg = document.getElementById('noItemsMsg');
-            container.innerHTML = '';
+    const container = document.getElementById('groupedItemsGrid');
+    const msg = document.getElementById('noItemsMsg');
+    container.innerHTML = '';
+    
+    try {
+        const items = await fetchJSON(`/players/${playerId}/items`);
+        msg.classList.toggle('d-none', items.length > 0);
+        console.log("items", items);
+        const grouped = {};
 
-            try {
-                const items = await fetchJSON(`/players/${playerId}/items`);
-                msg.classList.toggle('d-none', items.length > 0);
-
-                const grouped = {};
-                for (const item of items) {
-                    const type = item.type_name || 'Outros';
-                    const loc = item.localization || 'outros';
-                    if (!grouped[type]) grouped[type] = {};
-                    if (!grouped[type][loc]) grouped[type][loc] = [];
-                    grouped[type][loc].push(item);
-                }
-
-                for (const [typeName, locGroup] of Object.entries(grouped)) {
-                    const typeSection = document.createElement('div');
-                    typeSection.innerHTML = `<h4 class="mt-4">${typeName}</h4>`;
-
-                    for (const [loc, locItems] of Object.entries(locGroup)) {
-                        const locSection = document.createElement('div');
-                        locSection.innerHTML = `<h6 class="mt-2">${localizationParse(loc)}</h6>`;
-                        const row = document.createElement('div');
-                        row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
-
-                        for (const item of locItems) {
-                            const card = document.createElement('div');
-                            card.className = 'card p-2 text-center';
-                            card.style.minWidth = '160px';
-                            const armazenamento = item.storage_slots > 0
-                                ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
-                                : "Não possui";
-
-                            card.innerHTML = `
-                                <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
-                                <div class="card-body p-2">
-                                    <h6 class="card-title small">${item.name}</h6>
-                                    <p class="small text-muted">${item.name_type}</p>
-                                    <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
-                                    <p class="small m-0">Armazenamento: ${armazenamento}</p>
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <div class="input-group" style="max-width: 130px;">
-                                            <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
-                                            <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
-                                            <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
-                                            Remover
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                            row.appendChild(card);
-                        }
-
-                        locSection.appendChild(row);
-                        typeSection.appendChild(locSection);
-                    }
-
-                    container.appendChild(typeSection);
-                }
-
-            } catch (err) {
-                msg.classList.remove('d-none');
-                msg.textContent = 'Erro ao carregar itens do jogador.';
-            }
+        // Agrupar os itens por localization
+        for (const item of items) {
+            const key = item.localization || 'outros';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(item);
         }
+
+        for (const [loc, locItems] of Object.entries(grouped)) {
+            const section = document.createElement('div');
+            section.innerHTML = `<h5>${localizationParse(loc)}</h5>`;
+            const row = document.createElement('div');
+            row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+
+            locItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card p-2 text-center';
+                card.style.minWidth = '160px';
+                const armazenamento = item.storage_slots > 0
+                    ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
+                    : "Não possui";
+
+                card.innerHTML = `
+                    <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small">${item.name}</h6>
+                        <p class="small text-muted">${item.name_type}</p>
+                        <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
+                        <p class="small m-0">Armazenamento: ${armazenamento}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="input-group" style="max-width: 130px;">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
+                                Remover
+                            </button>
+                        </div>
+                    </div>
+                `;
+                row.appendChild(card);
+            });
+
+            section.appendChild(row);
+            container.appendChild(section);
+        }
+
+    } catch (err) {
+        msg.classList.remove('d-none');
+        msg.textContent = 'Erro ao carregar itens do jogador.';
+    }
+}
 
         async function removeItemFromPlayer(itemId) {
             if (!confirm('Remover este item do jogador?')) return;
