@@ -1756,14 +1756,20 @@ def get_compatible_parents(item_id):
 @app.route('/items', methods=['POST'])
 def add_item():
     data = request.json
+    # Valida o tipo de munição
+    name_type=data['name_type']
+    if name_type not in type_names:
+        e=f"'{name_type}' não é um item válido do types.xml."
+        return jsonify({"error": str(e)}), 400
+    
     conn = get_db_connection()
     try:
         conn.execute('''
-            INSERT INTO item (name, name_type, type_id, slots, width, height, img)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO item (name, name_type, type_id, slots, width, height, img, storage_slots, storage_width, storage_height)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['name'], data['name_type'], data['type_id'],
-            data['slots'], data['width'], data['height'], data['img']
+            data['slots'], data['width'], data['height'], data['img'], data['storage_slots'], data['storage_width'], data['storage_height'] 
         ))
         conn.commit()
         return jsonify({"message": "Item adicionado com sucesso"}), 201
@@ -1776,15 +1782,23 @@ def add_item():
 @app.route('/items/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
     data = request.json
+    # Valida o tipo de munição
+    name_type=data['name_type']
+    if name_type not in type_names:
+        e=f"'{name_type}' não é um item válido do types.xml."
+        return jsonify({"error": str(e)}), 400
+    
     conn = get_db_connection()
     try:
         conn.execute('''
             UPDATE item SET name = ?, name_type = ?, type_id = ?, 
-                slots = ?, width = ?, height = ?, img = ?
+                slots = ?, width = ?, height = ?, img = ?, 
+                storage_slots = ?, storage_width = ?, storage_height = ?
             WHERE id = ?
         ''', (
             data['name'], data['name_type'], data['type_id'],
-            data['slots'], data['width'], data['height'], data['img'],
+            data['slots'], data['width'], data['height'], data['img'], 
+            data['storage_slots'], data['storage_width'], data['storage_height'],
             item_id
         ))
         conn.commit()

@@ -3,7 +3,7 @@
 
 <head>
     <title>Armas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
@@ -17,6 +17,7 @@
 </head>
 
 <body class="bg-light">
+
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
@@ -202,7 +203,7 @@
   
         <!-- Modal de Novo/Editar -->
         <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <form id="itemForm" class="modal-content" onsubmit="saveItem(event)">
             <div class="modal-header">
                 <h5 class="modal-title">Item</h5>
@@ -210,13 +211,31 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="itemId">
+                <small class="text-secondary">Nome</small>
                 <input type="text" id="itemName" class="form-control mb-2" placeholder="Nome" required>
+                <small class="text-secondary">Nome (types.xml)</small>
                 <input type="text" id="itemNameType" class="form-control mb-2" placeholder="Name Type" required>
+                <small class="text-secondary">URL da Imagem</small>
                 <input type="text" id="itemImg" class="form-control mb-2" placeholder="URL da Imagem" required>
+                <small class="text-secondary">Largura</small>
                 <input type="number" id="itemWidth" class="form-control mb-2" placeholder="Largura" required>
+                <small class="text-secondary">Altura</small>
                 <input type="number" id="itemHeight" class="form-control mb-2" placeholder="Altura" required>
-                <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required>
+                <small class="text-secondary">Slots</small>
+                <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required readonly>
+                <small class="text-secondary">Tipo de item</small>
                 <select id="itemTypeId" class="form-select mb-2" required></select>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="small text-secondary">Preencha somente se possuir slots de armazenamento</p>
+                        <small class="text-secondary">Largura do storage</small>
+                        <input type="number" id="itemStorageWidth" class="form-control mb-2" placeholder="Largura do storage" required>
+                        <small class="text-secondary">Altura do storage</small>
+                        <input type="number" id="itemStorageHeight" class="form-control mb-2" placeholder="Altura do storage" required>
+                        <small class="text-secondary">Slots do storage</small>
+                        <input type="number" id="itemStorageSlots" class="form-control mb-2" placeholder="Slots do storage" required readonly>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" type="submit">Salvar</button>
@@ -227,11 +246,26 @@
         </div>
     </div>
 
+        
+    <!-- Toast de erro -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">
+                    Erro exemplo!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
+      
+
 
     <div class="container">
         <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary float-end">Logout</a>
     </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Acessórios -->
     <script>
         (function () {
@@ -560,6 +594,13 @@
 
     <!-- Items -->
     <script>
+        function showErrorToast(message) {
+            const toastEl = document.getElementById('errorToast');
+            const toastBody = document.getElementById('errorToastBody');
+            toastBody.textContent = message;
+            const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+            toast.show();
+        }
         async function fetchJSON(url, options = {}) {
             const res = await fetch(url, options);
             if (!res.ok) {
@@ -617,15 +658,21 @@
             const newName = document.getElementById('editTypeName').value.trim();
 
             if (!newName) {
-                alert('O nome não pode estar vazio.');
+                showErrorToast('O nome não pode estar vazio.');
                 return;
             }
 
-            await fetch(`/item_types/${typeId}`, {
+            const res = await fetch(`/item_types/${typeId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newName })
             });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                showErrorToast(err.error || 'Erro ao atualizar tipo.');
+                return;
+            }
 
             bootstrap.Modal.getInstance(document.getElementById('editTypeModal')).hide();
             loadItemTypes();
@@ -668,13 +715,15 @@
             items.forEach(item => {
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-4';
+                const armazenamento = item.storage_slots > 0 ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)` : "Não possui";
                 col.innerHTML = `
                     <div class="card h-100 shadow-sm p-4">
                         <img src="${item.img}" class="card-img-top" alt="${item.name}">
                         <div class="card-body">
                             <h5 class="card-title">${item.name}</h5>
                             <p class="card-text text-muted">${item.name_type}</p>
-                            <p class="card-text">Tamanho: ${item.width}x${item.height} (${item.slots} slots)</p>
+                            <p class="card-text text-muted m-0">Tamanho: ${item.width}x${item.height} (${item.slots} slots)</p>
+                            <p class="card-text text-muted m-0">Armazenamento: ${armazenamento}</p>
                         </div>
                         <p><strong>Subitens:</strong></p>
                         <ul id="subitems-${item.id}" class="list-group list-group-flush mb-2"></ul>
@@ -766,6 +815,12 @@
             document.getElementById('itemHeight').value = item.height;
             document.getElementById('itemSlots').value = item.slots;
             document.getElementById('itemTypeId').value = item.type_id;
+            document.getElementById('itemStorageWidth').value = item.storage_width;
+            document.getElementById('itemStorageHeight').value = item.storage_height;
+            document.getElementById('itemStorageSlots').value = item.storage_slots;
+
+            // Chama após preencher os campos relacionados
+            updateItemSlots();
 
             new bootstrap.Modal(document.getElementById('itemModal')).show();
         }
@@ -780,21 +835,42 @@
                 width: +document.getElementById('itemWidth').value,
                 height: +document.getElementById('itemHeight').value,
                 slots: +document.getElementById('itemSlots').value,
-                type_id: +document.getElementById('itemTypeId').value
+                type_id: +document.getElementById('itemTypeId').value,
+                storage_width: +document.getElementById('itemStorageWidth').value,
+                storage_height: +document.getElementById('itemStorageHeight').value,
+                storage_slots: +document.getElementById('itemStorageSlots').value
             };
 
             const url = id ? `/items/${id}` : '/items';
             const method = id ? 'PUT' : 'POST';
 
-            await fetchJSON(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
-            loadItems();
+                if (!res.ok) {
+                    let message = 'Erro ao salvar item.';
+                    try {
+                        const err = await res.json();
+                        if (err && err.error) message = err.error;
+                    } catch (jsonErr) {
+                        console.error('Erro ao interpretar resposta JSON:', jsonErr);
+                    }
+                    showErrorToast(message);
+                    return;
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
+                loadItems();
+            } catch (err) {
+                console.error('Erro na requisição:', err);
+                showErrorToast('Erro de rede ao salvar item.');
+            }
         }
+
 
         async function deleteItem(id) {
             if (!confirm('Deseja excluir este item?')) return;
@@ -814,12 +890,25 @@
 
         async function saveItemType(event) {
             event.preventDefault();
-            const name = document.getElementById('typeName').value;
-            await fetchJSON('/item_types', {
+            const name = document.getElementById('typeName').value.trim();
+
+            if (!name) {
+                showErrorToast('O nome não pode estar vazio.');
+                return;
+            }
+
+            const res = await fetch('/item_types', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name })
             });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                showErrorToast(err.error || 'Erro ao criar tipo.');
+                return;
+            }
+
             bootstrap.Modal.getInstance(document.getElementById('typeModal')).hide();
             loadItemTypes();
         }
@@ -842,9 +931,41 @@
             });
             loadItems();
         }
+        function updateItemSlots() {
+            const width = parseInt(document.getElementById('itemWidth').value, 10);
+            const height = parseInt(document.getElementById('itemHeight').value, 10);
+
+            const slotsInput = document.getElementById('itemSlots');
+
+            if (!isNaN(width) && !isNaN(height)) {
+                slotsInput.value = width * height;
+            } else {
+                slotsInput.value = '';
+            }
+            
+            const widthStorage = parseInt(document.getElementById('itemStorageWidth').value, 10);
+            const heightStorage = parseInt(document.getElementById('itemStorageHeight').value, 10);
+
+            const slotsInputStorage = document.getElementById('itemStorageSlots');
+
+            if (!isNaN(widthStorage) && !isNaN(heightStorage)) {
+                slotsInputStorage.value = widthStorage * heightStorage;
+            } else {
+                slotsInputStorage.value = '';
+            }
+        }
+
+        // Adiciona os ouvintes de evento após o carregamento do DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('itemWidth').addEventListener('input', updateItemSlots);
+            document.getElementById('itemHeight').addEventListener('input', updateItemSlots);
+            document.getElementById('itemStorageWidth').addEventListener('input', updateItemSlots);
+            document.getElementById('itemStorageHeight').addEventListener('input', updateItemSlots);
+        });
     </script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   
+
 </body>
 
 </html>

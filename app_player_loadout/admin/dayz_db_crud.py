@@ -145,6 +145,9 @@ def criar_tabelas():
         width INTEGER NOT NULL,
         height INTEGER NOT NULL,
         img TEXT NOT NULL,
+        storage_slots INTEGER DEFAULT 0,
+        storage_width INTEGER DEFAULT 0,
+        storage_height INTEGER DEFAULT 0,
         FOREIGN KEY (type_id) REFERENCES item_types(id)
     );
 
