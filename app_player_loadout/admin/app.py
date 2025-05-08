@@ -964,7 +964,6 @@ def add_attachment():
     # Exibe o formulário de adição de anexo (GET)
     return render_template('add_attachment.html')
 
-
 @app.route('/edit_attachment/<int:id>', methods=['GET', 'POST'])
 def edit_attachment(id):
     if 'user' not in session:
@@ -1013,8 +1012,6 @@ def edit_attachment(id):
     conn.close()
     return render_template('edit_attachment.html', attachment=attachment)
 
-
-
 @app.route('/delete_attachment/<int:id>', methods=['GET', 'POST'])
 def delete_attachment(id):
     if 'user' not in session:
@@ -1040,7 +1037,6 @@ def delete_attachment(id):
     
     conn.close()
     return redirect(request.referrer or url_for('index'))  # Redireciona para a página anterior ou página inicial
-
 
 # weapon_ammunitions
 @app.route('/add_weapon_ammunitions', methods=['GET', 'POST'])
@@ -1078,7 +1074,6 @@ def add_weapon_ammunitions():
     
     return redirect(request.referrer or url_for('index'))
 
-
 @app.route('/delete_weapon_ammunitions/<int:ammo_id>/<int:weapon_id>', methods=['GET'])
 def delete_weapon_ammunitions(ammo_id, weapon_id):
     if 'user' not in session:
@@ -1109,7 +1104,6 @@ def delete_weapon_ammunitions(ammo_id, weapon_id):
     conn.close()
 
     return redirect(request.referrer or url_for('index'))
-
 
 # weapon_magazines
 @app.route('/add_weapon_magazines', methods=['GET', 'POST'])
@@ -1149,7 +1143,6 @@ def add_weapon_magazines():
     # Se o método não for POST, redireciona o usuário
     return redirect(request.referrer or url_for('index'))
 
-
 @app.route('/delete_weapon_magazines/<int:magazine_id>/<int:weapon_id>')
 def delete_weapon_magazines(magazine_id, weapon_id):
     if 'user' not in session:
@@ -1179,7 +1172,6 @@ def delete_weapon_magazines(magazine_id, weapon_id):
     
     # Redireciona para a página anterior (ou a página inicial se o referrer não estiver presente)
     return redirect(request.referrer or url_for('index'))
-
 
 # weapon_attachments
 @app.route('/add_weapon_attachments', methods=['GET', 'POST'])
@@ -1298,7 +1290,6 @@ def delete_loadout_rules_weapons():
     
     conn.close()
     return redirect(request.referrer or url_for('index'))  # Redireciona para a página anterior ou página inicial
-
 
 @app.route('/player_loadout_weapons/<player_id>', methods=['GET', 'POST'])
 def player_loadout_weapons(player_id):
@@ -1553,7 +1544,6 @@ def get_ammos(weapon_id):
 
     return jsonify([{'id': m['id'], 'name': m['name'], 'img': m['img'], 'slots': m['slots'], 'width': m['width'], 'height': m['height']} for m in ammos])
 
-
 @app.route('/get_attachments/<int:weapon_id>')
 def weapon_attachments(weapon_id):
     conn = get_db_connection()
@@ -1674,6 +1664,164 @@ def save_loadout_weapons(player_id):
 
     return redirect(url_for('player_loadout_weapons', player_id=player_id))
 
+# Items
+@app.route('/items', methods=['GET'])
+def get_items():
+    conn = get_db_connection()
+    items = conn.execute('''
+        SELECT item.*, item_types.name AS type_name
+        FROM item
+        JOIN item_types ON item.type_id = item_types.id
+    ''').fetchall()
+    conn.close()
+    return jsonify([dict(item) for item in items])
+
+@app.route('/items/<int:item_id>', methods=['GET'])
+def get_item(item_id):
+    conn = get_db_connection()
+    item = conn.execute('''
+        SELECT item.*, item_types.name AS type_name
+        FROM item
+        JOIN item_types ON item.type_id = item_types.id
+        WHERE item.id = ?
+    ''', (item_id,)).fetchone()
+    conn.close()
+    return jsonify(dict(item))
+
+@app.route('/items/<int:item_id>/compatible-parents', methods=['GET'])
+def get_compatible_parents(item_id):
+    conn = get_db_connection()
+    results = conn.execute('''
+        SELECT i.id, i.name, i.img
+        FROM item_compatibility ic
+        JOIN item i ON ic.parent_item_id = i.id
+        WHERE ic.child_item_id = ?
+    ''', (item_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in results])
+
+@app.route('/items', methods=['POST'])
+def add_item():
+    data = request.json
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            INSERT INTO item (name, name_type, type_id, slots, width, height, img)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data['name'], data['name_type'], data['type_id'],
+            data['slots'], data['width'], data['height'], data['img']
+        ))
+        conn.commit()
+        return jsonify({"message": "Item adicionado com sucesso"}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/items/<int:item_id>', methods=['PUT'])
+def update_item(item_id):
+    data = request.json
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            UPDATE item SET name = ?, name_type = ?, type_id = ?, 
+                slots = ?, width = ?, height = ?, img = ?
+            WHERE id = ?
+        ''', (
+            data['name'], data['name_type'], data['type_id'],
+            data['slots'], data['width'], data['height'], data['img'],
+            item_id
+        ))
+        conn.commit()
+        return jsonify({"message": "Item atualizado com sucesso"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/items/<int:item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM item WHERE id = ?', (item_id,))
+        conn.commit()
+        return jsonify({"message": "Item deletado com sucesso"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/item_types', methods=['GET'])
+def get_item_types():
+    conn = get_db_connection()
+    types = conn.execute('SELECT * FROM item_types').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in types])
+
+@app.route('/item_types', methods=['POST'])
+def create_item_type():
+    data = request.json
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO item_types (name) VALUES (?)', (data['name'],))
+        conn.commit()
+        return jsonify({'message': 'Tipo criado com sucesso'}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/items/<int:item_id>/compatibilities', methods=['GET'])
+def get_compatibilities(item_id):
+    conn = get_db_connection()
+    results = conn.execute('''
+        SELECT i.id, i.name, i.img
+        FROM item_compatibility ic
+        JOIN item i ON ic.child_item_id = i.id
+        WHERE ic.parent_item_id = ?
+    ''', (item_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in results])
+
+@app.route('/items/<int:item_id>/compatibilities', methods=['POST'])
+def add_compatibility(item_id):
+    data = request.json  # Ex: {"child_item_id": 2}
+    child_item_id = data['child_item_id']
+
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            INSERT INTO item_compatibility (parent_item_id, child_item_id)
+            VALUES (?, ?)
+        ''', (item_id, child_item_id))
+        conn.commit()
+        return jsonify({'message': 'Compatibilidade adicionada com sucesso'}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/items/<int:item_id>/compatibilities/<int:child_item_id>', methods=['DELETE'])
+def delete_compatibility(item_id, child_item_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            DELETE FROM item_compatibility 
+            WHERE parent_item_id = ? AND child_item_id = ?
+        ''', (item_id, child_item_id))
+        conn.commit()
+        return jsonify({'message': 'Compatibilidade removida'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
 
 
 @app.route('/login', methods=['GET', 'POST'])

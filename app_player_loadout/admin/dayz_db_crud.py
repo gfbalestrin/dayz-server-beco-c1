@@ -127,7 +127,37 @@ def criar_tabelas():
         weapon_slot TEXT CHECK(weapon_slot IN ('primary', 'secondary', 'small')),
         FOREIGN KEY (player_loadouts_weapons_id) REFERENCES player_loadouts_weapons(id),
         FOREIGN KEY (attachment_id) REFERENCES attachments(id)
+    );    
+    
+    -- Tipos de item
+    CREATE TABLE IF NOT EXISTS item_types (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL
     );
+
+    -- Itens genéricos
+    CREATE TABLE IF NOT EXISTS item (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        name_type TEXT UNIQUE NOT NULL,
+        type_id INTEGER NOT NULL,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL,
+        FOREIGN KEY (type_id) REFERENCES item_types(id)
+    );
+
+    -- Auto-relacionamento: item que pode ser encaixado em outro
+    CREATE TABLE IF NOT EXISTS item_compatibility (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parent_item_id INTEGER NOT NULL, -- item que "recebe"
+        child_item_id INTEGER NOT NULL,  -- item que "encaixa"
+        FOREIGN KEY (parent_item_id) REFERENCES item(id),
+        FOREIGN KEY (child_item_id) REFERENCES item(id),
+        UNIQUE (parent_item_id, child_item_id) -- evita duplicatas
+    );
+
     """)
     conn.commit()
     print("Tabelas criadas com sucesso.")

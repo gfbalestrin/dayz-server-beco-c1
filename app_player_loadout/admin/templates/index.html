@@ -105,29 +105,96 @@
 
     <div class="container py-5">
         <h1 class="mb-4">Lista de Acessórios</h1>
-        <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
-        <input type="text" id="attachmentSearchInput" class="form-control mb-2"
-            placeholder="Buscar por nome ou tipo...">
-        <select id="attachmentTypeFilter" class="form-select mb-3">
-            <option value="">Todos os Tipos</option>
-            <option value="scope">Mira</option>
-            <option value="buttstock">Coronha</option>
-            <option value="handguard">Guarda-mão</option>
-        </select>
+            <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
+            <input type="text" id="attachmentSearchInput" class="form-control mb-2"
+                placeholder="Buscar por nome ou tipo...">
+            <select id="attachmentTypeFilter" class="form-select mb-3">
+                <option value="">Todos os Tipos</option>
+                <option value="scope">Mira</option>
+                <option value="buttstock">Coronha</option>
+                <option value="handguard">Guarda-mão</option>
+            </select>
 
-        <div class="row" id="attachmentListContainer"></div>
+            <div class="row" id="attachmentListContainer"></div>
 
-        <nav>
-            <ul class="pagination justify-content-center mt-3" id="attachmentPagination"></ul>
-        </nav>
-    </div>
+            <nav>
+                <ul class="pagination justify-content-center mt-3" id="attachmentPagination"></ul>
+            </nav>
+        </div>
 
+        <!-- Modal para novo tipo -->
+        <div class="modal fade" id="typeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+            <form id="typeForm" class="modal-content" onsubmit="saveItemType(event)">
+                <div class="modal-header">
+                <h5 class="modal-title">Novo Tipo de Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <input type="text" id="typeName" class="form-control" placeholder="Nome do tipo" required>
+                </div>
+                <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">Salvar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+            </div>
+        </div>
+
+        <div class="container py-5">
+            <h1 class="mb-4">Itens do DayZ</h1>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    
+                    <select id="filterType" class="form-select" onchange="loadItems()">
+                        <option value="">-- Filtrar por tipo --</option>
+                    </select>
+                    
+
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-success" onclick="showNewItemForm()">Novo Item</button>
+                    <button class="btn btn-outline-secondary" onclick="newItemType()">Novo Tipo</button>
+
+                </div>
+            </div>
+
+            <div class="row" id="itemsGrid"></div>
+
+            <!-- Modal de Novo/Editar -->
+            <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="itemForm" class="modal-content" onsubmit="saveItem(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title">Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="itemId">
+                    <input type="text" id="itemName" class="form-control mb-2" placeholder="Nome" required>
+                    <input type="text" id="itemNameType" class="form-control mb-2" placeholder="Name Type" required>
+                    <input type="text" id="itemImg" class="form-control mb-2" placeholder="URL da Imagem" required>
+                    <input type="number" id="itemWidth" class="form-control mb-2" placeholder="Largura" required>
+                    <input type="number" id="itemHeight" class="form-control mb-2" placeholder="Altura" required>
+                    <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required>
+                    <select id="itemTypeId" class="form-select mb-2" required></select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit">Salvar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
 
 
     <div class="container">
         <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary float-end">Logout</a>
     </div>
 
+    <!-- Acessórios -->
     <script>
         (function () {
             let currentAttachmentPage = 1;
@@ -206,6 +273,7 @@
         })();
     </script>
 
+    <!-- Carregadores -->
     <script>
         let currentMagazinePage = 1;
         let currentMagazineQuery = "";
@@ -268,6 +336,7 @@
         });
     </script>
 
+    <!-- Munições -->
     <script>
         let currentAmmoPage = 1;
         let currentAmmoQuery = "";
@@ -330,6 +399,7 @@
         });
     </script>
 
+    <!-- Armas -->
     <script>
         let currentWeaponPage = 1;
         let currentWeaponQuery = "";
@@ -398,6 +468,7 @@
         });
     </script>
 
+    <!-- Calibres -->
     <script>
         let currentCaliberPage = 1;
         let currentCaliberQuery = "";
@@ -449,6 +520,191 @@
         });
     </script>
 
+    <!-- Items -->
+    <script>
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, options);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Erro desconhecido');
+            }
+            return res.json();
+        }
+
+        async function loadItemTypes() {
+            const types = await fetchJSON('/item_types');
+            const select = document.getElementById('filterType');
+            const modalSelect = document.getElementById('itemTypeId');
+
+            [select, modalSelect].forEach(s => s.innerHTML = '<option value="">-- Selecione --</option>');
+            types.forEach(t => {
+                const opt = new Option(t.name, t.id);
+                select.appendChild(opt.cloneNode(true));
+                modalSelect.appendChild(opt.cloneNode(true));
+            });
+        }
+
+        async function loadItems() {
+            const typeId = document.getElementById('filterType').value;
+            let url = '/items';
+            if (typeId) url += '?type_id=' + typeId;
+            const items = await fetchJSON(url);
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = '<p class="text-muted">Nenhum item encontrado.</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+                col.innerHTML = `
+                    <div class="card h-100 shadow-sm">
+                        <img src="${item.img}" class="card-img-top" alt="${item.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${item.name}</h5>
+                            <p class="card-text text-muted">${item.name_type}</p>
+                            <p class="card-text">Tamanho: ${item.width}x${item.height} (${item.slots} slots)</p>
+                        </div>
+                        <p><strong>Subitens:</strong></p>
+                        <ul id="subitems-${item.id}" class="list-group list-group-flush mb-2"></ul>
+                        <div class="input-group">
+                            <select class="form-select" id="addSubitemSelect-${item.id}">
+                                <option value="">-- Adicionar subitem --</option>
+                            </select>
+                            <button class="btn btn-outline-success" onclick="addSubitem(${item.id})">Adicionar</button>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editItem(${item.id})">Editar</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteItem(${item.id})">Excluir</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(col);
+            });
+            items.forEach(async item => {
+                const subitems = await fetchJSON(`/items/${item.id}/compatibilities`);
+                const ul = document.getElementById(`subitems-${item.id}`);
+                if (!ul) return;
+                subitems.forEach(sub => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `
+                        <span><img src="${sub.img}" width="32" class="me-2">${sub.name}</span>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeSubitem(${item.id}, ${sub.id})">Remover</button>
+                    `;
+                    ul.appendChild(li);
+                });
+
+                const allItems = await fetchJSON('/items');
+                const select = document.getElementById(`addSubitemSelect-${item.id}`);
+                allItems.forEach(opt => {
+                    if (opt.id !== item.id && !subitems.some(s => s.id === opt.id)) {
+                        const option = new Option(opt.name, opt.id);
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        function showNewItemForm() {
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            new bootstrap.Modal(document.getElementById('itemModal')).show();
+        }
+
+        async function editItem(id) {
+            const item = await fetchJSON(`/items/${id}`);
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemNameType').value = item.name_type;
+            document.getElementById('itemImg').value = item.img;
+            document.getElementById('itemWidth').value = item.width;
+            document.getElementById('itemHeight').value = item.height;
+            document.getElementById('itemSlots').value = item.slots;
+            document.getElementById('itemTypeId').value = item.type_id;
+
+            new bootstrap.Modal(document.getElementById('itemModal')).show();
+        }
+
+        async function saveItem(event) {
+            event.preventDefault();
+            const id = document.getElementById('itemId').value;
+            const data = {
+                name: document.getElementById('itemName').value,
+                name_type: document.getElementById('itemNameType').value,
+                img: document.getElementById('itemImg').value,
+                width: +document.getElementById('itemWidth').value,
+                height: +document.getElementById('itemHeight').value,
+                slots: +document.getElementById('itemSlots').value,
+                type_id: +document.getElementById('itemTypeId').value
+            };
+
+            const url = id ? `/items/${id}` : '/items';
+            const method = id ? 'PUT' : 'POST';
+
+            await fetchJSON(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
+            loadItems();
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Deseja excluir este item?')) return;
+            await fetchJSON(`/items/${id}`, { method: 'DELETE' });
+            loadItems();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItemTypes();
+            loadItems();
+        });
+    </script>
+    <script>
+        function newItemType() {
+            document.getElementById('typeForm').reset();
+            new bootstrap.Modal(document.getElementById('typeModal')).show();
+        }
+
+        async function saveItemType(event) {
+            event.preventDefault();
+            const name = document.getElementById('typeName').value;
+            await fetchJSON('/item_types', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            bootstrap.Modal.getInstance(document.getElementById('typeModal')).hide();
+            loadItemTypes();
+        }
+        async function addSubitem(parentId) {
+            const select = document.getElementById(`addSubitemSelect-${parentId}`);
+            const childId = +select.value;
+            if (!childId) return alert('Selecione um subitem válido');
+            await fetchJSON(`/items/${parentId}/compatibilities`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ child_item_id: childId })
+            });
+            loadItems();
+        }
+
+        async function removeSubitem(parentId, childId) {
+            if (!confirm('Remover subitem?')) return;
+            await fetchJSON(`/items/${parentId}/compatibilities/${childId}`, {
+                method: 'DELETE'
+            });
+            loadItems();
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

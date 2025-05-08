@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Itens DayZ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-5">
+
+    <h2 class="mb-4">Tipos de Item</h2>
+    <div class="mb-3 d-flex">
+        <input type="text" id="newTypeName" class="form-control me-2" placeholder="Novo tipo">
+        <button class="btn btn-success" onclick="addItemType()">Adicionar</button>
+    </div>
+    <ul class="list-group mb-5" id="typesList"></ul>
+
+    <h2 class="mb-4">Compatibilidades de Item</h2>
+    <div class="mb-3 row">
+        <div class="col-md-5">
+            <input type="number" id="itemId" class="form-control" placeholder="ID do Item">
+        </div>
+        <div class="col-md-5">
+            <input type="number" id="compatibleId" class="form-control" placeholder="ID Compatível">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" onclick="addCompatibility()">Adicionar</button>
+        </div>
+    </div>
+
+    <button class="btn btn-outline-info mb-3" onclick="loadCompatibilities()">Ver Compatibilidades</button>
+    <ul class="list-group" id="compatibilityList"></ul>
+
+    <script>
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, options);
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Erro desconhecido');
+            }
+            return res.json();
+        }
+
+        async function loadItemTypes() {
+            try {
+                const data = await fetchJSON('/item_types');
+                const list = document.getElementById('typesList');
+                list.innerHTML = '';
+                data.forEach(type => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = type.name;
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                alert("Erro ao carregar tipos: " + e.message);
+            }
+        }
+
+        async function addItemType() {
+            const input = document.getElementById('newTypeName');
+            const name = input.value.trim();
+            if (!name) return;
+
+            try {
+                await fetchJSON('/item_types', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                input.value = '';
+                loadItemTypes();
+            } catch (e) {
+                alert("Erro: " + e.message);
+            }
+        }
+
+        async function addCompatibility() {
+            const itemId = document.getElementById('itemId').value;
+            const compatibleId = document.getElementById('compatibleId').value;
+            if (!itemId || !compatibleId) return;
+
+            try {
+                await fetchJSON(`/items/${itemId}/compatibilities`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ compatible_with_id: compatibleId })
+                });
+                alert("Compatibilidade adicionada!");
+                loadCompatibilities();
+            } catch (e) {
+                alert("Erro ao adicionar compatibilidade: " + e.message);
+            }
+        }
+
+        async function loadCompatibilities() {
+            const itemId = document.getElementById('itemId').value;
+            if (!itemId) return;
+
+            try {
+                const data = await fetchJSON(`/items/${itemId}/compatibilities`);
+                const list = document.getElementById('compatibilityList');
+                list.innerHTML = '';
+
+                if (data.length === 0) {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = 'Nenhuma compatibilidade';
+                    list.appendChild(li);
+                } else {
+                    data.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                        const span = document.createElement('span');
+                        span.innerHTML = `<img src="${item.img}" style="height:40px;" class="me-2">${item.name}`;
+                        
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-sm btn-danger';
+                        btn.textContent = 'Remover';
+                        btn.onclick = () => deleteCompatibility(itemId, item.id);
+
+                        li.appendChild(span);
+                        li.appendChild(btn);
+                        list.appendChild(li);
+                    });
+                }
+            } catch (e) {
+                alert("Erro ao carregar compatibilidades: " + e.message);
+            }
+        }
+
+        async function deleteCompatibility(itemId, compatibleId) {
+            try {
+                await fetchJSON(`/items/${itemId}/compatibilities/${compatibleId}`, { method: 'DELETE' });
+                loadCompatibilities();
+            } catch (e) {
+                alert("Erro ao remover: " + e.message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadItemTypes);
+    </script>
+
+</body>
+</html>
