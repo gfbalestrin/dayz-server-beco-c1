@@ -225,6 +225,15 @@
                 <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required readonly>
                 <small class="text-secondary">Tipo de item</small>
                 <select id="itemTypeId" class="form-select mb-2" required></select>
+                <small class="text-secondary">Localização</small>
+                <select id="itemLocalization" class="form-select mb-2">
+                    <option value="">Não possui</option>
+                    <option value="head">Cabeça</option>
+                    <option value="eyes">Olhos</option>
+                    <option value="face">Rosto</option>
+                    <option value="torso">Torso</option>
+                    <option value="foot">Pés</option>
+                </select>
                 <div class="card">
                     <div class="card-body">
                         <p class="small text-secondary">Preencha somente se possuir slots de armazenamento</p>
@@ -594,6 +603,27 @@
 
     <!-- Items -->
     <script>
+        function localizationParse(localization) {
+            switch (localization) {
+                case "head":
+                    return "Cabeça";
+                case "eyes":
+                    return "Olhos";
+                case "face":
+                    return "Rosto";
+                case "torso":
+                    return "Torso";
+                case "foot":
+                    return "Pés";
+                case "":
+                case null:
+                case undefined:
+                    return "Não possui";
+                default:
+                    return localization; // retorna o valor original se não for mapeado
+            }
+        }
+
         function showErrorToast(message) {
             const toastEl = document.getElementById('errorToast');
             const toastBody = document.getElementById('errorToastBody');
@@ -724,6 +754,7 @@
                             <p class="card-text text-muted">${item.name_type}</p>
                             <p class="card-text text-muted m-0">Tamanho: ${item.width}x${item.height} (${item.slots} slots)</p>
                             <p class="card-text text-muted m-0">Armazenamento: ${armazenamento}</p>
+                            <p class="card-text text-muted m-0">Localização: ${localizationParse(item.localization)}</p>
                         </div>
                         <p><strong>Subitens:</strong></p>
                         <ul id="subitems-${item.id}" class="list-group list-group-flush mb-2"></ul>
@@ -818,6 +849,7 @@
             document.getElementById('itemStorageWidth').value = item.storage_width;
             document.getElementById('itemStorageHeight').value = item.storage_height;
             document.getElementById('itemStorageSlots').value = item.storage_slots;
+            document.getElementById('itemLocalization').value = item.localization ? item.localization : "";
 
             // Chama após preencher os campos relacionados
             updateItemSlots();
@@ -838,8 +870,10 @@
                 type_id: +document.getElementById('itemTypeId').value,
                 storage_width: +document.getElementById('itemStorageWidth').value,
                 storage_height: +document.getElementById('itemStorageHeight').value,
-                storage_slots: +document.getElementById('itemStorageSlots').value
+                storage_slots: +document.getElementById('itemStorageSlots').value,
+                localization: document.getElementById('itemLocalization').value
             };
+
 
             const url = id ? `/items/${id}` : '/items';
             const method = id ? 'PUT' : 'POST';

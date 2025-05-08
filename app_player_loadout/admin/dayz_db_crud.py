@@ -148,6 +148,7 @@ def criar_tabelas():
         storage_slots INTEGER DEFAULT 0,
         storage_width INTEGER DEFAULT 0,
         storage_height INTEGER DEFAULT 0,
+        localization TEXT,
         FOREIGN KEY (type_id) REFERENCES item_types(id)
     );
 

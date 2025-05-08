@@ -1765,11 +1765,11 @@ def add_item():
     conn = get_db_connection()
     try:
         conn.execute('''
-            INSERT INTO item (name, name_type, type_id, slots, width, height, img, storage_slots, storage_width, storage_height)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO item (name, name_type, type_id, slots, width, height, img, storage_slots, storage_width, storage_height, localization)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['name'], data['name_type'], data['type_id'],
-            data['slots'], data['width'], data['height'], data['img'], data['storage_slots'], data['storage_width'], data['storage_height'] 
+            data['slots'], data['width'], data['height'], data['img'], data['storage_slots'], data['storage_width'], data['storage_height'], data['localization'] 
         ))
         conn.commit()
         return jsonify({"message": "Item adicionado com sucesso"}), 201
@@ -1793,12 +1793,12 @@ def update_item(item_id):
         conn.execute('''
             UPDATE item SET name = ?, name_type = ?, type_id = ?, 
                 slots = ?, width = ?, height = ?, img = ?, 
-                storage_slots = ?, storage_width = ?, storage_height = ?
+                storage_slots = ?, storage_width = ?, storage_height = ?, localization = ?
             WHERE id = ?
         ''', (
             data['name'], data['name_type'], data['type_id'],
             data['slots'], data['width'], data['height'], data['img'], 
-            data['storage_slots'], data['storage_width'], data['storage_height'],
+            data['storage_slots'], data['storage_width'], data['storage_height'], data['localization'],
             item_id
         ))
         conn.commit()
