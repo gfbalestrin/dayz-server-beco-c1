@@ -177,11 +177,11 @@ class WeaponData {
 
 class Weapons {
 	ref WeaponData primary_weapon;
+    ref WeaponData secondary_weapon;
+	ref WeaponData small_weapon;
 }
 
 class LoadoutData {
-	ref array<string> clothes;
-	ref array<string> accessories;
 	ref Weapons weapons;
 }
 
@@ -201,37 +201,85 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
 	LoadoutData data = loadoutMap.Get(playerId);
 
 	// Arma primária
-	if (data.weapons && data.weapons.primary_weapon) {
-		WeaponData weapon = data.weapons.primary_weapon;
-		EntityAI weaponPrimaryEntity = player.GetInventory().CreateInInventory(weapon.name_type);
+    if (data.weapons && data.weapons.primary_weapon) {
+        WeaponData weaponPrimary = data.weapons.primary_weapon;
+        EntityAI weaponPrimaryEntity = player.GetInventory().CreateInInventory(weaponPrimary.name_type);
 
-		if (weaponPrimaryEntity) {
-			// Acessórios
-			if (weapon.attachments) {
-				foreach (WeaponAttachment att : weapon.attachments) {
-					EntityAI attachmentPrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(att.name_type);
-					if (att.battery && attachmentPrimary) {
-						attachmentPrimary.GetInventory().CreateAttachment("Battery9V");
-					}
-				}
-			}
+        if (weaponPrimaryEntity) {
+            if (weaponPrimary.attachments) {
+                foreach (WeaponAttachment attPrimary : weaponPrimary.attachments) {
+                    EntityAI attachmentPrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(attPrimary.name_type);
+                    if (attPrimary.battery && attachmentPrimary) {
+                        attachmentPrimary.GetInventory().CreateAttachment("Battery9V");
+                    }
+                }
+            }
+            if (weaponPrimary.magazine) {				
+                EntityAI magPrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(weaponPrimary.magazine.name_type);              
+                if (magPrimary && weaponPrimary.ammunitions) {
+                    for (int j = 0; j < weaponPrimary.magazine.capacity; j++) {
+                        magPrimary.GetInventory().CreateInInventory(weaponPrimary.ammunitions.name_type);
+                    }
+                }
+            }
+            player.SetQuickBarEntityShortcut(weaponPrimaryEntity, 0, true);
+        }
+    }
 
-			// Carregador
-			if (weapon.magazine) {				
-                EntityAI magazinePrimary = weaponPrimaryEntity.GetInventory().CreateAttachment(weapon.magazine.name_type);              
-				if (magazinePrimary && weapon.ammunitions) {
-					for (int i = 0; i < weapon.magazine.capacity; i++) {
-						magazinePrimary.GetInventory().CreateInInventory(weapon.ammunitions.name_type);
-					}
-                    weaponPrimaryEntity.PushCartridgeToChamberFromMagazine(weapon.ammunitions.name_type);
-				}                         
-			}
-		}
+    // Arma secundária
+    if (data.weapons && data.weapons.secondary_weapon) {
+        WeaponData weaponSecondary = data.weapons.secondary_weapon;
+        EntityAI weaponSecondaryEntity = player.GetInventory().CreateInInventory(weaponSecondary.name_type);
 
-        player.SetQuickBarEntityShortcut(weaponPrimaryEntity, 0, true);
-	}
+        if (weaponSecondaryEntity) {
+            if (weaponSecondary.attachments) {
+                foreach (WeaponAttachment attSecondary : weaponSecondary.attachments) {
+                    EntityAI attachmentSecondary = weaponSecondaryEntity.GetInventory().CreateAttachment(attSecondary.name_type);
+                    if (attSecondary.battery && attachmentSecondary) {
+                        attachmentSecondary.GetInventory().CreateAttachment("Battery9V");
+                    }
+                }
+            }
+            if (weaponSecondary.magazine) {
+                EntityAI magSecondary = weaponSecondaryEntity.GetInventory().CreateAttachment(weaponSecondary.magazine.name_type);
+                if (magSecondary && weaponSecondary.ammunitions) {
+                    for (int k = 0; k < weaponSecondary.magazine.capacity; k++) {
+                        magSecondary.GetInventory().CreateInInventory(weaponSecondary.ammunitions.name_type);
+                    }
+                }
+            }
+            player.SetQuickBarEntityShortcut(weaponSecondaryEntity, 1, true);
+        }
+    }
+
+    // Arma pequena
+    if (data.weapons && data.weapons.small_weapon) {
+        WeaponData weaponSmall = data.weapons.small_weapon;
+        EntityAI weaponSmallEntity = player.GetInventory().CreateInInventory(weaponSmall.name_type);
+
+        if (weaponSmallEntity) {
+            if (weaponSmall.attachments) {
+                foreach (WeaponAttachment attSmall : weaponSmall.attachments) {
+                    EntityAI attachmentSmall = weaponSmallEntity.GetInventory().CreateAttachment(attSmall.name_type);
+                    if (attSmall.battery && attachmentSmall) {
+                        attachmentSmall.GetInventory().CreateAttachment("Battery9V");
+                    }
+                }
+            }
+            if (weaponSmall.magazine) {
+                EntityAI magSmall = weaponSmallEntity.GetInventory().CreateAttachment(weaponSmall.magazine.name_type);
+                if (magSmall && weaponSmall.ammunitions) {
+                    for (int m = 0; m < weaponSmall.magazine.capacity; m++) {
+                        magSmall.GetInventory().CreateInInventory(weaponSmall.ammunitions.name_type);
+                    }
+                }
+            }
+            player.SetQuickBarEntityShortcut(weaponSmallEntity, 2, true);
+        }
+    }
+
+
 
 	WriteToLog("Loadout carregado com sucesso para o jogador: " + playerId);
 	return true;
 }
-

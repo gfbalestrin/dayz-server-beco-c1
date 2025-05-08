@@ -2,6 +2,9 @@ import requests
 import xml.etree.ElementTree as ET
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
+from apscheduler.schedulers.background import BackgroundScheduler
+import os
+import json
 import sqlite3
 
 USERS = {
@@ -10,6 +13,8 @@ USERS = {
 
 app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
+
+JSON_PATH = 'custom_loadouts.json'
 
 # Carrega o XML e extrai os nomes uma vez ao iniciar
 def load_type_names():
@@ -31,6 +36,126 @@ def get_db_connection_players_beco_c1():
     conn = sqlite3.connect('../databases/players_beco_c1.db')
     conn.row_factory = sqlite3.Row
     return conn
+
+def query_db(query, args=(), one=False):
+    conn = get_db_connection()
+    cur = conn.execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    conn.close()
+    return (rv[0] if rv else None) if one else rv
+
+
+def get_weapon_data(weapon_id, magazine_id, ammo_id, attachments):
+    if not weapon_id:
+        return None
+
+    weapon = query_db("SELECT * FROM weapons WHERE id = ?", [weapon_id], one=True)
+    if not weapon:
+        return None
+
+    weapon_data = {
+        "name_type": weapon["name_type"],
+        "feed_type": weapon["feed_type"],
+        "slots": weapon["slots"],
+        "width": weapon["width"],
+        "height": weapon["height"]
+    }
+
+    if magazine_id:
+        mag = query_db("SELECT * FROM magazines WHERE id = ?", [magazine_id], one=True)
+        if mag:
+            weapon_data["magazine"] = {
+                "name_type": mag["name_type"],
+                "capacity": mag["capacity"],
+                "slots": mag["slots"],
+                "width": mag["width"],
+                "height": mag["height"]
+            }
+
+    if ammo_id:
+        ammo = query_db("SELECT * FROM ammunitions WHERE id = ?", [ammo_id], one=True)
+        if ammo:
+            weapon_data["ammunitions"] = {
+                "name_type": ammo["name_type"],
+                "slots": ammo["slots"],
+                "width": ammo["width"],
+                "height": ammo["height"]
+            }
+
+    if attachments:
+        attachment_list = []
+        for att in attachments:
+            attachment_list.append({
+                "name_type": att["name_type"],
+                "type": att["type"],
+                "slots": att["slots"],
+                "width": att["width"],
+                "height": att["height"],
+                "battery": bool(att["battery"])
+            })
+        weapon_data["attachments"] = attachment_list
+
+    return weapon_data
+
+
+def export_loadouts_json():
+    players = query_db("SELECT * FROM player_loadouts_weapons")
+    full_data = {}
+
+    for player in players:
+        player_id = f"{player['player_id']}"
+        player_data = {"weapons": {}}
+
+        # Pega todos os attachments desse jogador
+        all_attachments = query_db("""
+            SELECT a.*, lwa.weapon_slot 
+            FROM player_loadouts_weapon_attachments lwa
+            JOIN attachments a ON a.id = lwa.attachment_id
+            WHERE lwa.player_loadouts_weapons_id = ?
+        """, [player["id"]])
+
+        # Agrupa attachments por slot
+        attachments_by_slot = {"primary": [], "secondary": [], "small": []}
+        for att in all_attachments:
+            attachments_by_slot[att["weapon_slot"]].append(att)
+
+        # Monta cada tipo de arma
+        player_data["weapons"]["primary_weapon"] = get_weapon_data(
+            player["primary_weapon_id"],
+            player["primary_magazine_id"],
+            player["primary_ammo_id"],
+            attachments_by_slot["primary"]
+        )
+        player_data["weapons"]["secondary_weapon"] = get_weapon_data(
+            player["secondary_weapon_id"],
+            player["secondary_magazine_id"],
+            player["secondary_ammo_id"],
+            attachments_by_slot["secondary"]
+        )
+        player_data["weapons"]["small_weapon"] = get_weapon_data(
+            player["small_weapon_id"],
+            player["small_magazine_id"],
+            player["small_ammo_id"],
+            attachments_by_slot["small"]
+        )
+
+        full_data[player_id] = player_data
+
+    # Salva em arquivo
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(full_data, f, indent=2)
+
+    return True
+
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
+    scheduler.start()
+
+    # Garante que o scheduler pare quando o app parar
+    import atexit
+    atexit.register(lambda: scheduler.shutdown())
 
 @app.route('/')
 def index():
@@ -1187,6 +1312,27 @@ def player_loadout_weapons(player_id):
         attachments=attachments_by_slot
     )
 
+@app.route('/delete_loadout/<player_id>', methods=['GET'])
+def delete_loadout(player_id):
+    conn = get_db_connection()
+    
+    try:
+        # Primeiro deleta os attachments (se houver relacionamento)
+        conn.execute('DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id IN (SELECT id FROM player_loadouts_weapons WHERE player_id = ?)', (player_id,))
+        
+        # Depois deleta o loadout principal
+        conn.execute('DELETE FROM player_loadouts_weapons WHERE player_id = ?', (player_id,))
+        
+        conn.commit()
+        flash('Loadout excluído com sucesso!', 'success')
+    except Exception as e:
+        conn.rollback()
+        flash(f'Erro ao excluir loadout: {str(e)}', 'danger')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('player_loadout_weapons', player_id=player_id))
+
 @app.route('/loadout_players', methods=['GET'])
 def loadout_players():
     conn = get_db_connection_players_beco_c1()
@@ -1297,6 +1443,7 @@ def save_loadout_weapons(player_id):
                 ''', (player_loadouts_weapons_id, int(aid), slot))
 
         conn.commit()
+        
         flash("Loadout salvo com sucesso!", "success")
 
     except Exception as e:
@@ -1331,4 +1478,5 @@ def logout():
 
 # ✅ ESSENCIAL PARA INICIAR O SERVIDOR
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=54321, debug=True)
+    start_scheduler()
+    app.run(host='0.0.0.0', port=54321, debug=False)

@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Loadout do Jogador</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .weapon-card {
             cursor: pointer;
@@ -88,6 +92,13 @@
             margin-top: 5px;
             text-overflow: ellipsis;
         }
+        .btn-hover-effect {
+            transition: all 0.3s ease;
+        }
+        .btn-hover-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 
@@ -168,94 +179,219 @@
             </div>
         </div>
     </div>
-
-
+    <!-- JS do Bootstrap (com Popper incluído) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
-        <div class="mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="text-primary mb-4 text-center">Arma Primária</h4>
-                    <hr>
-                    <div class="row" id="primary-weapon-list">
-                        {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
-                        <div class="col-md-3">
-                            <div class="card weapon-card" data-weapon-id="{{ weapon.id }}">
-                                <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                <div class="card-body text-center">
-                                    <p class="card-text">{{ weapon.name }}</p>
+
+       
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrimary">
+                    <i class="fas fa-gun me-2"></i> Configurar arma primária
+                </button>
+                
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecundary">
+                    <i class="fas fa-gun me-2"></i> Configurar arma secundária
+                </button>
+                
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSmall">
+                    <i class="fas fa-gun me-2"></i> Configurar arma pequena
+                </button>                
+        </div>
+
+        
+        <div class="collapse" id="collapsePrimary">
+            <!-- Seção Primary Weapon (existente) -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Configurar Arma Primária</h4>
+                        <hr>
+                        <div class="row" id="primary-weapon-list">
+                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                            <div class="col-md-3">
+                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                    data-weapon-type="primary">
+                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                    <div class="card-body text-center">
+                                        <p class="card-text">{{ weapon.name }}</p>
+                                    </div>
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
+                        <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-primary-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Primário</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="primary-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-primary-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Primária</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="primary-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-primary-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Primários</h4>
+                        <hr>
+                        <div id="primary-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse" id="collapseSecundary">
+            <!-- Seção Secondary Weapon -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Ajustar Arma Secundária</h4>
+                        <hr>
+                        <div class="row" id="secondary-weapon-list">
+                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                            <div class="col-md-3">
+                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                    data-weapon-type="secondary">
+                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                    <div class="card-body text-center">
+                                        <p class="card-text">{{ weapon.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="secondary_weapon_id" id="secondary_weapon_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Secundário</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="secondary-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="secondary_magazine_id" id="secondary_magazine_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Secundária</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="secondary-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="secondary_ammo_id" id="secondary_ammo_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Secundários</h4>
+                        <hr>
+                        <div id="secondary-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse" id="collapseSmall">
+            <!-- Seção Small Weapon -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Ajustar Arma Pequena</h4>
+                        <hr>
+                        <div class="row" id="small-weapon-list">
+                            {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) and not weapon.is_banned %} 
+                                <div class="col-md-3">
+                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}" data-weapon-type="small">
+                                        <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                        <div class="card-body text-center">
+                                            <p class="card-text">{{ weapon.name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
                         {% endfor %}
-                    </div>
-                    <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-3 d-none" id="div-carregadores">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="text-primary mb-4 text-center">Carregador Compatível</h4>
-                    <hr>
-                    <div class="d-flex flex-wrap" id="magazine-list">
-                        <p>Selecione uma arma primeiro</p>
-                    </div>
-                    <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-3 d-none" id="div-municoes">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="text-primary mb-4 text-center">Munição Compatível</h4>
-                    <hr>
-                    <div class="d-flex flex-wrap" id="ammo-list">
-                        <p>Selecione uma arma primeiro</p>
-                    </div>
-                    <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-3 d-none" id="div-acessorios">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="text-primary mb-4 text-center">Acessórios Compatíveis</h4>
-                    <hr>
-                    <div id="attachments-section" class="row">
+                        </div>
+                        <input type="hidden" name="small_weapon_id" id="small_weapon_id">
                     </div>
                 </div>
             </div>
 
-        </div>
+            <div class="mb-3 d-none" id="div-small-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Pequeno</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="small-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="small_magazine_id" id="small_magazine_id">
+                    </div>
+                </div>
+            </div>
 
-        <!-- <div class="mb-3">
-            <label class="form-label">Arma Secundária</label>
-            <select name="secondary_weapon_id" class="form-select">
-                <option value="">Nenhuma</option>
-                {% for weapon in weapons if weapon.slots >= 12 %}
-                <option value="{{ weapon.id }}" {% if loadout and loadout.secondary_weapon_id==weapon.id %}selected{%
-                    endif %} {% if weapon.is_banned==1 %}disabled{% endif %}>
-                    {{ weapon.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+            <div class="mb-3 d-none" id="div-small-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Pequena</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="small-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="small_ammo_id" id="small_ammo_id">
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Arma Pequena (&lt; 12 slots)</label>
-            <select name="small_weapon_id" class="form-select">
-                <option value="">Nenhuma</option>
-                {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) %} <option
-                    value="{{ weapon.id }}" {% if loadout and loadout.small_weapon_id==weapon.id %}selected{% endif %}
-                    {% if weapon.is_banned==1 %}disabled{% endif %}>
-                    {{ weapon.name }}
-                    </option>
-                    {% endfor %}
-            </select>
-        </div> -->
+            <div class="mb-3 d-none" id="div-small-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Pequenos</h4>
+                        <hr>
+                        <div id="small-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
@@ -266,113 +402,142 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <button type="submit" class="btn btn-success">Salvar Loadout</button>
-        <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
+        <div class="d-flex justify-content-between mt-4">
+            <div>
+                <button type="submit" class="btn btn-success">Salvar Loadout</button>
+                <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
+
+            </div>
+            <a href="{{ url_for('delete_loadout', player_id=player.PlayerID) }}" class="btn btn-danger"
+                onclick="return confirm('Tem certeza que deseja excluir?');">Resetar Loadout</a>
+        </div>
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const weaponCards = document.querySelectorAll('.weapon-card');
-            const weaponInput = document.getElementById('primary_weapon_id');
+            // Função genérica para lidar com a seleção de armas
+            function setupWeaponSelection(weaponType) {
+                const weaponCards = document.querySelectorAll(`.weapon-card[data-weapon-type="${weaponType}"]`);
+                const weaponInput = document.getElementById(`${weaponType}_weapon_id`);
 
-            const divCarregadores = document.getElementById('div-carregadores');
+                const divMagazines = document.getElementById(`div-${weaponType}-magazines`);
+                const magazineList = document.getElementById(`${weaponType}-magazine-list`);
+                const magazineInput = document.getElementById(`${weaponType}_magazine_id`);
 
-            const magazineList = document.getElementById('magazine-list');
-            const divMunicoes = document.getElementById('div-municoes');
+                const divAmmos = document.getElementById(`div-${weaponType}-ammos`);
+                const ammoList = document.getElementById(`${weaponType}-ammo-list`);
+                const ammoInput = document.getElementById(`${weaponType}_ammo_id`);
 
-            const magazineInput = document.getElementById('primary_magazine_id');
-            const ammoList = document.getElementById('ammo-list');
-            const divAcessorios = document.getElementById('div-acessorios');
+                const divAttachments = document.getElementById(`div-${weaponType}-attachments`);
+                const attachmentsSection = document.getElementById(`${weaponType}-attachments-section`);
 
-            const ammoInput = document.getElementById('primary_ammo_id');
+                weaponCards.forEach(card => {
+                    card.addEventListener('click', function () {
+                        // Resetar seleções anteriores
+                        document.querySelectorAll(`.weapon-card[data-weapon-type="${weaponType}"]`).forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
 
-            weaponCards.forEach(card => {
-                card.addEventListener('click', function () {
-                    divCarregadores.classList.add("d-none");
-                    divMunicoes.classList.add("d-none");
-                    divAcessorios.classList.add("d-none");
-                    // Marca como selecionado
-                    weaponCards.forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
+                        const weaponId = this.dataset.weaponId;
+                        weaponInput.value = weaponId;
 
-                    const weaponId = this.dataset.weaponId;
-                    weaponInput.value = weaponId;
+                        // Resetar magazines e ammos
+                        divMagazines.classList.add("d-none");
+                        divAmmos.classList.add("d-none");
+                        divAttachments.classList.add("d-none");
+                        magazineInput.value = '';
+                        ammoInput.value = '';
 
-                    // Buscar magazines compatíveis
-                    fetch(`/get_magazines/${weaponId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            magazineList.innerHTML = '';
-                            if (data.length === 0) {
-                                magazineList.innerHTML = '<p>Nenhum carregador compatível.</p>';
-                                magazineInput.value = '';
-                            } else {
-                                divCarregadores.classList.remove("d-none");
-                                data.forEach(mag => {
-                                    const card = document.createElement('div');
-                                    card.className = 'card m-2 magazine-card';
-                                    card.style.width = '100px';
-                                    card.dataset.magazineId = mag.id;
+                        // Carregar magazines compatíveis
+                        fetch(`/get_magazines/${weaponId}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                magazineList.innerHTML = '';
+                                if (data.length === 0) {
+                                    magazineList.innerHTML = '<p>Nenhum carregador compatível.</p>';
+                                } else {
+                                    divMagazines.classList.remove("d-none");
+                                    data.forEach(mag => {
+                                        const card = document.createElement('div');
+                                        card.className = 'card m-2 magazine-card';
+                                        card.style.width = '100px';
+                                        card.dataset.magazineId = mag.id;
+                                        card.dataset.weaponType = weaponType;
 
-                                    card.innerHTML = `
+                                        card.innerHTML = `
                                     <img src="${mag.img}" class="card-img-top" alt="${mag.name}">
                                     <div class="card-body text-center p-1">
                                         <small>${mag.name}</small>
                                     </div>
                                 `;
 
-                                    card.addEventListener('click', function () {
-                                        document.querySelectorAll('.magazine-card').forEach(c => c.classList.remove('selected'));
-                                        card.classList.add('selected');
-                                        magazineInput.value = mag.id;
+                                        card.addEventListener('click', function () {
+                                            document.querySelectorAll(`.magazine-card[data-weapon-type="${weaponType}"]`).forEach(c => c.classList.remove('selected'));
+                                            card.classList.add('selected');
+                                            magazineInput.value = mag.id;
+
+                                            // Carregar munições compatíveis
+                                            loadAmmos(weaponId, weaponType);
+                                        });
+
+                                        magazineList.appendChild(card);
                                     });
+                                }
+                            });
 
-                                    magazineList.appendChild(card);
-                                });
-                            }
-                        });
+                        // Carregar munições compatíveis
+                        loadAmmos(weaponId, weaponType);
 
-                    // Buscar munições compatíveis
-                    fetch(`/get_ammos/${weaponId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            ammoList.innerHTML = '';
-                            if (data.length === 0) {
-                                ammoList.innerHTML = '<p>Nenhuma munição compatível.</p>';
-                                ammoInput.value = '';
-                            } else {
-                                divMunicoes.classList.remove("d-none");
-                                data.forEach(ammo => {
-                                    const card = document.createElement('div');
-                                    card.className = 'card m-2 ammo-card';
-                                    card.style.width = '100px';
-                                    card.dataset.ammoId = ammo.id;
-
-                                    card.innerHTML = `
-                                    <img src="${ammo.img}" class="card-img-top" alt="${ammo.name}">
-                                    <div class="card-body text-center p-1">
-                                        <small>${ammo.name}</small>
-                                    </div>
-                                `;
-
-                                    card.addEventListener('click', function () {
-                                        document.querySelectorAll('.ammo-card').forEach(c => c.classList.remove('selected'));
-                                        card.classList.add('selected');
-                                        ammoInput.value = ammo.id;
-                                    });
-
-                                    ammoList.appendChild(card);
-                                });
-                            }
-                        });
-
-                    loadAttachments(weaponId);
-
+                        // Carregar attachments
+                        loadAttachments(weaponId, weaponType);
+                    });
                 });
-            });
+            }
 
-            function loadAttachments(weaponId) {
-                const section = document.getElementById('attachments-section');
-                section.innerHTML = ''; // Limpa os attachments
+            // Função para carregar munições
+            function loadAmmos(weaponId, weaponType) {
+                const divAmmos = document.getElementById(`div-${weaponType}-ammos`);
+                const ammoList = document.getElementById(`${weaponType}-ammo-list`);
+                const ammoInput = document.getElementById(`${weaponType}_ammo_id`);
+
+                fetch(`/get_ammos/${weaponId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        ammoList.innerHTML = '';
+                        if (data.length === 0) {
+                            ammoList.innerHTML = '<p>Nenhuma munição compatível.</p>';
+                            ammoInput.value = '';
+                        } else {
+                            divAmmos.classList.remove("d-none");
+                            data.forEach(ammo => {
+                                const card = document.createElement('div');
+                                card.className = 'card m-2 ammo-card';
+                                card.style.width = '100px';
+                                card.dataset.ammoId = ammo.id;
+                                card.dataset.weaponType = weaponType;
+
+                                card.innerHTML = `
+                            <img src="${ammo.img}" class="card-img-top" alt="${ammo.name}">
+                            <div class="card-body text-center p-1">
+                                <small>${ammo.name}</small>
+                            </div>
+                        `;
+
+                                card.addEventListener('click', function () {
+                                    document.querySelectorAll(`.ammo-card[data-weapon-type="${weaponType}"]`).forEach(c => c.classList.remove('selected'));
+                                    card.classList.add('selected');
+                                    ammoInput.value = ammo.id;
+                                });
+
+                                ammoList.appendChild(card);
+                            });
+                        }
+                    });
+            }
+
+            // Função para carregar attachments
+            function loadAttachments(weaponId, weaponType) {
+                const section = document.getElementById(`${weaponType}-attachments-section`);
+                const divAttachments = document.getElementById(`div-${weaponType}-attachments`);
+                section.innerHTML = '';
 
                 if (!weaponId) return;
 
@@ -380,26 +545,27 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.length > 0) {
-                            divAcessorios.classList.remove("d-none");
+                            divAttachments.classList.remove("d-none");
                         }
                         data.forEach(att => {
                             const card = document.createElement('div');
-                            card.className = 'attachment-card';
+                            card.className = 'attachment-card col-sm-12 col-lg-3';
                             card.setAttribute('data-id', att.id);
                             card.setAttribute('data-type', att.type);
+                            card.setAttribute('data-weapon-type', weaponType);
                             card.setAttribute('title', att.name);
-                            card.onclick = () => toggleAttachment(card);
+                            card.onclick = () => toggleAttachment(card, weaponType);
 
                             card.innerHTML = `
                         <img src="${att.img}" alt="${att.name}">
                         <div class="attachment-name">${att.name}</div>
-                        `;
+                    `;
 
                             const checkbox = document.createElement('input');
                             checkbox.type = 'checkbox';
-                            checkbox.name = 'primary_attachments';
+                            checkbox.name = `${weaponType}_attachments`;
                             checkbox.value = att.id;
-                            checkbox.id = `attachment-${att.id}`;
+                            checkbox.id = `${weaponType}-attachment-${att.id}`;
                             checkbox.classList.add('d-none');
 
                             section.appendChild(card);
@@ -412,14 +578,15 @@
                     });
             }
 
-            function toggleAttachment(card) {
+            // Função para alternar attachments
+            function toggleAttachment(card, weaponType) {
                 const type = card.getAttribute('data-type');
                 const id = card.getAttribute('data-id');
-                const checkbox = document.getElementById(`attachment-${id}`);
+                const checkbox = document.getElementById(`${weaponType}-attachment-${id}`);
 
                 if (!card.classList.contains('selected')) {
                     // Verifica se já existe um attachment selecionado com o mesmo tipo
-                    const alreadySelected = document.querySelector(`.attachment-card.selected[data-type="${type}"]`);
+                    const alreadySelected = document.querySelector(`.attachment-card.selected[data-type="${type}"][data-weapon-type="${weaponType}"]`);
                     if (alreadySelected) {
                         const name = alreadySelected.querySelector('.attachment-name').textContent;
                         alert(`Você já selecionou um attachment do tipo "${type}" (${name}).`);
@@ -431,8 +598,11 @@
                 card.classList.toggle('selected');
             }
 
+            // Configurar os listeners para cada tipo de arma
+            setupWeaponSelection('primary');
+            setupWeaponSelection('secondary');
+            setupWeaponSelection('small');
         });
-
     </script>
 
 </body>

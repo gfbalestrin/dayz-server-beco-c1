@@ -1,7 +1,7 @@
 python3 -m venv venv
 source venv/bin/activate
 
-pip install Flask requests
+pip install Flask requests filelock apscheduler
 
 # O dayz_db_crud cria o banco
 python app.py
