@@ -1676,6 +1676,59 @@ def get_items():
     conn.close()
     return jsonify([dict(item) for item in items])
 
+@app.route('/items_pagination', methods=['GET'])
+def get_items_pagination():
+    type_id = request.args.get('type_id')
+    name = request.args.get('name')
+    min_slots = request.args.get('min_slots', type=int)
+    max_slots = request.args.get('max_slots', type=int)
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 12))
+    offset = (page - 1) * per_page
+
+    filters = []
+    params = []
+
+    if type_id:
+        filters.append("item.type_id = ?")
+        params.append(type_id)
+    if name:
+        filters.append("item.name LIKE ?")
+        params.append(f"%{name}%")
+    if min_slots is not None:
+        filters.append("item.slots >= ?")
+        params.append(min_slots)
+    if max_slots is not None:
+        filters.append("item.slots <= ?")
+        params.append(max_slots)
+
+    where_clause = "WHERE " + " AND ".join(filters) if filters else ""
+
+    query = f'''
+        SELECT item.*, item_types.name AS name_type
+        FROM item
+        JOIN item_types ON item.type_id = item_types.id
+        {where_clause}
+        LIMIT ? OFFSET ?
+    '''
+    total_query = f'''
+        SELECT COUNT(*) FROM item
+        {where_clause}
+    '''
+
+    conn = get_db_connection()
+    total = conn.execute(total_query, params).fetchone()[0]
+    items = conn.execute(query, params + [per_page, offset]).fetchall()
+    conn.close()
+
+    return jsonify({
+        "items": [dict(item) for item in items],
+        "total": total,
+        "page": page,
+        "per_page": per_page
+    })
+
+
 @app.route('/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
     conn = get_db_connection()
@@ -1775,6 +1828,38 @@ def create_item_type():
         return jsonify({'error': str(e)}), 400
     finally:
         conn.close()
+
+@app.route('/item_types/<int:type_id>', methods=['PUT'])
+def update_item_type(type_id):
+    data = request.get_json()
+    new_name = data.get('name')
+    if not new_name:
+        return jsonify({'error': 'Nome é obrigatório'}), 400
+
+    conn = get_db_connection()
+    conn.execute('UPDATE item_types SET name = ? WHERE id = ?', (new_name, type_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/item_types/<int:type_id>', methods=['DELETE'])
+def delete_item_type(type_id):
+    conn = get_db_connection()
+    try:
+        # Desassociar todos os itens que usam este tipo (setar type_id como NULL ou 0)
+        conn.execute('UPDATE item SET type_id = NULL WHERE type_id = ?', (type_id,))
+        
+        # Excluir o tipo
+        conn.execute('DELETE FROM item_types WHERE id = ?', (type_id,))
+        
+        conn.commit()
+        return jsonify({'message': 'Tipo de item excluído com sucesso'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
 
 @app.route('/items/<int:item_id>/compatibilities', methods=['GET'])
 def get_compatibilities(item_id):

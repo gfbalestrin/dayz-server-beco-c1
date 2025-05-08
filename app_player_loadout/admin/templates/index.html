@@ -4,6 +4,16 @@
 <head>
     <title>Armas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        .card-img-top {
+            height: 150px;
+            object-fit: contain;
+        }
+        .item-card { cursor: pointer; }
+        .card img { max-height: 75px; object-fit: contain; }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -105,23 +115,53 @@
 
     <div class="container py-5">
         <h1 class="mb-4">Lista de Acessórios</h1>
-            <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
-            <input type="text" id="attachmentSearchInput" class="form-control mb-2"
-                placeholder="Buscar por nome ou tipo...">
-            <select id="attachmentTypeFilter" class="form-select mb-3">
-                <option value="">Todos os Tipos</option>
-                <option value="scope">Mira</option>
-                <option value="buttstock">Coronha</option>
-                <option value="handguard">Guarda-mão</option>
-            </select>
+        <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
+        <input type="text" id="attachmentSearchInput" class="form-control mb-2"
+            placeholder="Buscar por nome ou tipo...">
+        <select id="attachmentTypeFilter" class="form-select mb-3">
+            <option value="">Todos os Tipos</option>
+            <option value="scope">Mira</option>
+            <option value="buttstock">Coronha</option>
+            <option value="handguard">Guarda-mão</option>
+        </select>
 
-            <div class="row" id="attachmentListContainer"></div>
+        <div class="row" id="attachmentListContainer"></div>
 
-            <nav>
-                <ul class="pagination justify-content-center mt-3" id="attachmentPagination"></ul>
-            </nav>
+        <nav>
+            <ul class="pagination justify-content-center mt-3" id="attachmentPagination"></ul>
+        </nav>
+    </div>
+
+    <div class="container py-5">
+        <h1 class="mb-4">Tipos de itens</h1>
+        <button class="btn btn-success mb-3" onclick="newItemType()">Adicionar Tipo de Item</button>
+        <div id="itemTypesList" class="d-flex flex-wrap gap-2 mt-3"></div>
+    </div>
+    <div class="container">
+        <h1 class="mb-4">Itens</h1>
+        <button class="btn btn-success mb-3" onclick="showNewItemForm()">Adicionar Novo Item</button>
+
+        <select id="filterType" class="form-select mb-3" onchange="loadItems()">
+            <option value="">-- Filtrar por tipo --</option>
+        </select>
+        <div>
+            <input id="filterName" class="form-control mb-3" placeholder="Buscar por nome" oninput="loadItems(1)">
         </div>
+        <div class="d-none">
+            <input id="filterMinSlots" class="form-control" type="number" placeholder="Min slots" oninput="loadItems(1)">
+        </div>
+        <div class="d-none">
+            <input id="filterMaxSlots" class="form-control" type="number" placeholder="Max slots" oninput="loadItems(1)">
+        </div>
+        <div class="row" id="itemsGrid"></div>
+        <nav>
+            <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+        </nav>
+    </div>
 
+    <div class="container py-5">
+       
+        
         <!-- Modal para novo tipo -->
         <div class="modal fade" id="typeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
@@ -140,54 +180,52 @@
             </form>
             </div>
         </div>
-
-        <div class="container py-5">
-            <h1 class="mb-4">Itens do DayZ</h1>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    
-                    <select id="filterType" class="form-select" onchange="loadItems()">
-                        <option value="">-- Filtrar por tipo --</option>
-                    </select>
-                    
-
-                </div>
-                <div class="col-md-6 text-end">
-                    <button class="btn btn-success" onclick="showNewItemForm()">Novo Item</button>
-                    <button class="btn btn-outline-secondary" onclick="newItemType()">Novo Tipo</button>
-
-                </div>
-            </div>
-
-            <div class="row" id="itemsGrid"></div>
-
-            <!-- Modal de Novo/Editar -->
-            <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+        <!-- Modal de Edição de Tipo -->
+        <div class="modal fade" id="editTypeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
-                <form id="itemForm" class="modal-content" onsubmit="saveItem(event)">
+            <form class="modal-content" onsubmit="saveItemTypeEdit(event)">
                 <div class="modal-header">
-                    <h5 class="modal-title">Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">Editar Tipo de Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="itemId">
-                    <input type="text" id="itemName" class="form-control mb-2" placeholder="Nome" required>
-                    <input type="text" id="itemNameType" class="form-control mb-2" placeholder="Name Type" required>
-                    <input type="text" id="itemImg" class="form-control mb-2" placeholder="URL da Imagem" required>
-                    <input type="number" id="itemWidth" class="form-control mb-2" placeholder="Largura" required>
-                    <input type="number" id="itemHeight" class="form-control mb-2" placeholder="Altura" required>
-                    <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required>
-                    <select id="itemTypeId" class="form-select mb-2" required></select>
+                <input type="hidden" id="editTypeId">
+                <input type="text" id="editTypeName" class="form-control" placeholder="Novo nome do tipo" required>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" type="submit">Salvar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" type="submit">Salvar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
-                </form>
-            </div>
+            </form>
             </div>
         </div>
+  
+        <!-- Modal de Novo/Editar -->
+        <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="itemForm" class="modal-content" onsubmit="saveItem(event)">
+            <div class="modal-header">
+                <h5 class="modal-title">Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="itemId">
+                <input type="text" id="itemName" class="form-control mb-2" placeholder="Nome" required>
+                <input type="text" id="itemNameType" class="form-control mb-2" placeholder="Name Type" required>
+                <input type="text" id="itemImg" class="form-control mb-2" placeholder="URL da Imagem" required>
+                <input type="number" id="itemWidth" class="form-control mb-2" placeholder="Largura" required>
+                <input type="number" id="itemHeight" class="form-control mb-2" placeholder="Altura" required>
+                <input type="number" id="itemSlots" class="form-control mb-2" placeholder="Slots" required>
+                <select id="itemTypeId" class="form-select mb-2" required></select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">Salvar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
 
 
     <div class="container">
@@ -531,29 +569,99 @@
             return res.json();
         }
 
+    
         async function loadItemTypes() {
-            const types = await fetchJSON('/item_types');
+            const types = await fetchJSON('/item_types'); 
             const select = document.getElementById('filterType');
-            const modalSelect = document.getElementById('itemTypeId');
+            select.innerHTML = '<option value="">-- Filtrar por tipo --</option>';
+            const selectItem =  document.getElementById('itemTypeId');
+            selectItem.innerHTML = '<option value="">-- Filtrar por tipo --</option>';
 
-            [select, modalSelect].forEach(s => s.innerHTML = '<option value="">-- Selecione --</option>');
-            types.forEach(t => {
-                const opt = new Option(t.name, t.id);
-                select.appendChild(opt.cloneNode(true));
-                modalSelect.appendChild(opt.cloneNode(true));
+            types.forEach(type => {
+                const option = new Option(type.name, type.id);
+                select.appendChild(option);
+                const option2 = new Option(type.name, type.id);
+                selectItem.appendChild(option2);
             });
+
+            // Também exibe a lista com botões para editar (fora do <select>)
+            const container = document.getElementById('itemTypesList');
+            if (container) {
+                container.innerHTML = '';
+                types.forEach(t => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'd-flex align-items-center bg-light border rounded-pill px-3 py-1';
+
+                    wrapper.innerHTML = `
+                        <span class="me-2 fw-semibold">${t.name}</span>
+                        <button class="btn btn-sm btn-outline-primary btn-pill me-1" onclick="editItemType(${t.id}, '${t.name}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-pill" onclick="deleteItemType(${t.id})">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    `;
+
+                    container.appendChild(wrapper);
+                });
+            }
+        }
+        function editItemType(typeId, currentName) {
+            document.getElementById('editTypeId').value = typeId;
+            document.getElementById('editTypeName').value = currentName;
+            new bootstrap.Modal(document.getElementById('editTypeModal')).show();
+        }
+        async function saveItemTypeEdit(event) {
+            event.preventDefault();
+            const typeId = document.getElementById('editTypeId').value;
+            const newName = document.getElementById('editTypeName').value.trim();
+
+            if (!newName) {
+                alert('O nome não pode estar vazio.');
+                return;
+            }
+
+            await fetch(`/item_types/${typeId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName })
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('editTypeModal')).hide();
+            loadItemTypes();
+        }
+        async function deleteItemType(id) {
+            if (!confirm('Tem certeza que deseja excluir este tipo? Todos os itens associados serão desassociados.')) return;
+
+            try {
+                await fetchJSON(`/item_types/${id}`, { method: 'DELETE' });
+                await loadItemTypes(); // Recarrega selects e lista horizontal
+                alert('Tipo de item excluído com sucesso');
+            } catch (e) {
+                alert('Erro ao excluir tipo: ' + e.message);
+            }
         }
 
-        async function loadItems() {
+        async function loadItems(page = 1) {
             const typeId = document.getElementById('filterType').value;
-            let url = '/items';
-            if (typeId) url += '?type_id=' + typeId;
-            const items = await fetchJSON(url);
+            const name = document.getElementById('filterName').value;
+            const minSlots = document.getElementById('filterMinSlots').value;
+            const maxSlots = document.getElementById('filterMaxSlots').value;
+
+            let url = `/items_pagination?page=${page}&per_page=12`;
+            if (typeId) url += `&type_id=${typeId}`;
+            if (name) url += `&name=${encodeURIComponent(name)}`;
+            if (minSlots) url += `&min_slots=${minSlots}`;
+            if (maxSlots) url += `&max_slots=${maxSlots}`;
+
+            const data = await fetchJSON(url);
+            const items = data.items;
             const grid = document.getElementById('itemsGrid');
             grid.innerHTML = '';
 
             if (items.length === 0) {
                 grid.innerHTML = '<p class="text-muted">Nenhum item encontrado.</p>';
+                document.getElementById('pagination').innerHTML = '';
                 return;
             }
 
@@ -561,7 +669,7 @@
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-4';
                 col.innerHTML = `
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm p-4">
                         <img src="${item.img}" class="card-img-top" alt="${item.name}">
                         <div class="card-body">
                             <h5 class="card-title">${item.name}</h5>
@@ -584,10 +692,14 @@
                 `;
                 grid.appendChild(col);
             });
-            items.forEach(async item => {
+
+            renderPagination(data.page, Math.ceil(data.total / data.per_page));
+
+            for (const item of items) {
                 const subitems = await fetchJSON(`/items/${item.id}/compatibilities`);
                 const ul = document.getElementById(`subitems-${item.id}`);
-                if (!ul) return;
+                if (!ul) continue;
+
                 subitems.forEach(sub => {
                     const li = document.createElement('li');
                     li.className = 'list-group-item d-flex justify-content-between align-items-center';
@@ -597,6 +709,13 @@
                     `;
                     ul.appendChild(li);
                 });
+                if (!subitems.length)
+                {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `Nenhum`;
+                    ul.appendChild(li);
+                }
 
                 const allItems = await fetchJSON('/items');
                 const select = document.getElementById(`addSubitemSelect-${item.id}`);
@@ -606,8 +725,30 @@
                         select.appendChild(option);
                     }
                 });
-            });
+            }
         }
+        function renderPagination(current, totalPages) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            const createPage = (p, label = p, active = false) => {
+                const li = document.createElement('li');
+                li.className = `page-item ${active ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
+                li.addEventListener('click', e => {
+                    e.preventDefault();
+                    loadItems(p);
+                });
+                container.appendChild(li);
+            };
+
+            if (current > 1) createPage(current - 1, '«');
+            for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
+                createPage(i, i, i === current);
+            }
+            if (current < totalPages) createPage(current + 1, '»');
+        }
+
 
         function showNewItemForm() {
             document.getElementById('itemForm').reset();
@@ -665,8 +806,7 @@
             loadItemTypes();
             loadItems();
         });
-    </script>
-    <script>
+    
         function newItemType() {
             document.getElementById('typeForm').reset();
             new bootstrap.Modal(document.getElementById('typeModal')).show();
