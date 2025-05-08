@@ -115,7 +115,7 @@
     </div>
 
     <div class="container py-5">
-        <h1 class="mb-4">Lista de Acessórios</h1>
+        <h1 class="mb-4">Lista de Acessórios para Armas</h1>
         <a href="{{ url_for('add_attachment') }}" class="btn btn-success mb-3">Adicionar Novo Acessório</a>
         <input type="text" id="attachmentSearchInput" class="form-control mb-2"
             placeholder="Buscar por nome ou tipo...">
@@ -134,12 +134,12 @@
     </div>
 
     <div class="container py-5">
-        <h1 class="mb-4">Tipos de itens</h1>
+        <h1 class="mb-4">Tipos de itens gerais</h1>
         <button class="btn btn-success mb-3" onclick="newItemType()">Adicionar Tipo de Item</button>
         <div id="itemTypesList" class="d-flex flex-wrap gap-2 mt-3"></div>
     </div>
     <div class="container">
-        <h1 class="mb-4">Itens</h1>
+        <h1 class="mb-4">Itens gerais</h1>
         <button class="btn btn-success mb-3" onclick="showNewItemForm()">Adicionar Novo Item</button>
 
         <select id="filterType" class="form-select mb-3" onchange="loadItems()">
@@ -725,7 +725,7 @@
             const minSlots = document.getElementById('filterMinSlots').value;
             const maxSlots = document.getElementById('filterMaxSlots').value;
 
-            let url = `/items_pagination?page=${page}&per_page=12`;
+            let url = `/items_pagination?page=${page}&per_page=6`;
             if (typeId) url += `&type_id=${typeId}`;
             if (name) url += `&name=${encodeURIComponent(name)}`;
             if (minSlots) url += `&min_slots=${minSlots}`;

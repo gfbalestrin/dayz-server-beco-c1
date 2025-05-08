@@ -878,7 +878,7 @@ def api_attachments():
     search_query = request.args.get('q', '')
     type_filter = request.args.get('type', '')
     page = int(request.args.get('page', 1))
-    per_page = 12
+    per_page = 6
     offset = (page - 1) * per_page
 
     db = get_db_connection()
