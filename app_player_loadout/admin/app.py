@@ -166,27 +166,6 @@ def index():
         # Conectar ao banco de dados
         conn = get_db_connection()
 
-        # Realizar as consultas
-        weapons = conn.execute('SELECT * FROM weapons').fetchall()
-        ammunitions = conn.execute("""
-            SELECT
-                ammunitions.id,
-                ammunitions.name,
-                ammunitions.name_type,
-                calibers.name AS caliber_name,
-                ammunitions.slots,
-                ammunitions.width,
-                ammunitions.height,
-                ammunitions.img
-            FROM
-                ammunitions
-            JOIN
-                calibers ON ammunitions.caliber_id = calibers.id;
-        """).fetchall()
-        magazines = conn.execute('SELECT * FROM magazines').fetchall()
-        calibers = conn.execute('SELECT * FROM calibers').fetchall()
-        attachments = conn.execute('SELECT * FROM attachments').fetchall()
-
     except DatabaseError as e:
         flash(f"Ocorreu um erro ao acessar o banco de dados: {str(e)}", 'danger')
         return redirect(url_for('login'))
@@ -196,13 +175,51 @@ def index():
         conn.close()
 
     # Renderizar a página com os dados obtidos
-    return render_template('index.html', 
-                           weapons=weapons, 
-                           ammunitions=ammunitions, 
-                           magazines=magazines, 
-                           calibers=calibers, 
-                           attachments=attachments)
+    return render_template('index.html')
+
 # Arma
+@app.route("/api/weapons")
+def api_weapons():
+    page = int(request.args.get("page", 1))
+    query = request.args.get("q", "").strip()
+    feed_type = request.args.get("feed_type", "").strip().lower()
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    base_query = "SELECT * FROM weapons"
+    filters = []
+    params = []
+
+    if query:
+        filters.append("(name LIKE ? OR name_type LIKE ?)")
+        params.extend([f"%{query}%", f"%{query}%"])
+
+    if feed_type:
+        filters.append("feed_type = ?")
+        params.append(feed_type)
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    count_query = f"SELECT COUNT(*) FROM ({base_query})"
+    total = cur.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    final_query = f"{base_query} LIMIT ? OFFSET ?"
+    rows = cur.execute(final_query, (*params, per_page, offset)).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "weapons": [dict(r) for r in rows],
+        "current_page": page,
+        "total_pages": total_pages
+    })
+
+
 @app.route('/add_weapon', methods=['GET', 'POST'])
 def add_weapon():
     if 'user' not in session:
@@ -400,6 +417,49 @@ def delete_weapon(id):
 
 
 # Calibre
+@app.route("/api/calibers")
+def api_calibers():
+    page = int(request.args.get("page", 1))
+    query = request.args.get("q", "").strip()
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Query base
+    base_query = "SELECT * FROM calibers"
+    filters = []
+    params = []
+
+    # Filtra pelo nome do calibre, se houver
+    if query:
+        filters.append("name LIKE ?")
+        params.append(f"%{query}%")
+
+    # Aplica os filtros, se existirem
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    # Query para contar o total de calibres
+    count_query = f"SELECT COUNT(*) FROM ({base_query})"
+    total = cur.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    # Query para obter os calibres paginados
+    final_query = f"{base_query} LIMIT ? OFFSET ?"
+    rows = cur.execute(final_query, (*params, per_page, offset)).fetchall()
+
+    conn.close()
+
+    # Retorna os calibres com informações de paginação
+    return jsonify({
+        "calibers": [dict(r) for r in rows],
+        "current_page": page,
+        "total_pages": total_pages
+    })
+
+
 @app.route('/add_caliber', methods=['GET', 'POST'])
 def add_caliber():
     if 'user' not in session:
@@ -488,9 +548,48 @@ def delete_caliber(id):
     
     return redirect('/')
 
-
-
 # Munição
+@app.route("/api/ammunitions")
+def api_ammunitions():
+    page = int(request.args.get("page", 1))
+    query = request.args.get("q", "").strip()
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    base_query = """
+        SELECT a.*, c.name as caliber_name
+        FROM ammunitions a
+        JOIN calibers c ON a.caliber_id = c.id
+    """
+    filters = []
+    params = []
+
+    if query:
+        filters.append("(a.name LIKE ? OR a.name_type LIKE ? OR c.name LIKE ?)")
+        params.extend([f"%{query}%", f"%{query}%", f"%{query}%"])
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    count_query = f"SELECT COUNT(*) FROM ({base_query})"
+    total = cur.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    final_query = f"{base_query} LIMIT ? OFFSET ?"
+    rows = cur.execute(final_query, (*params, per_page, offset)).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "ammunitions": [dict(r) for r in rows],
+        "current_page": page,
+        "total_pages": total_pages
+    })
+
+
 @app.route('/add_ammo', methods=['GET', 'POST'])
 def add_ammo():
     if 'user' not in session:
@@ -607,6 +706,43 @@ def delete_ammo(id):
         conn.close()
 
     return redirect('/')
+
+# Carregador
+@app.route("/api/magazines")
+def api_magazines():
+    page = int(request.args.get("page", 1))
+    query = request.args.get("q", "").strip()
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    base_query = "SELECT * FROM magazines"
+    filters = []
+    params = []
+
+    if query:
+        filters.append("(name LIKE ? OR name_type LIKE ?)")
+        params.extend([f"%{query}%", f"%{query}%"])
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    count_query = f"SELECT COUNT(*) FROM ({base_query})"
+    total = cur.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    final_query = f"{base_query} LIMIT ? OFFSET ?"
+    magazines = cur.execute(final_query, (*params, per_page, offset)).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "magazines": [dict(m) for m in magazines],
+        "current_page": page,
+        "total_pages": total_pages
+    })
 
 
 @app.route('/add_magazine', methods=['GET', 'POST'])
@@ -737,6 +873,55 @@ def delete_magazine(id):
 
 
 # Acessórios
+@app.route('/api/attachments')
+def api_attachments():
+    search_query = request.args.get('q', '')
+    type_filter = request.args.get('type', '')
+    page = int(request.args.get('page', 1))
+    per_page = 12
+    offset = (page - 1) * per_page
+
+    db = get_db_connection()
+    base_query = "SELECT * FROM attachments WHERE 1=1"
+    count_query = "SELECT COUNT(*) FROM attachments WHERE 1=1"
+    params = []
+    
+    if search_query:
+        base_query += " AND (name LIKE ? OR name_type LIKE ?)"
+        count_query += " AND (name LIKE ? OR name_type LIKE ?)"
+        params += [f"%{search_query}%", f"%{search_query}%"]
+
+    if type_filter:
+        base_query += " AND type = ?"
+        count_query += " AND type = ?"
+        params.append(type_filter)
+
+    total = db.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    base_query += " LIMIT ? OFFSET ?"
+    params += [per_page, offset]
+    rows = db.execute(base_query, params).fetchall()
+    db.close()
+
+    data = [{
+        "id": row["id"],
+        "name": row["name"],
+        "name_type": row["name_type"],
+        "type": row["type"],
+        "battery": row["battery"],
+        "slots": row["slots"],
+        "width": row["width"],
+        "height": row["height"],
+        "img": row["img"]
+    } for row in rows]
+
+    return jsonify({
+        "attachments": data,
+        "total_pages": total_pages,
+        "current_page": page
+    })
+    
 @app.route('/add_attachment', methods=['GET', 'POST'])
 def add_attachment():
     if 'user' not in session:
@@ -1479,4 +1664,4 @@ def logout():
 # ✅ ESSENCIAL PARA INICIAR O SERVIDOR
 if __name__ == '__main__':
     start_scheduler()
-    app.run(host='0.0.0.0', port=54321, debug=False)
+    app.run(host='0.0.0.0', port=54321, debug=True)

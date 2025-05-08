@@ -1,0 +1,90 @@
+{
+  "nRhBiJjrMtYme0c5mKk5khnwKSH5SjD40C8SBl9L4S4=": {
+    "weapons": {
+      "primary_weapon": {
+        "name_type": "M4A1",
+        "feed_type": "magazine",
+        "slots": 24,
+        "width": 8,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_STANAG_60Rnd",
+          "capacity": 60,
+          "slots": 6,
+          "width": 2,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_556x45Tracer",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
+        "attachments": [
+          {
+            "name_type": "ACOGOptic",
+            "type": "scope",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_MPHndgrd",
+            "type": "handguard",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_CQBBttstck",
+            "type": "buttstock",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          }
+        ]
+      },
+      "secondary_weapon": null,
+      "small_weapon": null
+    }
+  },
+  "96thY5z735sVt63IAcCdlygO_j_kvIg9Knhv1VgDEnk=": {
+    "weapons": {
+      "primary_weapon": {
+        "name_type": "AKM",
+        "feed_type": "magazine",
+        "slots": 24,
+        "width": 8,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_AKM_Drum75Rnd",
+          "capacity": 75,
+          "slots": 9,
+          "width": 3,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_762x39",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
+        "attachments": [
+          {
+            "name_type": "KobraOptic",
+            "type": "scope",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "battery": true
+          }
+        ]
+      },
+      "secondary_weapon": null,
+      "small_weapon": null
+    }
+  }
+}
