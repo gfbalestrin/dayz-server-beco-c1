@@ -99,13 +99,240 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        .btn-active {
+            background-color: #0e1330; /* Cor de fundo quando o botão está ativo */
+            color: white; /* Cor do texto */
+        }
     </style>
 </head>
 
 <body class="container py-4">
     <h2>Loadout de {{ player.PlayerName or player.PlayerID }}</h2>
+    <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
+        <div class="row g-3 mb-4">
+            <!-- Botão para Configurar Arma Primária -->
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrimary" aria-expanded="false" aria-controls="collapsePrimary">
+                    <i class="fas fa-gun me-2"></i> Configurar arma primária
+                </button>
+            </div>
+            
+            <!-- Botão para Configurar Arma Secundária -->
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecundary" aria-expanded="false" aria-controls="collapseSecundary">
+                    <i class="fas fa-gun me-2"></i> Configurar arma secundária
+                </button>
+            </div>
+            
+            <!-- Botão para Configurar Arma Pequena -->
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSmall" aria-expanded="false" aria-controls="collapseSmall">
+                    <i class="fas fa-gun me-2"></i> Configurar arma pequena
+                </button>                
+            </div>
+            
+        
+        <div class="collapse mt-0" id="collapsePrimary">
+            <!-- Seção Primary Weapon (existente) -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mt-4" id="primary-weapon-list">
+                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                            <div class="col-md-3">
+                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                    data-weapon-type="primary">
+                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                    <div class="card-body text-center">
+                                        <p class="card-text">{{ weapon.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
+                    </div>
+                </div>
+            </div>
 
-    <div class="mb-3">
+            <div class="mb-3 d-none" id="div-primary-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Primário</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="primary-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-primary-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Primária</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="primary-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-primary-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Primários</h4>
+                        <hr>
+                        <div id="primary-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse mt-0" id="collapseSecundary">
+            <!-- Seção Secondary Weapon -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mt-4" id="secondary-weapon-list">
+                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                            <div class="col-md-3">
+                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                    data-weapon-type="secondary">
+                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                    <div class="card-body text-center">
+                                        <p class="card-text">{{ weapon.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="secondary_weapon_id" id="secondary_weapon_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Secundário</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="secondary-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="secondary_magazine_id" id="secondary_magazine_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Secundária</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="secondary-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="secondary_ammo_id" id="secondary_ammo_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-secondary-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Secundários</h4>
+                        <hr>
+                        <div id="secondary-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse mt-0" id="collapseSmall">
+            <!-- Seção Small Weapon -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body mt-4">
+                        <div class="row" id="small-weapon-list">
+                            {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) and not weapon.is_banned %} 
+                                <div class="col-md-3">
+                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}" data-weapon-type="small">
+                                        <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                        <div class="card-body text-center">
+                                            <p class="card-text">{{ weapon.name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                        {% endfor %}
+                        </div>
+                        <input type="hidden" name="small_weapon_id" id="small_weapon_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-small-magazines">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Carregador Pequeno</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="small-magazine-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="small_magazine_id" id="small_magazine_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-small-ammos">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Munição Pequena</h4>
+                        <hr>
+                        <div class="d-flex flex-wrap" id="small-ammo-list">
+                            <p>Selecione uma arma primeiro</p>
+                        </div>
+                        <input type="hidden" name="small_ammo_id" id="small_ammo_id">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 d-none" id="div-small-attachments">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-4 text-center">Acessórios Pequenos</h4>
+                        <hr>
+                        <div id="small-attachments-section" class="row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="d-flex justify-content-between mt-4">
+            <div>
+                <button type="submit" class="btn btn-success">Salvar Loadout</button>
+                <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
+
+            </div>
+            <a href="{{ url_for('delete_loadout', player_id=player.PlayerID) }}" class="btn btn-danger"
+                onclick="return confirm('Tem certeza que deseja excluir?');">Resetar Loadout</a>
+        </div>
+    </form>
+    <div class="mb-3 mt-3">
         <div class="card">
             <div class="card-body">
                 <h4 class="text-success mb-4 text-center">Loadout salvo</h4>
@@ -182,236 +409,7 @@
     <!-- JS do Bootstrap (com Popper incluído) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
-
-       
-
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrimary">
-                    <i class="fas fa-gun me-2"></i> Configurar arma primária
-                </button>
-                
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecundary">
-                    <i class="fas fa-gun me-2"></i> Configurar arma secundária
-                </button>
-                
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSmall">
-                    <i class="fas fa-gun me-2"></i> Configurar arma pequena
-                </button>                
-        </div>
-
-        
-        <div class="collapse" id="collapsePrimary">
-            <!-- Seção Primary Weapon (existente) -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Configurar Arma Primária</h4>
-                        <hr>
-                        <div class="row" id="primary-weapon-list">
-                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
-                            <div class="col-md-3">
-                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
-                                    data-weapon-type="primary">
-                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                    <div class="card-body text-center">
-                                        <p class="card-text">{{ weapon.name }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-primary-magazines">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Carregador Primário</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="primary-magazine-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-primary-ammos">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Munição Primária</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="primary-ammo-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-primary-attachments">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Acessórios Primários</h4>
-                        <hr>
-                        <div id="primary-attachments-section" class="row"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="collapse" id="collapseSecundary">
-            <!-- Seção Secondary Weapon -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Ajustar Arma Secundária</h4>
-                        <hr>
-                        <div class="row" id="secondary-weapon-list">
-                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
-                            <div class="col-md-3">
-                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
-                                    data-weapon-type="secondary">
-                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                    <div class="card-body text-center">
-                                        <p class="card-text">{{ weapon.name }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <input type="hidden" name="secondary_weapon_id" id="secondary_weapon_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-magazines">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Carregador Secundário</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="secondary-magazine-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="secondary_magazine_id" id="secondary_magazine_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-ammos">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Munição Secundária</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="secondary-ammo-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="secondary_ammo_id" id="secondary_ammo_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-attachments">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Acessórios Secundários</h4>
-                        <hr>
-                        <div id="secondary-attachments-section" class="row"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="collapse" id="collapseSmall">
-            <!-- Seção Small Weapon -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Ajustar Arma Pequena</h4>
-                        <hr>
-                        <div class="row" id="small-weapon-list">
-                            {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) and not weapon.is_banned %} 
-                                <div class="col-md-3">
-                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}" data-weapon-type="small">
-                                        <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                        <div class="card-body text-center">
-                                            <p class="card-text">{{ weapon.name }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                        {% endfor %}
-                        </div>
-                        <input type="hidden" name="small_weapon_id" id="small_weapon_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-small-magazines">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Carregador Pequeno</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="small-magazine-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="small_magazine_id" id="small_magazine_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-small-ammos">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Munição Pequena</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="small-ammo-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="small_ammo_id" id="small_ammo_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-small-attachments">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Acessórios Pequenos</h4>
-                        <hr>
-                        <div id="small-attachments-section" class="row"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        <div class="d-flex justify-content-between mt-4">
-            <div>
-                <button type="submit" class="btn btn-success">Salvar Loadout</button>
-                <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
-
-            </div>
-            <a href="{{ url_for('delete_loadout', player_id=player.PlayerID) }}" class="btn btn-danger"
-                onclick="return confirm('Tem certeza que deseja excluir?');">Resetar Loadout</a>
-        </div>
-    </form>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Função genérica para lidar com a seleção de armas
@@ -604,7 +602,43 @@
             setupWeaponSelection('small');
         });
     </script>
+    <!-- Script para Alterar Estilo e Comportamento -->
+<script>
+    // Quando o colapso é mostrado ou ocultado, alteramos a aparência do botão
+    var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    
+    collapseElements.forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Remover a classe 'btn-active' de todos os botões
+            collapseElements.forEach(function(btn) {
+                btn.classList.remove('btn-active');
+            });
 
+            // Adiciona a classe 'btn-active' no botão clicado
+            if (!button.classList.contains('btn-active')) {
+                button.classList.add('btn-active');
+            }
+        });
+    });
+
+    // Usando o "data-bs-parent" para garantir que apenas um colapso esteja aberto de cada vez
+    document.addEventListener('DOMContentLoaded', function () {
+        var collapseContainers = document.querySelectorAll('.collapse');
+        collapseContainers.forEach(function (collapse) {
+            collapse.addEventListener('show.bs.collapse', function () {
+                // Fecha outros colapsos
+                collapseContainers.forEach(function (otherCollapse) {
+                    if (otherCollapse !== collapse) {
+                        var bsCollapse = new bootstrap.Collapse(otherCollapse, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                });
+            });
+        });
+    });
+</script>
 </body>
 
 </html>

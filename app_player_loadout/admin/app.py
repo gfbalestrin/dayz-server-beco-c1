@@ -1572,7 +1572,7 @@ def save_loadout_weapons(player_id):
     conn = get_db_connection()
 
     try:
-        # Obtem os dados do formulário
+        # Obtém os dados do formulário
         primary_weapon_id = request.form.get('primary_weapon_id') or None
         primary_magazine_id = request.form.get('primary_magazine_id') or None
         primary_ammo_id = request.form.get('primary_ammo_id') or None
@@ -1587,29 +1587,64 @@ def save_loadout_weapons(player_id):
 
         def parse(val): return int(val) if val else None
 
-        # Upsert na tabela player_loadouts_weapons
-        conn.execute('''
-            INSERT INTO player_loadouts_weapons (
-                player_id, primary_weapon_id, primary_magazine_id, primary_ammo_id,
-                secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
-                small_weapon_id, small_magazine_id, small_ammo_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(player_id) DO UPDATE SET
-                primary_weapon_id = excluded.primary_weapon_id,
-                primary_magazine_id = excluded.primary_magazine_id,
-                primary_ammo_id = excluded.primary_ammo_id,
-                secondary_weapon_id = excluded.secondary_weapon_id,
-                secondary_magazine_id = excluded.secondary_magazine_id,
-                secondary_ammo_id = excluded.secondary_ammo_id,
-                small_weapon_id = excluded.small_weapon_id,
-                small_magazine_id = excluded.small_magazine_id,
-                small_ammo_id = excluded.small_ammo_id
-        ''', (
-            player_id,
-            parse(primary_weapon_id), parse(primary_magazine_id), parse(primary_ammo_id),
-            parse(secondary_weapon_id), parse(secondary_magazine_id), parse(secondary_ammo_id),
-            parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id)
-        ))
+        # Verifica se os dados de loadout já existem
+        existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
+
+        # Prepara a consulta para inserir ou atualizar
+        if existing_loadout:
+            update_data = []
+            update_query = "UPDATE player_loadouts_weapons SET "
+
+            if primary_weapon_id:
+                update_query += "primary_weapon_id = ?, "
+                update_data.append(parse(primary_weapon_id))
+            if primary_magazine_id:
+                update_query += "primary_magazine_id = ?, "
+                update_data.append(parse(primary_magazine_id))
+            if primary_ammo_id:
+                update_query += "primary_ammo_id = ?, "
+                update_data.append(parse(primary_ammo_id))
+
+            if secondary_weapon_id:
+                update_query += "secondary_weapon_id = ?, "
+                update_data.append(parse(secondary_weapon_id))
+            if secondary_magazine_id:
+                update_query += "secondary_magazine_id = ?, "
+                update_data.append(parse(secondary_magazine_id))
+            if secondary_ammo_id:
+                update_query += "secondary_ammo_id = ?, "
+                update_data.append(parse(secondary_ammo_id))
+
+            if small_weapon_id:
+                update_query += "small_weapon_id = ?, "
+                update_data.append(parse(small_weapon_id))
+            if small_magazine_id:
+                update_query += "small_magazine_id = ?, "
+                update_data.append(parse(small_magazine_id))
+            if small_ammo_id:
+                update_query += "small_ammo_id = ?, "
+                update_data.append(parse(small_ammo_id))
+
+            # Remove a vírgula extra no final da consulta de atualização
+            update_query = update_query.rstrip(', ') + " WHERE player_id = ?"
+            update_data.append(player_id)
+
+            # Realiza o update
+            conn.execute(update_query, tuple(update_data))
+        else:
+            # Caso o loadout não exista, insere um novo
+            conn.execute(''' 
+                INSERT INTO player_loadouts_weapons (
+                    player_id, primary_weapon_id, primary_magazine_id, primary_ammo_id,
+                    secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
+                    small_weapon_id, small_magazine_id, small_ammo_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                player_id,
+                parse(primary_weapon_id), parse(primary_magazine_id), parse(primary_ammo_id),
+                parse(secondary_weapon_id), parse(secondary_magazine_id), parse(secondary_ammo_id),
+                parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id)
+            ))
 
         # Recupera o ID do loadout
         row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
@@ -1622,13 +1657,12 @@ def save_loadout_weapons(player_id):
         for slot in ['primary', 'secondary', 'small']:
             attachment_ids = request.form.getlist(f'{slot}_attachments')
             for aid in attachment_ids:
-                conn.execute('''
+                conn.execute(''' 
                     INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
                     VALUES (?, ?, ?)
                 ''', (player_loadouts_weapons_id, int(aid), slot))
 
         conn.commit()
-        
         flash("Loadout salvo com sucesso!", "success")
 
     except Exception as e:
