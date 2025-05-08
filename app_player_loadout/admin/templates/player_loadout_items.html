@@ -67,7 +67,8 @@
 
         for (const [loc, locItems] of Object.entries(grouped)) {
             const section = document.createElement('div');
-            section.innerHTML = `<h5>${localizationParse(loc)}</h5>`;
+            section.innerHTML = `<h5>${localizationParse(loc)}</h5>`;            
+
             const row = document.createElement('div');
             row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
 
