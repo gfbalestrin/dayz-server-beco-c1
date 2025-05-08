@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
     <meta charset="UTF-8">
     <title>Loadout de itens do jogador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="container py-4">
     <h2>Loadout de <span id="playerName">{{ player.PlayerName or player.PlayerID }}</span></h2>
 
@@ -13,7 +15,8 @@
     <div id="noItemsMsg" class="alert alert-warning d-none mt-3">Nenhum item configurado para este jogador.</div>
 
     <div class="mb-3">
-        <input type="text" id="itemSearchInput" class="form-control" placeholder="Buscar itens por nome..." oninput="loadAvailableItemsGrouped()">
+        <input type="text" id="itemSearchInput" class="form-control" placeholder="Buscar itens por nome..."
+            oninput="loadAvailableItemsGrouped()">
     </div>
 
     <h4>Itens disponíveis</h4>
@@ -28,6 +31,32 @@
             await loadPlayerItems();
             await loadAvailableItemsGrouped();
         };
+        // function localizationParse(localization) {
+        //     switch (localization) {
+        //         case "head":
+        //             return "Cabeça";
+        //         case "eyes":
+        //             return "Olhos";
+        //         case "face":
+        //             return "Rosto";
+        //         case "torso":
+        //             return "Torso";
+        //         case "foot":
+        //             return "Pés";
+        //         case "back":
+        //             return "Costas";
+        //         case "waist":
+        //             return "Cintura";
+        //         case "hands":
+        //             return "Mãos";
+        //         case "":
+        //         case null:
+        //         case undefined:
+        //             return "Não possui";
+        //         default:
+        //             return localization; // retorna o valor original se não for mapeado
+        //     }
+        // }
 
         async function fetchJSON(url, options = {}) {
             const res = await fetch(url, options);
@@ -48,73 +77,102 @@
         }
 
         async function loadPlayerItems() {
-    const container = document.getElementById('groupedItemsGrid');
-    const msg = document.getElementById('noItemsMsg');
-    container.innerHTML = '';
-    
-    try {
-        const items = await fetchJSON(`/players/${playerId}/items`);
-        msg.classList.toggle('d-none', items.length > 0);
-        console.log("items", items);
-        const grouped = {};
+            const container = document.getElementById('groupedItemsGrid');
+            const msg = document.getElementById('noItemsMsg');
+            container.innerHTML = '';
 
-        // Agrupar os itens por localization
-        for (const item of items) {
-            const key = item.localization || 'outros';
-            if (!grouped[key]) grouped[key] = [];
-            grouped[key].push(item);
-        }
+            try {
+                const items = await fetchJSON(`/players/${playerId}/items`);
+                msg.classList.toggle('d-none', items.length > 0);
+                console.log("items", items);
+                const groupedByType = {};
 
-        for (const [loc, locItems] of Object.entries(grouped)) {
-            const section = document.createElement('div');
-            section.innerHTML = `<h5>${localizationParse(loc)}</h5>`;            
+                // Agrupar os itens por tipo (type_name)
+                for (const item of items) {
+                    const type = item.type_name || 'Outros'; // Agrupar por tipo (type_name)
+                    if (!groupedByType[type]) groupedByType[type] = {};
 
-            const row = document.createElement('div');
-            row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+                    // Dentro de cada tipo, agrupar por localização (localization)
+                    const loc = item.localization || 'outros';
+                    if (!groupedByType[type][loc]) groupedByType[type][loc] = [];
+                    groupedByType[type][loc].push(item);
+                }
 
-            locItems.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card p-2 text-center';
-                card.style.minWidth = '160px';
-                const armazenamento = item.storage_slots > 0
-                    ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
-                    : "Não possui";
+                // Para cada tipo, criar uma seção
+                for (const [type, locGroup] of Object.entries(groupedByType)) {
+                    const section = document.createElement('div');
 
-                card.innerHTML = `
-                    <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
-                    <div class="card-body p-2">
-                        <h6 class="card-title small">${item.name}</h6>
-                        <p class="small text-muted">${item.name_type}</p>
-                        <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
-                        <p class="small m-0">Armazenamento: ${armazenamento}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div class="input-group" style="max-width: 130px;">
-                                <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
-                                    <i class="fas fa-plus"></i>
+                    // Card que vai englobar todos os itens de um tipo
+                    const card = document.createElement('div');
+                    card.className = 'card mb-4'; // Card para o tipo
+
+                    // Card header com o nome do tipo
+                    card.innerHTML = `
+                <div class="card-header bg-primary text-white">
+                    <h5>${type}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="items_${type}" class="row d-flex flex-wrap gap-3">
+                        <!-- Itens do tipo serão aqui inseridos -->
+                    </div>
+                </div>
+            `;
+
+                    // Adiciona o card no container
+                    container.appendChild(card);
+
+                    // Para cada local dentro de cada tipo, criar uma subseção
+                    for (const [loc, locItems] of Object.entries(locGroup)) {
+                        const locSection = document.createElement('div');
+                        locSection.innerHTML = `<h6>${localizationParse(loc)}</h6>`;
+                        const row = document.createElement('div');
+                        row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+
+                        locItems.forEach(item => {
+                            const cardItem = document.createElement('div');
+                            cardItem.className = 'card p-2 text-center bg-light'; // Card interno para o item
+                            cardItem.style.minWidth = '160px';
+                            const armazenamento = item.storage_slots > 0
+                                ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
+                                : "Não possui";
+
+                            cardItem.innerHTML = `
+                        <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
+                        <div class="card-body p-2">
+                            <h6 class="card-title small">${item.name}</h6>
+                            <p class="small text-muted">${item.name_type}</p>
+                            <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
+                            <p class="small m-0">Armazenamento: ${armazenamento}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="input-group" style="max-width: 130px;">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
+                                    Remover
                                 </button>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
-                                Remover
-                            </button>
                         </div>
-                    </div>
-                `;
-                row.appendChild(card);
-            });
+                    `;
+                            row.appendChild(cardItem);
+                        });
 
-            section.appendChild(row);
-            container.appendChild(section);
+                        locSection.appendChild(row);
+                        card.querySelector('.card-body').appendChild(locSection);
+                    }
+                }
+
+            } catch (err) {
+                msg.classList.remove('d-none');
+                msg.textContent = 'Erro ao carregar itens do jogador.';
+            }
         }
 
-    } catch (err) {
-        msg.classList.remove('d-none');
-        msg.textContent = 'Erro ao carregar itens do jogador.';
-    }
-}
 
         async function removeItemFromPlayer(itemId) {
             if (!confirm('Remover este item do jogador?')) return;
@@ -137,74 +195,103 @@
         countMap[item.id] = (countMap[item.id] || 0) + 1;
     }
 
-    const grouped = {};
+    const groupedByType = {};
+    const groupedByLocalization = {};
+
+    // Agrupar itens por tipo e dentro por localization
     for (const item of allItems) {
         if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) continue;
 
-        if (!grouped[item.type_name]) grouped[item.type_name] = {};
-        const loc = item.localization || 'outros';
+        if (!groupedByType[item.type_name]) groupedByType[item.type_name] = {};
 
-        if (!grouped[item.type_name][loc]) grouped[item.type_name][loc] = [];
-        grouped[item.type_name][loc].push(item);
+        if (!groupedByType[item.type_name][item.localization]) {
+            groupedByType[item.type_name][item.localization] = [];
+        }
+        groupedByType[item.type_name][item.localization].push(item);
     }
 
     const container = document.getElementById('availableItemsContainer');
     container.innerHTML = '';
 
-    for (const [typeName, locGroups] of Object.entries(grouped)) {
-        const card = document.createElement('div');
-        card.className = 'card mb-4 shadow-sm';
+    // Accordion para os itens disponíveis
+    const accordion = document.createElement('div');
+    accordion.className = 'accordion';
+    accordion.id = 'availableItemsAccordion';
 
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header bg-primary text-white d-flex justify-content-between align-items-center';
-        cardHeader.innerHTML = `<h6 class="mb-0">${typeName}</h6>`;
+    for (const [typeName, locItems] of Object.entries(groupedByType)) {
+        const currentPage = groupPageState[typeName] || 1;
+        const totalPages = Math.ceil(Object.values(locItems).flat().length / ITEMS_PER_PAGE);
+        const pageItems = Object.values(locItems).flat().slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-        const cardBody = document.createElement('div');
-        cardBody.className = 'card-body';
+        // Accordion item para cada tipo
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        const itemId = `itemType-${typeName.replace(/\s+/g, '-').toLowerCase()}`;
 
-        for (const [locKey, items] of Object.entries(locGroups)) {
-            const locLabel = localizationParse(locKey);
+        accordionItem.innerHTML = `
+            <h2 class="accordion-header" id="heading-${itemId}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${itemId}" aria-expanded="true" aria-controls="collapse-${itemId}">
+                    ${typeName}
+                </button>
+            </h2>
+            <div id="collapse-${itemId}" class="accordion-collapse collapse" aria-labelledby="heading-${itemId}" data-bs-parent="#availableItemsAccordion">
+                <div class="accordion-body">
+                    ${Object.entries(locItems).map(([localization, items]) => {
+                        // Se não houver itens para uma localização, pule.
+                        if (items.length === 0) return '';
 
-            const locSection = document.createElement('div');
-            locSection.className = 'mb-4';
+                        const locName = localizationParse(localization) || "Não especificado";
 
-            const locTitle = document.createElement('h6');
-            locTitle.className = 'mb-2 text-secondary border-bottom pb-1';
-            locTitle.textContent = locLabel;
-            locSection.appendChild(locTitle);
+                        return `
+                            <h5>${locName}</h5>
+                            <div class="d-flex flex-row flex-nowrap overflow-auto gap-3">
+                                ${items.map(item => {
+                                    const count = countMap[item.id] || 0;
 
-            const row = document.createElement('div');
-            row.className = 'd-flex flex-row flex-wrap gap-3';
+                                    return `
+                                        <div class="card p-2 text-center bg-light" style="min-width: 160px;">
+                                            <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title small">${item.name}</h6>
+                                                ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
+                                                <button class="btn btn-sm btn-primary mt-1" onclick="addItemToPlayerDirect(${item.id})" ${count > 0 ? 'disabled' : ''}>
+                                                    Adicionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `;
+                    }).join('')}
+                    <!-- Paginação -->
+                    ${totalPages > 1 ? `
+                        <div class="mt-2 d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changePage(${typeName}, -1)" ${currentPage === 1 ? 'disabled' : ''}>
+                                Anterior
+                            </button>
+                            <span>Página ${currentPage} de ${totalPages}</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="changePage(${typeName}, 1)" ${currentPage === totalPages ? 'disabled' : ''}>
+                                Próxima
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
 
-            for (const item of items) {
-                const count = countMap[item.id] || 0;
-
-                const itemCard = document.createElement('div');
-                itemCard.className = 'card p-2 text-center';
-                itemCard.style.minWidth = '160px';
-
-                itemCard.innerHTML = `
-                    <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
-                    <div class="card-body p-2">
-                        <h6 class="card-title small">${item.name}</h6>
-                        ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
-                        <button class="btn btn-sm btn-primary mt-1" onclick="addItemToPlayerDirect(${item.id})" ${count > 0 ? 'disabled' : ''}>
-                            Adicionar
-                        </button>
-                    </div>
-                `;
-                row.appendChild(itemCard);
-            }
-
-            locSection.appendChild(row);
-            cardBody.appendChild(locSection);
-        }
-
-        card.appendChild(cardHeader);
-        card.appendChild(cardBody);
-        container.appendChild(card);
+        accordion.appendChild(accordionItem);
     }
+
+    container.appendChild(accordion);
 }
+
+function changePage(typeName, direction) {
+    const currentPage = groupPageState[typeName] || 1;
+    groupPageState[typeName] = currentPage + direction;
+    loadAvailableItemsGrouped();
+}
+
 
         async function addItemToPlayerDirect(itemId) {
             try {
@@ -234,5 +321,8 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>
