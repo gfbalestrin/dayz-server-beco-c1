@@ -158,6 +158,17 @@ def criar_tabelas():
         FOREIGN KEY (child_item_id) REFERENCES item(id),
         UNIQUE (parent_item_id, child_item_id) -- evita duplicatas
     );
+    
+    CREATE TABLE player_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_id TEXT NOT NULL,
+        item_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (player_id) REFERENCES players_database(PlayerID),
+        FOREIGN KEY (item_id) REFERENCES item(id),
+        UNIQUE (player_id, item_id) -- evita múltiplas linhas duplicadas
+    );
+
 
     """)
     conn.commit()

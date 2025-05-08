@@ -1716,7 +1716,6 @@ def get_items_pagination():
         "per_page": per_page
     })
 
-
 @app.route('/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
     conn = get_db_connection()
@@ -1862,7 +1861,6 @@ def delete_item_type(type_id):
     finally:
         conn.close()
 
-
 @app.route('/items/<int:item_id>/compatibilities', methods=['GET'])
 def get_compatibilities(item_id):
     conn = get_db_connection()
@@ -1909,6 +1907,199 @@ def delete_compatibility(item_id, child_item_id):
         return jsonify({'error': str(e)}), 400
     finally:
         conn.close()
+
+# Loadout de items para players
+@app.route('/player_loadout_items/<player_id>', methods=['GET', 'POST'])
+def player_loadout_items(player_id):
+    conn = get_db_connection()
+    
+    items = conn.execute('''
+        SELECT pi.id AS player_item_id, i.*
+        FROM player_items pi
+        JOIN item i ON pi.item_id = i.id
+        WHERE pi.player_id = ?
+    ''', (player_id,)).fetchall()
+    conn.close()
+    conn2 = get_db_connection_players_beco_c1()
+    player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
+    conn.close()
+    return render_template(
+        'player_loadout_items.html',
+        items=items, player=player
+    )
+ 
+# @app.route('/players/<player_id>/items')
+# def get_player_items(player_id):
+#     conn = get_db_connection()
+#     items = conn.execute('''
+#         SELECT item.*
+#         FROM player_items
+#         JOIN item ON player_items.item_id = item.id
+#         WHERE player_items.player_id = ?
+#     ''', (player_id,)).fetchall()
+#     conn.close()
+#     return jsonify([dict(row) for row in items])
+
+# @app.route('/players/<player_id>/items', methods=['POST'])
+# def add_item_to_player(player_id):
+#     data = request.get_json()
+#     item_id = data.get('item_id')
+
+#     if not item_id:
+#         return jsonify({'error': 'ID do item é obrigatório'}), 400
+
+#     conn = get_db_connection()
+#     try:
+#         conn.execute('INSERT INTO player_items (player_id, item_id) VALUES (?, ?)', (player_id, item_id))
+#         conn.commit()
+#     except sqlite3.IntegrityError:
+#         return jsonify({'error': 'Item já está adicionado'}), 400
+#     finally:
+#         conn.close()
+
+#     return jsonify({'success': True})
+
+# @app.route('/players/<player_id>/items/<int:item_id>', methods=['DELETE'])
+# def remove_item_from_player(player_id, item_id):
+#     conn = get_db_connection()
+#     conn.execute('DELETE FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
+#     conn.commit()
+#     conn.close()
+#     return jsonify({'success': True})
+
+@app.route('/players/<player_id>/items', methods=['DELETE'])
+def clear_player_items(player_id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM player_items WHERE player_id = ?', (player_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': f'Todos os itens do jogador {player_id} foram removidos.'})
+
+# Novos metodos do loadout de items
+# Função auxiliar para obter os itens do jogador
+def get_player_items(player_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT i.*, pi.quantity
+        FROM player_items pi
+        JOIN item i ON pi.item_id = i.id
+        WHERE pi.player_id = ?
+    """, (player_id,))
+    items = cursor.fetchall()
+    return items
+
+# Endpoint para listar os itens de um jogador
+@app.route('/players/<player_id>/items', methods=['GET'])
+def list_player_items(player_id):
+    try:
+        items = get_player_items(player_id)
+        return jsonify([dict(item) for item in items])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Endpoint para adicionar um item ao jogador
+@app.route('/players/<player_id>/items', methods=['POST'])
+def add_item_to_player(player_id):
+    item_id = request.json.get('item_id')
+    if not item_id:
+        return jsonify({'error': 'Item ID é obrigatório'}), 400
+
+    # Verifica se o item já está presente no inventário do jogador
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT quantity FROM player_items WHERE player_id = ? AND item_id = ?
+    """, (player_id, item_id))
+    result = cursor.fetchone()
+
+    # Se o item já existe, incrementa a quantidade
+    if result:
+        cursor.execute("""
+            UPDATE player_items
+            SET quantity = quantity + 1
+            WHERE player_id = ? AND item_id = ?
+        """, (player_id, item_id))
+    else:
+        # Caso contrário, insere o item com quantidade 1
+        cursor.execute("""
+            INSERT INTO player_items (player_id, item_id, quantity)
+            VALUES (?, ?, 1)
+        """, (player_id, item_id))
+
+    conn.commit()
+    return jsonify({'message': 'Item adicionado com sucesso'}), 200
+
+# Endpoint para remover um item do jogador
+@app.route('/players/<player_id>/items/<item_id>', methods=['DELETE'])
+def remove_item_from_player(player_id, item_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM player_items WHERE player_id = ? AND item_id = ?
+    """, (player_id, item_id))
+    conn.commit()
+    return jsonify({'message': 'Item removido com sucesso'}), 200
+
+# Endpoint para verificar compatibilidade entre os itens
+@app.route('/items/compatibility', methods=['GET'])
+def check_item_compatibility():
+    parent_item_id = request.args.get('parent_item_id')
+    child_item_id = request.args.get('child_item_id')
+
+    if not parent_item_id or not child_item_id:
+        return jsonify({'error': 'Os IDs dos itens são necessários'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM item_compatibility
+        WHERE parent_item_id = ? AND child_item_id = ?
+    """, (parent_item_id, child_item_id))
+    compatibility = cursor.fetchone()
+
+    if compatibility:
+        return jsonify({'compatible': True}), 200
+    else:
+        return jsonify({'compatible': False}), 200
+
+# Endpoint para listar todos os itens
+@app.route('/items', methods=['GET'])
+def list_items():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, name_type, img FROM item")
+    items = cursor.fetchall()
+    return jsonify([{
+        'id': item['id'],
+        'name': item['name'],
+        'name_type': item['name_type'],
+        'img': item['img']
+    } for item in items])
+
+@app.route('/players/<player_id>/items/<int:item_id>/quantity', methods=['PATCH'])
+def update_item_quantity(player_id, item_id):
+    delta = request.json.get('delta')
+    if not isinstance(delta, int):
+        return jsonify({'error': 'Delta inválido'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT quantity FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({'error': 'Item não encontrado'}), 404
+
+    new_quantity = row['quantity'] + delta
+    if new_quantity < 1:
+        cursor.execute('DELETE FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
+    else:
+        cursor.execute('UPDATE player_items SET quantity = ? WHERE player_id = ? AND item_id = ?', (new_quantity, player_id, item_id))
+
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 
 @app.route('/login', methods=['GET', 'POST'])

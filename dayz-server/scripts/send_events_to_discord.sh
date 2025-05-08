@@ -39,6 +39,10 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			DistanceMeter=$(echo "$DamageParsed" | cut -d'|' -f10)
 			INSERT_PLAYER_DAMAGE "$PlayerIdAttacker" "$PlayerIdVictim" "$PosAttacker" "$PosVictim" "$LocalDamage" "$HitType" "$Damage" "$Health" "$Data" "$Weapon" "$DistanceMeter"
 
+			if [[ "$DayzDeathmatch" -eq "1" ]]; then
+				continue
+			fi
+
 			SafePlayerAttackerInfo=""
 			PlayerAttacker=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerIdAttacker';")
 			if [[ -n "$PlayerAttacker" ]]; then

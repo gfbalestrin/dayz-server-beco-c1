@@ -33,6 +33,7 @@
                 <span>{{ player.PlayerName }} (<a href="https://steamcommunity.com/profiles/{{ player.SteamID }}">{{ player.SteamName }}</a>)</span>
                 <span>
                     <a href="{{ url_for('player_loadout_weapons', player_id=player.PlayerID) }}" class="btn btn-sm btn-primary">Loadout de armas</a>
+                    <a href="{{ url_for('player_loadout_items', player_id=player.PlayerID) }}" class="btn btn-sm btn-primary">Loadout de itens</a>
                 </span>
             </li>
         {% endfor %}
