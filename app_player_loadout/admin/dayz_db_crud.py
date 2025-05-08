@@ -85,9 +85,6 @@ def criar_tabelas():
     CREATE TABLE IF NOT EXISTS loadout_rules_weapons (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         weapon_id INTEGER UNIQUE NOT NULL,
-        allowed_primary BOOLEAN NOT NULL DEFAULT 1,
-        allowed_secondary BOOLEAN NOT NULL DEFAULT 1,
-        allowed_small BOOLEAN NOT NULL DEFAULT 1,
         is_banned BOOLEAN NOT NULL DEFAULT 0,
         FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE
     );

@@ -38,19 +38,6 @@
                     </select>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" name="allowed_primary" value="1" class="form-check-input" id="primaryCheck" checked>
-                    <label class="form-check-label" for="primaryCheck">Permitido como primária</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" name="allowed_secondary" value="1" class="form-check-input" id="secondaryCheck" checked>
-                    <label class="form-check-label" for="secondaryCheck">Permitido como secundária</label>
-                </div>
-                <div class="form-check">
-                    <input type="hidden" name="allowed_small" value="0" id="allowed_small_hidden">
-                    <input type="checkbox" name="allowed_small" value="1" class="form-check-input" id="allowed_small" checked>
-                    <label class="form-check-label" for="allowed_small">Permitido como arma pequena (&lt; 12 slots)</label>
-                </div>
-                <div class="form-check">
                     <input type="checkbox" name="is_banned" value="1" class="form-check-input" id="banCheck">
                     <label class="form-check-label text-danger" for="banCheck">Banir arma</label>
                 </div>
@@ -63,9 +50,6 @@
                 <thead>
                     <tr>
                         <th>Arma</th>
-                        <th>Primária</th>
-                        <th>Secundária</th>
-                        <th>Pequena</th>
                         <th>Banida</th>
                     </tr>
                 </thead>
@@ -73,9 +57,6 @@
                     {% for rule in rules %}
                     <tr>
                         <td>{{ rule.name }}</td>
-                        <td>{{ 'Sim' if rule.allowed_primary else 'Não' }}</td>
-                        <td>{{ 'Sim' if rule.allowed_secondary else 'Não' }}</td>
-                        <td>{{ 'Sim' if rule.allowed_small else 'Não' }}</td>
                         <td class="{{ 'text-danger' if rule.is_banned else '' }}">{{ 'Sim' if rule.is_banned else 'Não' }}</td>
                     </tr>
                     {% endfor %}
@@ -86,34 +67,5 @@
             </div>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('form');
-            const AllowedSmall = document.getElementById('allowed_small');
-            const AllowedSmallHidden = document.getElementById('allowed_small_hidden');
-            
-
-            // Função que atualiza o valor do campo hidden
-            function updateAllowedSmall() {
-                // Atualiza o campo hidden com base no estado do checkbox
-                if (AllowedSmall.checked) {
-                    AllowedSmallHidden.value = '1'; // Se marcado, 1
-                } else {
-                    AllowedSmallHidden.value = '0'; // Se desmarcado, 0
-                }
-            }
-
-            // Quando o checkbox for alterado, atualiza o valor do campo hidden
-            AllowedSmall.addEventListener('change', updateAllowedSmall);
-
-            // Atualizar o valor do campo hidden na primeira carga
-            updateAllowedSmall();
-
-            // Quando o formulário for enviado, garantimos que o valor do campo hidden é o mais atualizado
-            form.addEventListener('submit', function(event) {
-                updateAllowedSmall();
-            });
-        });
-    </script>
 </body>
 </html>

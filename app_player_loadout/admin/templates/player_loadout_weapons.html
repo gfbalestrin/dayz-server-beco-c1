@@ -258,7 +258,7 @@
                 <div class="card">
                     <div class="card-body mt-4">
                         <div class="row" id="small-weapon-list">
-                            {% for weapon in weapons if (weapon.slots < 12 or weapon.allowed_small) and not weapon.is_banned %} 
+                            {% for weapon in weapons if weapon.slots < 12 and not weapon.is_banned %} 
                                 <div class="col-md-3">
                                     <div class="card weapon-card" data-weapon-id="{{ weapon.id }}" data-weapon-type="small">
                                         <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">

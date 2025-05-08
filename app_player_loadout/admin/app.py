@@ -1247,20 +1247,14 @@ def loadout_rules():
     if request.method == 'POST':
         data = request.form
         weapon_id = data['weapon_id']
-        allowed_primary = int(data.get('allowed_primary', 1))
-        allowed_secondary = int(data.get('allowed_secondary', 1))
-        allowed_small = int(data.get('allowed_small', 1))
         is_banned = int(data.get('is_banned', 0))
         
         conn.execute('''
-            INSERT INTO loadout_rules_weapons (weapon_id, allowed_primary, allowed_secondary, allowed_small, is_banned)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO loadout_rules_weapons (weapon_id, is_banned)
+            VALUES (?, ?)
             ON CONFLICT(weapon_id) DO UPDATE SET
-                allowed_primary = excluded.allowed_primary,
-                allowed_secondary = excluded.allowed_secondary,
-                allowed_small = excluded.allowed_small,
                 is_banned = excluded.is_banned;
-        ''', (weapon_id, allowed_primary, allowed_secondary, allowed_small, is_banned))
+        ''', (weapon_id, is_banned))
         conn.commit()
         conn.close()
         return redirect('/loadout_rules')
@@ -1322,12 +1316,6 @@ def player_loadout_weapons(player_id):
                     errors.append(f"A arma selecionada para {slot_type} é inválida.")
                 elif rule['is_banned']:
                     errors.append(f"A arma selecionada para {slot_type} está banida.")
-                elif slot_type == 'primary' and not rule['allowed_primary']:
-                    errors.append("Essa arma não é permitida como primária.")
-                elif slot_type == 'secondary' and not rule['allowed_secondary']:
-                    errors.append("Essa arma não é permitida como secundária.")
-                elif slot_type == 'small' and not rule['allowed_small']:
-                    errors.append("Essa arma não é permitida como arma pequena.")
 
         if errors:
             for err in errors:
@@ -1366,7 +1354,7 @@ def player_loadout_weapons(player_id):
         return redirect(url_for('player_loadout', player_id=player_id))
 
     weapons = conn.execute('''
-        SELECT w.*, r.allowed_primary, r.allowed_secondary, r.allowed_small, r.is_banned
+        SELECT w.*, r.is_banned
         FROM weapons w
         LEFT JOIN loadout_rules_weapons r ON w.id = r.weapon_id
     ''').fetchall()
