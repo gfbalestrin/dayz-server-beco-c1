@@ -10,7 +10,7 @@
 
 </head>
 
-<body class="container py-4">
+<body class="container-fluid py-4">
     <!-- Título com destaque -->
     <h2 class="mt-4">
         Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID
@@ -31,16 +31,31 @@
         </a>
     </div>
 
-    <div id="groupedItemsGrid" class="mb-5 mt-4"></div>
-    <div id="noItemsMsg" class="alert alert-warning d-none mt-3">Nenhum item configurado para este jogador.</div>
+    
 
-    <div class="mb-3">
-        <input type="text" id="itemSearchInput" class="form-control" placeholder="Buscar itens por nome..."
-            oninput="loadAvailableItemsGrouped()">
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-box-open me-2"></i>Meus Itens</h5>
+        </div>
+        <div class="card-body">
+            <div id="groupedItemsGrid"></div>
+            <div id="noItemsMsg" class="alert alert-warning d-none text-center">Nenhum item configurado para este jogador.</div>
+        </div>
     </div>
 
-    <h4>Itens disponíveis</h4>
-    <div id="availableItemsContainer" class="mb-4"></div>
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-box-open me-2"></i>Itens disponíveis </h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-2">
+                <input type="text" id="itemSearchInput" class="form-control" placeholder="Buscar itens por nome..."
+                    oninput="loadAvailableItemsGrouped()">
+            </div>    
+            <div id="availableItemsContainer" class="mb-4"></div>
+        </div>
+    </div>
+    
 
     <script>
         const playerId = "{{ player.PlayerID }}";
@@ -70,6 +85,110 @@
             return map[loc] || "Outros";
         }
 
+        // Organizado por tipo e localization
+        // async function loadPlayerItems() {
+        //     const container = document.getElementById('groupedItemsGrid');
+        //     const msg = document.getElementById('noItemsMsg');
+        //     container.innerHTML = '';
+
+        //     try {
+        //         const items = await fetchJSON(`/players/${playerId}/items`);
+        //         msg.classList.toggle('d-none', items.length > 0);
+
+        //         const groupedByType = {};
+
+        //         // Agrupar por tipo e localização
+        //         for (const item of items) {
+        //             const type = item.type_name || 'Outros';
+        //             if (!groupedByType[type]) groupedByType[type] = {};
+
+        //             const loc = item.localization || 'outros';
+        //             if (!groupedByType[type][loc]) groupedByType[type][loc] = [];
+
+        //             groupedByType[type][loc].push(item);
+        //         }
+
+        //         // Criar o accordion geral
+        //         const accordion = document.createElement('div');
+        //         accordion.className = 'accordion';
+        //         accordion.id = 'playerItemsAccordion';
+
+        //         for (const [type, locGroup] of Object.entries(groupedByType)) {
+        //             const itemId = `accordion-${type.replace(/\s+/g, '-').toLowerCase()}`;
+
+        //             const accordionItem = document.createElement('div');
+        //             accordionItem.className = 'accordion-item';
+
+        //             accordionItem.innerHTML = `
+        //                 <h2 class="accordion-header" id="heading-${itemId}">
+        //                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+        //                         data-bs-target="#collapse-${itemId}" aria-expanded="false" aria-controls="collapse-${itemId}">
+        //                         ${type}
+        //                     </button>
+        //                 </h2>
+        //                 <div id="collapse-${itemId}" class="accordion-collapse collapse"
+        //                     aria-labelledby="heading-${itemId}" data-bs-parent="#playerItemsAccordion">
+        //                     <div class="accordion-body"></div>
+        //                 </div>
+        //             `;
+
+        //             const body = accordionItem.querySelector('.accordion-body');
+
+        //             for (const [loc, locItems] of Object.entries(locGroup)) {
+        //                 const locSection = document.createElement('div');
+        //                 locSection.innerHTML = `<h6>${localizationParse(loc)}</h6>`;
+        //                 const row = document.createElement('div');
+        //                 row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+
+        //                 locItems.forEach(item => {
+        //                     const cardItem = document.createElement('div');
+        //                     cardItem.className = 'card p-2 text-center bg-light';
+        //                     cardItem.style.minWidth = '160px';
+
+        //                     const armazenamento = item.storage_slots > 0
+        //                         ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
+        //                         : "Não possui";
+
+        //                     cardItem.innerHTML = `
+        //                         <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
+        //                         <div class="card-body p-2">
+        //                             <h6 class="card-title small">${item.name}</h6>
+        //                             <p class="small text-muted">${item.name_type}</p>
+        //                             <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
+        //                             <p class="small m-0">Armazenamento: ${armazenamento}</p>
+        //                             <div class="d-flex justify-content-between align-items-center mt-3">
+        //                                 <div class="input-group" style="max-width: 130px;">
+        //                                     <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
+        //                                         <i class="fas fa-minus"></i>
+        //                                     </button>
+        //                                     <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
+        //                                     <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
+        //                                         <i class="fas fa-plus"></i>
+        //                                     </button>
+        //                                 </div>
+        //                                 <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
+        //                                     Remover
+        //                                 </button>
+        //                             </div>
+        //                         </div>
+        //                     `;
+        //                     row.appendChild(cardItem);
+        //                 });
+
+        //                 locSection.appendChild(row);
+        //                 body.appendChild(locSection);
+        //             }
+
+        //             accordion.appendChild(accordionItem);
+        //         }
+
+        //         container.appendChild(accordion);
+        //     } catch (err) {
+        //         msg.classList.remove('d-none');
+        //         msg.textContent = 'Erro ao carregar itens do jogador.';
+        //     }
+        // }
+        
         async function loadPlayerItems() {
             const container = document.getElementById('groupedItemsGrid');
             const msg = document.getElementById('noItemsMsg');
@@ -78,59 +197,21 @@
             try {
                 const items = await fetchJSON(`/players/${playerId}/items`);
                 msg.classList.toggle('d-none', items.length > 0);
-                console.log("items", items);
-                const groupedByType = {};
 
-                // Agrupar os itens por tipo (type_name)
-                for (const item of items) {
-                    const type = item.type_name || 'Outros'; // Agrupar por tipo (type_name)
-                    if (!groupedByType[type]) groupedByType[type] = {};
+                const row = document.createElement('div');
+                row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+                row.style.width = '100%';
 
-                    // Dentro de cada tipo, agrupar por localização (localization)
-                    const loc = item.localization || 'outros';
-                    if (!groupedByType[type][loc]) groupedByType[type][loc] = [];
-                    groupedByType[type][loc].push(item);
-                }
+                items.forEach(item => {
+                    const cardItem = document.createElement('div');
+                    cardItem.className = 'card p-2 text-center bg-light';
+                    cardItem.style.minWidth = '160px';
 
-                // Para cada tipo, criar uma seção
-                for (const [type, locGroup] of Object.entries(groupedByType)) {
-                    const section = document.createElement('div');
+                    const armazenamento = item.storage_slots > 0
+                        ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
+                        : "Não possui";
 
-                    // Card que vai englobar todos os itens de um tipo
-                    const card = document.createElement('div');
-                    card.className = 'card mb-4'; // Card para o tipo
-
-                    // Card header com o nome do tipo
-                    card.innerHTML = `
-                <div class="card-header bg-primary text-white">
-                    <h5>${type}</h5>
-                </div>
-                <div class="card-body">
-                    <div id="items_${type}" class="row d-flex flex-wrap gap-3">
-                        <!-- Itens do tipo serão aqui inseridos -->
-                    </div>
-                </div>
-            `;
-
-                    // Adiciona o card no container
-                    container.appendChild(card);
-
-                    // Para cada local dentro de cada tipo, criar uma subseção
-                    for (const [loc, locItems] of Object.entries(locGroup)) {
-                        const locSection = document.createElement('div');
-                        locSection.innerHTML = `<h6>${localizationParse(loc)}</h6>`;
-                        const row = document.createElement('div');
-                        row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
-
-                        locItems.forEach(item => {
-                            const cardItem = document.createElement('div');
-                            cardItem.className = 'card p-2 text-center bg-light'; // Card interno para o item
-                            cardItem.style.minWidth = '160px';
-                            const armazenamento = item.storage_slots > 0
-                                ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
-                                : "Não possui";
-
-                            cardItem.innerHTML = `
+                    cardItem.innerHTML = `
                         <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
                         <div class="card-body p-2">
                             <h6 class="card-title small">${item.name}</h6>
@@ -153,14 +234,10 @@
                             </div>
                         </div>
                     `;
-                            row.appendChild(cardItem);
-                        });
+                    row.appendChild(cardItem);
+                });
 
-                        locSection.appendChild(row);
-                        card.querySelector('.card-body').appendChild(locSection);
-                    }
-                }
-
+                container.appendChild(row);
             } catch (err) {
                 msg.classList.remove('d-none');
                 msg.textContent = 'Erro ao carregar itens do jogador.';

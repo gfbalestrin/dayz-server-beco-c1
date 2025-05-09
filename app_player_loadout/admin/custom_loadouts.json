@@ -536,26 +536,5 @@
         "subitems": []
       }
     ]
-  },
-  "pA9gYDTAn1YuK24X9Vpc6sIjdLXcyEBjlAfiDbkskKw=": {
-    "weapons": {
-      "primary_weapon": null,
-      "secondary_weapon": null,
-      "small_weapon": null
-    },
-    "items": [
-      {
-        "name_type": "GhillieHood_Mossy",
-        "type_name": "Roupas",
-        "slots": 12,
-        "width": 4,
-        "height": 3,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "head",
-        "subitems": []
-      }
-    ]
   }
 }
