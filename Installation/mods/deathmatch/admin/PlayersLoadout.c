@@ -198,9 +198,15 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
 		return false;
 	}
 
-	LoadoutData data = loadoutMap.Get(playerId);
+	LoadoutData data = loadoutMap.Get(playerId);	
 
-	// Arma primária
+    if (data.items) {
+        foreach (LoadoutItem li : data.items) {
+            CreateItemWithSubitems(null, li, player);  // null porque criamos direto no inventário do jogador
+        }
+    }
+
+    // Arma primária
     if (data.weapons && data.weapons.primary_weapon) {
         WeaponData weaponPrimary = data.weapons.primary_weapon;
         EntityAI weaponPrimaryEntity = player.GetInventory().CreateInInventory(weaponPrimary.name_type);
@@ -282,12 +288,6 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                 }
             } 
             player.SetQuickBarEntityShortcut(weaponSmallEntity, 2, true);
-        }
-    }
-
-    if (data.items) {
-        foreach (LoadoutItem li : data.items) {
-            CreateItemWithSubitems(null, li, player);  // null porque criamos direto no inventário do jogador
         }
     }
 
