@@ -216,7 +216,7 @@ def export_loadouts_json():
             compat_map.setdefault(row["parent_item_id"], []).append(row["child_item_id"])
 
         # Montar árvore de itens
-        used_items = set()
+        used_counts = defaultdict(int)
         item_list = []
 
         def build_item_json(item):
@@ -233,7 +233,7 @@ def export_loadouts_json():
                 "subitem": None
             }
 
-        def build_item_tree(item, compat_map, item_map, used_items, depth=0, max_depth=5, ancestry=None):
+        def build_item_tree(item, compat_map, item_map, used_counts, depth=0, max_depth=5, ancestry=None):
             if depth >= max_depth:
                 return build_item_json(item)
 
@@ -244,29 +244,29 @@ def export_loadouts_json():
 
             children = compat_map.get(item["id"], [])
             for child_id in children:
-                if child_id in used_items or child_id in ancestry:
+                if used_counts[child_id] >= quantities.get(child_id, 0) or child_id in ancestry:
                     continue
 
                 child_item = item_map.get(child_id)
                 if not child_item:
                     continue
 
-                used_items.add(child_id)
+                used_counts[child_id] += 1
                 item_json["subitem"] = build_item_tree(
-                    child_item, compat_map, item_map, used_items,
+                    child_item, compat_map, item_map, used_counts,
                     depth + 1, max_depth, ancestry.copy()
                 )
-                break  # só um subitem por item
+                break  # apenas um subitem por item
 
             return item_json
 
         for item_id, quantity in quantities.items():
             for _ in range(quantity):
-                if item_id in used_items:
+                if used_counts[item_id] >= quantity:
                     continue
-                used_items.add(item_id)
+                used_counts[item_id] += 1
                 item = item_map[item_id]
-                item_list.append(build_item_tree(item, compat_map, item_map, used_items))
+                item_list.append(build_item_tree(item, compat_map, item_map, used_counts))
 
         player_data["items"] = item_list
 
@@ -279,10 +279,9 @@ def export_loadouts_json():
 
     return True
 
-
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=10)
     scheduler.start()
 
     # Garante que o scheduler pare quando o app parar

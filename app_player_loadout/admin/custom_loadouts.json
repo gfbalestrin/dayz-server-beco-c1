@@ -6,100 +6,10 @@
         "feed_type": "magazine",
         "slots": 24,
         "width": 8,
-        "height": 3,
-        "magazine": {
-          "name_type": "Mag_STANAG_60Rnd",
-          "capacity": 60,
-          "slots": 6,
-          "width": 2,
-          "height": 3
-        },
-        "ammunitions": {
-          "name_type": "Ammo_556x45Tracer",
-          "slots": 1,
-          "width": 1,
-          "height": 1
-        },
-        "attachments": [
-          {
-            "name_type": "M9A1_Bayonet",
-            "type": "compensator",
-            "slots": 3,
-            "width": 1,
-            "height": 3,
-            "battery": false
-          },
-          {
-            "name_type": "M4_PlasticHndgrd",
-            "type": "handguard",
-            "slots": 2,
-            "width": 2,
-            "height": 1,
-            "battery": false
-          },
-          {
-            "name_type": "M4_CQBBttstck",
-            "type": "buttstock",
-            "slots": 2,
-            "width": 2,
-            "height": 1,
-            "battery": false
-          },
-          {
-            "name_type": "GhillieAtt_Winter",
-            "type": "ghillie",
-            "slots": 12,
-            "width": 4,
-            "height": 3,
-            "battery": false
-          },
-          {
-            "name_type": "StarlightOptic",
-            "type": "scope",
-            "slots": 12,
-            "width": 4,
-            "height": 3,
-            "battery": true
-          }
-        ]
+        "height": 3
       },
-      "secondary_weapon": {
-        "name_type": "AKM",
-        "feed_type": "magazine",
-        "slots": 24,
-        "width": 8,
-        "height": 3,
-        "magazine": {
-          "name_type": "Mag_AKM_Drum75Rnd",
-          "capacity": 75,
-          "slots": 9,
-          "width": 3,
-          "height": 3
-        },
-        "ammunitions": {
-          "name_type": "Ammo_762x39Tracer",
-          "slots": 1,
-          "width": 1,
-          "height": 1
-        },
-        "attachments": [
-          {
-            "name_type": "KobraOptic",
-            "type": "scope",
-            "slots": 4,
-            "width": 2,
-            "height": 2,
-            "battery": true
-          }
-        ]
-      },
-      "small_weapon": {
-        "name_type": "Glock19",
-        "feed_type": "magazine",
-        "slots": 6,
-        "width": 3,
-        "height": 2
-      }
+      "secondary_weapon": null,
+      "small_weapon": null
     },
     "items": [
       {
@@ -135,6 +45,18 @@
             "subitem": null
           }
         }
+      },
+      {
+        "name_type": "Battery9V",
+        "type_name": "Itens gerais",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": null,
+        "subitem": null
       }
     ]
   }
