@@ -220,8 +220,11 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                     for (int j = 0; j < weaponPrimary.magazine.capacity; j++) {
                         magPrimary.GetInventory().CreateInInventory(weaponPrimary.ammunitions.name_type);
                     }
+                } else if (weaponPrimary.ammunitions) {
+                    player.GetInventory().CreateInInventory(weaponPrimary.ammunitions.name_type);
                 }
-            }
+            } 
+
             player.SetQuickBarEntityShortcut(weaponPrimaryEntity, 0, true);
         }
     }
@@ -246,8 +249,10 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                     for (int k = 0; k < weaponSecondary.magazine.capacity; k++) {
                         magSecondary.GetInventory().CreateInInventory(weaponSecondary.ammunitions.name_type);
                     }
+                } else if (weaponSecondary.ammunitions) {
+                    player.GetInventory().CreateInInventory(weaponSecondary.ammunitions.name_type);
                 }
-            }
+            } 
             player.SetQuickBarEntityShortcut(weaponSecondaryEntity, 1, true);
         }
     }
@@ -272,8 +277,10 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                     for (int m = 0; m < weaponSmall.magazine.capacity; m++) {
                         magSmall.GetInventory().CreateInInventory(weaponSmall.ammunitions.name_type);
                     }
+                } else if (weaponSmall.ammunitions) {
+                    player.GetInventory().CreateInInventory(weaponSmall.ammunitions.name_type);
                 }
-            }
+            } 
             player.SetQuickBarEntityShortcut(weaponSmallEntity, 2, true);
         }
     }
