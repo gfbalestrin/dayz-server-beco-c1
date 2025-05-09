@@ -184,7 +184,7 @@ class Item {
 	int storage_width;
 	int storage_height;
 	string localization;
-	ref SubItem1 subitem;
+	ref array<ref SubItem1> subitem;
 };
 class SubItem1 {
 	string name_type;
@@ -196,7 +196,7 @@ class SubItem1 {
 	int storage_width;
 	int storage_height;
 	string localization;
-	ref SubItem2 subitem;
+	ref array<ref SubItem2> subitem;
 };
 class SubItem2 {
 	string name_type;
@@ -208,8 +208,31 @@ class SubItem2 {
 	int storage_width;
 	int storage_height;
 	string localization;
+    ref array<ref SubItem3> subitem;
 };
-
+class SubItem3 {
+	string name_type;
+	string type_name;
+	int slots;
+	int width;
+	int height;
+	int storage_slots;
+	int storage_width;
+	int storage_height;
+	string localization;
+    ref array<ref SubItem4> subitem;
+};
+class SubItem4 {
+	string name_type;
+	string type_name;
+	int slots;
+	int width;
+	int height;
+	int storage_slots;
+	int storage_width;
+	int storage_height;
+	string localization;
+};
 class Weapons {
 	ref WeaponData primary_weapon;
     ref WeaponData secondary_weapon;
@@ -218,7 +241,8 @@ class Weapons {
 
 class LoadoutData {
 	ref Weapons weapons;
-    ref array<ref Item> items;
+    ref array<ref LoadoutItem> items;
+    //ref array<ref Item> items;
 }
 
 bool GiveCustomLoadout(PlayerBase player, string playerId)
@@ -314,29 +338,75 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
         }
     }
 
-	if (data.items) {
-		foreach (Item item : data.items) {
-            if (!item) {
-				WriteToLog("Item inválido no loadout");
-				continue;
-			}
-            WriteToLog("Analisando item " + item);
+	// if (data.items) {
+	// 	foreach (Item item : data.items) {
+    //         if (!item) {
+	// 			WriteToLog("Item inválido no loadout");
+	// 			continue;
+	// 		}
+    //         WriteToLog("Analisando item " + item.name_type);
 
-            EntityAI itemEntity = player.GetInventory().CreateInInventory(item.name_type);
-            if (!itemEntity) {
-                WriteToLog("Falha ao criar item: " + item.name_type);
-                continue;
-            }
+    //         EntityAI itemEntity = player.GetInventory().CreateInInventory(item.name_type);
+    //         if (!itemEntity) {
+    //             WriteToLog("Falha ao criar item: " + item.name_type);
+    //             continue;
+    //         }
 
-            if (item.subitem) {
-                EntityAI subitemEntity = itemEntity.GetInventory().CreateAttachment(item.subitem.name_type);
-                if (!subitemEntity) {
-                    Error("Falha ao criar subitem: " + item.subitem.name_type);
-                }
-            }
-		}
-	}
+    //         if (item.subitem1) {
+    //             EntityAI subitem1Entity = itemEntity.GetInventory().CreateAttachment(item.subitem.name_type);
+    //             if (!subitem1Entity) {
+    //                 Error("Falha ao criar subitem: " + item.subitem.name_type);
+    //             }
+    //         }
+	// 	}
+	// }
+
+    if (data.items) {
+        foreach (LoadoutItem li : data.items) {
+            CreateItemWithSubitems(null, li, player);  // null porque criamos direto no inventário do jogador
+        }
+    }
 
 	WriteToLog("Loadout carregado com sucesso para o jogador: " + playerId);
 	return true;
+}
+
+class LoadoutItem {
+	string name_type;
+	string type_name;
+	int slots;
+	int width;
+	int height;
+	int storage_slots;
+	int storage_width;
+	int storage_height;
+	string localization;
+	ref array<ref LoadoutItem> subitems;
+}
+
+EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBase player)
+{
+	EntityAI item;
+	if (parent) {
+        WriteToLog("Criando item como attachment... " + itemData.name_type);
+		item = parent.GetInventory().CreateAttachment(itemData.name_type);
+	} else {
+		WriteToLog("Criando item no inventário... " + itemData.name_type);
+		item = player.GetInventory().CreateInInventory(itemData.name_type);
+	}
+
+	if (!item) {
+        WriteToLog("Erro ao criar item");
+        return null;
+    }
+
+	if (itemData.subitems) {
+        WriteToLog("Entrando nos subitens...");
+		foreach (LoadoutItem sub : itemData.subitems) {
+            WriteToLog("Entrando no subitem..." + sub.name_type);
+			CreateItemWithSubitems(item, sub, player);
+		}
+	}
+
+	return item;
 }
