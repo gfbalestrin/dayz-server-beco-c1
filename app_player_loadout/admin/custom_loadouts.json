@@ -1,13 +1,7 @@
 {
   "nRhBiJjrMtYme0c5mKk5khnwKSH5SjD40C8SBl9L4S4=": {
     "weapons": {
-      "primary_weapon": {
-        "name_type": "M4A1",
-        "feed_type": "magazine",
-        "slots": 24,
-        "width": 8,
-        "height": 3
-      },
+      "primary_weapon": null,
       "secondary_weapon": null,
       "small_weapon": null
     },
