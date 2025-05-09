@@ -101,7 +101,7 @@ function MonitorLog() {
 				NEXT_INDEX=$(( (CURRENT_INDEX + 1) % TOTAL ))
 				NEXT_REGION=$(jq -r ".[$NEXT_INDEX].Region" "$DeathMatchCoords")
 				MessagesXmlFile="$DayzServerFolder/$DayzMessagesXmlFile";
-				sed -i "s|<text>.*</text>|<text>O servidor vai ser reiniciado em #tmin minutos. Próximo mapa: $NEXT_REGION</text>|" $MessagesXmlFile
+				#sed -i "s|<text>.*</text>|<text>O servidor vai ser reiniciado em #tmin minutos. Próximo mapa: $NEXT_REGION</text>|" $MessagesXmlFile
 
 				"$AppFolder/$AppScriptUpdateGeneralKillfeed" &
 				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET" &

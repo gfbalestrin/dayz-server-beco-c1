@@ -1,7 +1,0 @@
-python3 -m venv venv
-source venv/bin/activate
-
-pip install Flask requests
-
-# O dayz_db_crud cria o banco
-python app.py
