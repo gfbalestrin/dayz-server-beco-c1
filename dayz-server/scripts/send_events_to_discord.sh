@@ -169,9 +169,15 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 		if [[ "$Content" == *"is connected"* ]]; then
 			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) conectou"
 			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" &
+			if [[ "$DayzDeathmatch" -eq "1" ]]; then
+				INSERT_CUSTOM_LOG "Matando jogador $PlayerId ..." "INFO" "$ScriptName"
+				echo "Matando jogador $PlayerId ..."
+				echo "$PlayerId kill" >>"$DayzServerFolder/$DayzAdminCmdsFile"
+				sqlite3 "$DayzServerFolder/$DayzPlayerDbFile" "UPDATE Players set Alive = 0 where UID = '$PlayerId';"
+			fi
 		elif [[ "$Content" == *"has been disconnected"* ]]; then
 			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) desconectou"
-			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "DISCONNECT" &
+			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "DISCONNECT" &			
 		fi
 	# Evento de morte por player
 	elif [[ "$Content" == *"killed by Player"* ]]; then
