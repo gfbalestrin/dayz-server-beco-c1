@@ -369,7 +369,7 @@ def export_loadouts_json():
     return True
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=10)
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
     scheduler.start()
 
     # Garante que o scheduler pare quando o app parar
