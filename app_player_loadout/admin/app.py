@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import check_password_hash, generate_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
 from collections import defaultdict
+from functools import wraps
 import os
 import json
 import sqlite3
@@ -16,6 +17,24 @@ app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
 
 JSON_PATH = 'custom_loadouts.json'
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'login' not in session:
+            flash("Você precisa estar logado para acessar esta página.", "warning")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('is_admin'):
+            flash("Acesso restrito a administradores.", "danger")
+            return redirect(url_for('loadout_players'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Carrega o XML e extrai os nomes uma vez ao iniciar
 def load_type_names():
@@ -246,11 +265,84 @@ def start_scheduler():
     import atexit
     atexit.register(lambda: scheduler.shutdown())
 
-@app.route('/')
-def index():
-    if 'user' not in session:
+@app.route('/register', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def register():
+    if request.method == 'POST':
+        login = request.form['login'].strip()
+        player_id = request.form['player_id'].strip()
+        password = request.form['password'].strip()
+
+        if not login or not player_id or not password:
+            flash('Todos os campos são obrigatórios.', 'danger')
+            return render_template('register.html')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Verifica se o usuário já existe
+        cursor.execute("SELECT * FROM player_logins WHERE player_id = ?", (player_id,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            flash('Nome de usuário já está em uso.', 'danger')
+            conn.close()
+            return render_template('register.html')
+
+        # Hash da senha
+        hashed_password = generate_password_hash(password)
+
+        # Inserir novo usuário
+        cursor.execute("""
+            INSERT INTO player_logins (login, player_id, password, active, admin)
+            VALUES (?, ?, ?, 1, 0)
+        """, (login, player_id, hashed_password))
+
+        conn.commit()
+        conn.close()
+
+        flash('Registro realizado com sucesso! Faça login.', 'success')
         return redirect(url_for('login'))
-    
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        login = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM player_logins WHERE login = ?", (login,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user['password'], password):
+            session['login'] = login
+            session['player_id'] = user['player_id']
+            session['is_admin'] = bool(user['admin'])  # <== Aqui
+            flash('Login realizado com sucesso!', 'success')
+
+            if session['is_admin']:
+                return redirect(url_for('index'))
+            else:
+                return redirect(url_for('loadout_players'))
+        else:
+            flash("Usuário ou senha inválidos", "danger")
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/')
+@login_required
+@admin_required
+def index():
     try:
         # Conectar ao banco de dados
         conn = get_db_connection()
@@ -268,6 +360,7 @@ def index():
 
 # Arma
 @app.route("/api/weapons")
+@login_required
 def api_weapons():
     page = int(request.args.get("page", 1))
     query = request.args.get("q", "").strip()
@@ -308,11 +401,11 @@ def api_weapons():
         "total_pages": total_pages
     })
 
-
 @app.route('/add_weapon', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_weapon():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
 
     if request.method == 'POST':
         # Obter dados do formulário
@@ -353,11 +446,11 @@ def add_weapon():
 
     return render_template('add_weapon.html')
 
-
 @app.route('/edit_weapon/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit_weapon(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -476,9 +569,10 @@ def edit_weapon(id):
                            weapon_attachments=weapon_attachments)
 
 @app.route('/delete_weapon/<int:id>')
+@login_required
+@admin_required
 def delete_weapon(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -504,9 +598,10 @@ def delete_weapon(id):
 
     return redirect('/')
 
-
 # Calibre
 @app.route("/api/calibers")
+@login_required
+@admin_required
 def api_calibers():
     page = int(request.args.get("page", 1))
     query = request.args.get("q", "").strip()
@@ -550,9 +645,10 @@ def api_calibers():
 
 
 @app.route('/add_caliber', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_caliber():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -581,9 +677,10 @@ def add_caliber():
 
 
 @app.route('/edit_caliber/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit_caliber(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -616,9 +713,10 @@ def edit_caliber(id):
 
 
 @app.route('/delete_caliber/<int:id>')
+@login_required
+@admin_required
 def delete_caliber(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     try:
@@ -639,6 +737,7 @@ def delete_caliber(id):
 
 # Munição
 @app.route("/api/ammunitions")
+@login_required
 def api_ammunitions():
     page = int(request.args.get("page", 1))
     query = request.args.get("q", "").strip()
@@ -680,9 +779,10 @@ def api_ammunitions():
 
 
 @app.route('/add_ammo', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_ammo():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     calibers = conn.execute('SELECT * FROM calibers').fetchall()
@@ -723,9 +823,10 @@ def add_ammo():
 
 
 @app.route('/edit_ammo/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit_ammo(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -771,9 +872,10 @@ def edit_ammo(id):
 
 
 @app.route('/delete_ammo/<int:id>')
+@login_required
+@admin_required
 def delete_ammo(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
 
     conn = get_db_connection()
     try:
@@ -798,6 +900,7 @@ def delete_ammo(id):
 
 # Carregador
 @app.route("/api/magazines")
+@login_required
 def api_magazines():
     page = int(request.args.get("page", 1))
     query = request.args.get("q", "").strip()
@@ -835,9 +938,10 @@ def api_magazines():
 
 
 @app.route('/add_magazine', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_magazine():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -882,9 +986,10 @@ def add_magazine():
 
 
 @app.route('/edit_magazine/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit_magazine(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -937,9 +1042,10 @@ def edit_magazine(id):
 
 
 @app.route('/delete_magazine/<int:id>')
+@login_required
+@admin_required
 def delete_magazine(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     try:
@@ -963,6 +1069,8 @@ def delete_magazine(id):
 
 # Acessórios
 @app.route('/api/attachments')
+@login_required
+@admin_required
 def api_attachments():
     search_query = request.args.get('q', '')
     type_filter = request.args.get('type', '')
@@ -1012,9 +1120,10 @@ def api_attachments():
     })
     
 @app.route('/add_attachment', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_attachment():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     if request.method == 'POST':
@@ -1054,9 +1163,10 @@ def add_attachment():
     return render_template('add_attachment.html')
 
 @app.route('/edit_attachment/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit_attachment(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1102,9 +1212,10 @@ def edit_attachment(id):
     return render_template('edit_attachment.html', attachment=attachment)
 
 @app.route('/delete_attachment/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def delete_attachment(id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1129,9 +1240,10 @@ def delete_attachment(id):
 
 # weapon_ammunitions
 @app.route('/add_weapon_ammunitions', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_weapon_ammunitions():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     if request.method == 'POST':      
@@ -1164,9 +1276,9 @@ def add_weapon_ammunitions():
     return redirect(request.referrer or url_for('index'))
 
 @app.route('/delete_weapon_ammunitions/<int:ammo_id>/<int:weapon_id>', methods=['GET'])
+@login_required
 def delete_weapon_ammunitions(ammo_id, weapon_id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
 
@@ -1196,9 +1308,10 @@ def delete_weapon_ammunitions(ammo_id, weapon_id):
 
 # weapon_magazines
 @app.route('/add_weapon_magazines', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_weapon_magazines():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1233,9 +1346,10 @@ def add_weapon_magazines():
     return redirect(request.referrer or url_for('index'))
 
 @app.route('/delete_weapon_magazines/<int:magazine_id>/<int:weapon_id>')
+@login_required
+@admin_required
 def delete_weapon_magazines(magazine_id, weapon_id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1264,9 +1378,10 @@ def delete_weapon_magazines(magazine_id, weapon_id):
 
 # weapon_attachments
 @app.route('/add_weapon_attachments', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def add_weapon_attachments():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1300,9 +1415,10 @@ def add_weapon_attachments():
     return redirect(request.referrer)
 
 @app.route('/delete_weapon_attachments/<int:attachment_id>/<int:weapon_id>')
+@login_required
+@admin_required
 def delete_weapon_attachments(attachment_id, weapon_id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1330,6 +1446,8 @@ def delete_weapon_attachments(attachment_id, weapon_id):
     return redirect(request.referrer or url_for('home'))
 
 @app.route('/loadout_rules', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def loadout_rules():
     conn = get_db_connection()
     weapons = conn.execute('SELECT * FROM weapons').fetchall()
@@ -1357,9 +1475,10 @@ def loadout_rules():
     return render_template('loadout_rules.html', rules=rules, weapons=weapons)
 
 @app.route('/delete_loadout_rules_weapons', methods=['GET'])
+@login_required
+@admin_required
 def delete_loadout_rules_weapons():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    
     
     conn = get_db_connection()
     
@@ -1374,7 +1493,66 @@ def delete_loadout_rules_weapons():
     conn.close()
     return redirect(request.referrer or url_for('index'))  # Redireciona para a página anterior ou página inicial
 
+def get_player_weapons(player_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT 
+            plw.id AS loadout_id,
+            plw.player_id,
+            wp_primary.id AS primary_weapon_id,
+            wp_primary.name AS primary_weapon_name,
+            wp_primary.img AS primary_weapon_img,
+            mag_primary.id AS primary_magazine_id,
+            mag_primary.name AS primary_magazine_name,
+            mag_primary.img AS primary_magazine_img,
+            ammo_primary.id AS primary_ammo_id,
+            ammo_primary.name AS primary_ammo_name,
+            ammo_primary.img AS primary_ammo_img,
+            wp_secondary.id AS secondary_weapon_id,
+            wp_secondary.name AS secondary_weapon_name,
+            wp_secondary.img AS secondary_weapon_img,
+            mag_secondary.id AS secondary_magazine_id,
+            mag_secondary.name AS secondary_magazine_name,
+            mag_secondary.img AS secondary_magazine_img,
+            ammo_secondary.id AS secondary_ammo_id,
+            ammo_secondary.name AS secondary_ammo_name,
+            ammo_secondary.img AS secondary_ammo_img,
+            wp_small.id AS small_weapon_id,
+            wp_small.name AS small_weapon_name,
+            wp_small.img AS small_weapon_img,
+            mag_small.id AS small_magazine_id,
+            mag_small.name AS small_magazine_name,
+            mag_small.img AS small_magazine_img,
+            ammo_small.id AS small_ammo_id,
+            ammo_small.name AS small_ammo_name,
+            ammo_small.img AS small_ammo_img
+        FROM player_loadouts_weapons plw
+        LEFT JOIN weapons wp_primary ON plw.primary_weapon_id = wp_primary.id
+        LEFT JOIN weapons wp_secondary ON plw.secondary_weapon_id = wp_secondary.id
+        LEFT JOIN weapons wp_small ON plw.small_weapon_id = wp_small.id
+        LEFT JOIN magazines mag_primary ON plw.primary_magazine_id = mag_primary.id
+        LEFT JOIN magazines mag_secondary ON plw.secondary_magazine_id = mag_secondary.id
+        LEFT JOIN magazines mag_small ON plw.small_magazine_id = mag_small.id
+        LEFT JOIN ammunitions ammo_primary ON plw.primary_ammo_id = ammo_primary.id
+        LEFT JOIN ammunitions ammo_secondary ON plw.secondary_ammo_id = ammo_secondary.id
+        LEFT JOIN ammunitions ammo_small ON plw.small_ammo_id = ammo_small.id
+        WHERE plw.player_id = ?
+    """, (player_id,))
+    weapons = cursor.fetchall()
+    return weapons
+
+@app.route('/players/<player_id>/weapons', methods=['GET'])
+@login_required
+def list_player_weapons(player_id):
+    try:
+        weapons = get_player_weapons(player_id)
+        return jsonify([dict(weapon) for weapon in weapons])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/player_loadout_weapons/<player_id>', methods=['GET', 'POST'])
+@login_required
 def player_loadout_weapons(player_id):
     conn = get_db_connection()
     conn2 = get_db_connection_players_beco_c1()
@@ -1566,6 +1744,7 @@ def player_loadout_weapons(player_id):
     )
 
 @app.route('/delete_loadout_weapons/<player_id>', methods=['GET'])
+@login_required
 def delete_loadout_weapons(player_id):
     conn = get_db_connection()
     
@@ -1587,6 +1766,7 @@ def delete_loadout_weapons(player_id):
     return redirect(url_for('player_loadout_weapons', player_id=player_id))
 
 @app.route('/loadout_players', methods=['GET'])
+@login_required
 def loadout_players():
     conn = get_db_connection_players_beco_c1()
     players = conn.execute('SELECT * FROM players_database').fetchall()
@@ -1594,6 +1774,7 @@ def loadout_players():
     return render_template('loadout_players.html', players=players)
 
 @app.route('/get_magazines/<int:weapon_id>')
+@login_required
 def get_magazines(weapon_id):
     conn = get_db_connection()
     query = '''
@@ -1608,6 +1789,7 @@ def get_magazines(weapon_id):
     return jsonify([{'id': m['id'], 'name': m['name'], 'img': m['img'], 'capacity': m['capacity'], 'slots': m['slots'], 'width': m['width'], 'height': m['height']} for m in magazines])
 
 @app.route('/get_ammos/<int:weapon_id>')
+@login_required
 def get_ammos(weapon_id):
     conn = get_db_connection()
     query = '''
@@ -1622,6 +1804,7 @@ def get_ammos(weapon_id):
     return jsonify([{'id': m['id'], 'name': m['name'], 'img': m['img'], 'slots': m['slots'], 'width': m['width'], 'height': m['height']} for m in ammos])
 
 @app.route('/get_attachments/<int:weapon_id>')
+@login_required
 def weapon_attachments(weapon_id):
     conn = get_db_connection()
     attachments = conn.execute('''
@@ -1635,6 +1818,7 @@ def weapon_attachments(weapon_id):
     return jsonify([dict(a) for a in attachments])
 
 @app.route('/save_loadout_weapons/<player_id>', methods=['POST'])
+@login_required
 def save_loadout_weapons(player_id):
     conn = get_db_connection()
 
@@ -1743,6 +1927,7 @@ def save_loadout_weapons(player_id):
 
 # Items
 @app.route('/items', methods=['GET'])
+@login_required
 def get_items():
     conn = get_db_connection()
     items = conn.execute('''
@@ -1754,6 +1939,7 @@ def get_items():
     return jsonify([dict(item) for item in items])
 
 @app.route('/items_pagination', methods=['GET'])
+@login_required
 def get_items_pagination():
     type_id = request.args.get('type_id')
     name = request.args.get('name')
@@ -1806,6 +1992,7 @@ def get_items_pagination():
     })
 
 @app.route('/items/<int:item_id>', methods=['GET'])
+@login_required
 def get_item(item_id):
     conn = get_db_connection()
     item = conn.execute('''
@@ -1818,6 +2005,7 @@ def get_item(item_id):
     return jsonify(dict(item))
 
 @app.route('/items/<int:item_id>/compatible-parents', methods=['GET'])
+@login_required
 def get_compatible_parents(item_id):
     conn = get_db_connection()
     results = conn.execute('''
@@ -1830,6 +2018,8 @@ def get_compatible_parents(item_id):
     return jsonify([dict(row) for row in results])
 
 @app.route('/items', methods=['POST'])
+@login_required
+@admin_required
 def add_item():
     data = request.json
     # Valida o tipo de munição
@@ -1856,6 +2046,8 @@ def add_item():
         conn.close()
 
 @app.route('/items/<int:item_id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_item(item_id):
     data = request.json
     # Valida o tipo de munição
@@ -1886,6 +2078,8 @@ def update_item(item_id):
         conn.close()
 
 @app.route('/items/<int:item_id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_item(item_id):
     conn = get_db_connection()
     try:
@@ -1899,6 +2093,7 @@ def delete_item(item_id):
         conn.close()
 
 @app.route('/item_types', methods=['GET'])
+@login_required
 def get_item_types():
     conn = get_db_connection()
     types = conn.execute('SELECT * FROM item_types').fetchall()
@@ -1906,6 +2101,8 @@ def get_item_types():
     return jsonify([dict(row) for row in types])
 
 @app.route('/item_types', methods=['POST'])
+@login_required
+@admin_required
 def create_item_type():
     data = request.json
     conn = get_db_connection()
@@ -1920,6 +2117,8 @@ def create_item_type():
         conn.close()
 
 @app.route('/item_types/<int:type_id>', methods=['PUT'])
+@login_required
+@admin_required
 def update_item_type(type_id):
     data = request.get_json()
     new_name = data.get('name')
@@ -1933,6 +2132,8 @@ def update_item_type(type_id):
     return jsonify({'success': True})
 
 @app.route('/item_types/<int:type_id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_item_type(type_id):
     conn = get_db_connection()
     try:
@@ -1951,6 +2152,7 @@ def delete_item_type(type_id):
         conn.close()
 
 @app.route('/items/<int:item_id>/compatibilities', methods=['GET'])
+@login_required
 def get_compatibilities(item_id):
     conn = get_db_connection()
     results = conn.execute('''
@@ -1963,6 +2165,8 @@ def get_compatibilities(item_id):
     return jsonify([dict(row) for row in results])
 
 @app.route('/items/<int:item_id>/compatibilities', methods=['POST'])
+@login_required
+@admin_required
 def add_compatibility(item_id):
     data = request.json  # Ex: {"child_item_id": 2}
     child_item_id = data['child_item_id']
@@ -1982,6 +2186,8 @@ def add_compatibility(item_id):
         conn.close()
 
 @app.route('/items/<int:item_id>/compatibilities/<int:child_item_id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_compatibility(item_id, child_item_id):
     conn = get_db_connection()
     try:
@@ -1999,6 +2205,7 @@ def delete_compatibility(item_id, child_item_id):
 
 # Loadout de items para players
 @app.route('/player_loadout_items/<player_id>', methods=['GET', 'POST'])
+@login_required
 def player_loadout_items(player_id):
     conn = get_db_connection()
     
@@ -2016,47 +2223,9 @@ def player_loadout_items(player_id):
         'player_loadout_items.html',
         items=items, player=player
     )
- 
-# @app.route('/players/<player_id>/items')
-# def get_player_items(player_id):
-#     conn = get_db_connection()
-#     items = conn.execute('''
-#         SELECT item.*
-#         FROM player_items
-#         JOIN item ON player_items.item_id = item.id
-#         WHERE player_items.player_id = ?
-#     ''', (player_id,)).fetchall()
-#     conn.close()
-#     return jsonify([dict(row) for row in items])
-
-# @app.route('/players/<player_id>/items', methods=['POST'])
-# def add_item_to_player(player_id):
-#     data = request.get_json()
-#     item_id = data.get('item_id')
-
-#     if not item_id:
-#         return jsonify({'error': 'ID do item é obrigatório'}), 400
-
-#     conn = get_db_connection()
-#     try:
-#         conn.execute('INSERT INTO player_items (player_id, item_id) VALUES (?, ?)', (player_id, item_id))
-#         conn.commit()
-#     except sqlite3.IntegrityError:
-#         return jsonify({'error': 'Item já está adicionado'}), 400
-#     finally:
-#         conn.close()
-
-#     return jsonify({'success': True})
-
-# @app.route('/players/<player_id>/items/<int:item_id>', methods=['DELETE'])
-# def remove_item_from_player(player_id, item_id):
-#     conn = get_db_connection()
-#     conn.execute('DELETE FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
-#     conn.commit()
-#     conn.close()
-#     return jsonify({'success': True})
 
 @app.route('/players/<player_id>/items', methods=['DELETE'])
+@login_required
 def clear_player_items(player_id):
     conn = get_db_connection()
     conn.execute('DELETE FROM player_items WHERE player_id = ?', (player_id,))
@@ -2081,6 +2250,7 @@ def get_player_items(player_id):
 
 # Endpoint para listar os itens de um jogador
 @app.route('/players/<player_id>/items', methods=['GET'])
+@login_required
 def list_player_items(player_id):
     try:
         items = get_player_items(player_id)
@@ -2090,6 +2260,7 @@ def list_player_items(player_id):
 
 # Endpoint para adicionar um item ao jogador
 @app.route('/players/<player_id>/items', methods=['POST'])
+@login_required
 def add_item_to_player(player_id):
     item_id = request.json.get('item_id')
     if not item_id:
@@ -2122,6 +2293,7 @@ def add_item_to_player(player_id):
 
 # Endpoint para remover um item do jogador
 @app.route('/players/<player_id>/items/<item_id>', methods=['DELETE'])
+@login_required
 def remove_item_from_player(player_id, item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -2133,6 +2305,7 @@ def remove_item_from_player(player_id, item_id):
 
 # Endpoint para verificar compatibilidade entre os itens
 @app.route('/items/compatibility', methods=['GET'])
+@login_required
 def check_item_compatibility():
     parent_item_id = request.args.get('parent_item_id')
     child_item_id = request.args.get('child_item_id')
@@ -2155,6 +2328,7 @@ def check_item_compatibility():
 
 # Endpoint para listar todos os itens
 @app.route('/items', methods=['GET'])
+@login_required
 def list_items():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -2168,6 +2342,7 @@ def list_items():
     } for item in items])
 
 @app.route('/players/<player_id>/items/<int:item_id>/quantity', methods=['PATCH'])
+@login_required
 def update_item_quantity(player_id, item_id):
     delta = request.json.get('delta')
     if not isinstance(delta, int):
@@ -2192,6 +2367,7 @@ def update_item_quantity(player_id, item_id):
     return jsonify({'success': True})
 
 @app.route('/delete_loadout_items/<player_id>', methods=['GET'])
+@login_required
 def delete_loadout_items(player_id):
     conn = get_db_connection()
     
@@ -2208,26 +2384,6 @@ def delete_loadout_items(player_id):
         conn.close()
     
     return redirect(url_for('player_loadout_items', player_id=player_id))
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username in USERS and check_password_hash(USERS[username], password):
-            session['user'] = username
-            return redirect(url_for('index'))
-        else:
-            flash("Usuário ou senha inválidos", "danger")
-
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('login'))
 
 # ✅ ESSENCIAL PARA INICIAR O SERVIDOR
 if __name__ == '__main__':

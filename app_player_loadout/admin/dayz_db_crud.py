@@ -164,9 +164,18 @@ def criar_tabelas():
         player_id TEXT NOT NULL,
         item_id INTEGER NOT NULL,
         quantity INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (player_id) REFERENCES players_database(PlayerID),
         FOREIGN KEY (item_id) REFERENCES item(id),
         UNIQUE (player_id, item_id) -- evita múltiplas linhas duplicadas
+    );
+
+    CREATE TABLE player_logins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_id TEXT UNIQUE NOT NULL,
+        login TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        token TEXT,
+        active INTEGER DEFAULT 0,
+        admin INTEGER DEFAULT 0
     );
 
 

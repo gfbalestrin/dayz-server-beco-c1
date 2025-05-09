@@ -536,44 +536,5 @@
         "subitems": []
       }
     ]
-  },
-  "pA9gYDTAn1YuK24X9Vpc6sIjdLXcyEBjlAfiDbkskKw=": {
-    "weapons": {
-      "primary_weapon": {
-        "name_type": "CZ61",
-        "feed_type": "magazine",
-        "slots": 12,
-        "width": 4,
-        "height": 3,
-        "magazine": {
-          "name_type": "Mag_CZ61_20Rnd",
-          "capacity": 20,
-          "slots": 2,
-          "width": 1,
-          "height": 2
-        },
-        "ammunitions": {
-          "name_type": "Ammo_380",
-          "slots": 1,
-          "width": 1,
-          "height": 1
-        }
-      },
-      "secondary_weapon": {
-        "name_type": "Ruger1022",
-        "feed_type": "magazine",
-        "slots": 18,
-        "width": 6,
-        "height": 3
-      },
-      "small_weapon": {
-        "name_type": "Longhorn",
-        "feed_type": "manual",
-        "slots": 10,
-        "width": 5,
-        "height": 2
-      }
-    },
-    "items": []
   }
 }

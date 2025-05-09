@@ -6,18 +6,31 @@
     <title>Loadout de itens do jogador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
 </head>
 
 <body class="container py-4">
-    <h2>Loadout de <span id="playerName">{{ player.PlayerName or player.PlayerID }}</span></h2>
-    <div class="d-flex justify-content-between mt-4">
-        <div>
-            <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
-        </div>
-        <a href="{{ url_for('delete_loadout_items', player_id=player.PlayerID) }}" class="btn btn-danger"
-            onclick="return confirm('Tem certeza que deseja excluir?');">Resetar Loadout</a>
+    <!-- Título com destaque -->
+    <h2 class="mt-4">
+        Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID }}</span>
+    </h2>
+
+    <!-- Botões de ação com layout aprimorado -->
+    <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+        <!-- Botão de voltar -->
+        <a href="{{ url_for('loadout_players') }}" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-arrow-left-circle me-2"></i> Voltar
+        </a>
+
+        <!-- Botão de reset com confirmação -->
+        <a href="{{ url_for('delete_loadout_items', player_id=player.PlayerID) }}" class="btn btn-outline-danger btn-lg"
+            onclick="return confirm('Tem certeza que deseja excluir o loadout deste jogador?');">
+            <i class="bi bi-trash3-fill me-2"></i> Resetar Loadout
+        </a>
     </div>
-    <div id="groupedItemsGrid" class="mb-5"></div>
+
+    <div id="groupedItemsGrid" class="mb-5 mt-4"></div>
     <div id="noItemsMsg" class="alert alert-warning d-none mt-3">Nenhum item configurado para este jogador.</div>
 
     <div class="mb-3">
@@ -254,12 +267,6 @@
 
             container.appendChild(accordion);
         }
-
-        // function changePage(typeName, direction) {
-        //     const currentPage = groupPageState[typeName] || 1;
-        //     groupPageState[typeName] = currentPage + direction;
-        //     loadAvailableItemsGrouped();
-        // }
 
 
         async function addItemToPlayerDirect(itemId) {
