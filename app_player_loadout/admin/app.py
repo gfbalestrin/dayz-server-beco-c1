@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
+from collections import defaultdict
 import os
 import json
 import sqlite3
@@ -99,6 +100,55 @@ def get_weapon_data(weapon_id, magazine_id, ammo_id, attachments):
     return weapon_data
 
 
+# def export_loadouts_json():
+#     players = query_db("SELECT * FROM player_loadouts_weapons")
+#     full_data = {}
+
+#     for player in players:
+#         player_id = f"{player['player_id']}"
+#         player_data = {"weapons": {}}
+
+#         # Pega todos os attachments desse jogador
+#         all_attachments = query_db("""
+#             SELECT a.*, lwa.weapon_slot 
+#             FROM player_loadouts_weapon_attachments lwa
+#             JOIN attachments a ON a.id = lwa.attachment_id
+#             WHERE lwa.player_loadouts_weapons_id = ?
+#         """, [player["id"]])
+
+#         # Agrupa attachments por slot
+#         attachments_by_slot = {"primary": [], "secondary": [], "small": []}
+#         for att in all_attachments:
+#             attachments_by_slot[att["weapon_slot"]].append(att)
+
+#         # Monta cada tipo de arma
+#         player_data["weapons"]["primary_weapon"] = get_weapon_data(
+#             player["primary_weapon_id"],
+#             player["primary_magazine_id"],
+#             player["primary_ammo_id"],
+#             attachments_by_slot["primary"]
+#         )
+#         player_data["weapons"]["secondary_weapon"] = get_weapon_data(
+#             player["secondary_weapon_id"],
+#             player["secondary_magazine_id"],
+#             player["secondary_ammo_id"],
+#             attachments_by_slot["secondary"]
+#         )
+#         player_data["weapons"]["small_weapon"] = get_weapon_data(
+#             player["small_weapon_id"],
+#             player["small_magazine_id"],
+#             player["small_ammo_id"],
+#             attachments_by_slot["small"]
+#         )
+
+#         full_data[player_id] = player_data
+
+#     # Salva em arquivo
+#     with open(JSON_PATH, "w", encoding="utf-8") as f:
+#         json.dump(full_data, f, indent=2)
+
+#     return True
+
 def export_loadouts_json():
     players = query_db("SELECT * FROM player_loadouts_weapons")
     full_data = {}
@@ -140,13 +190,95 @@ def export_loadouts_json():
             attachments_by_slot["small"]
         )
 
+        # Buscar itens do jogador
+        items = query_db("""
+            SELECT i.*, it.name as type_name, pi.quantity
+            FROM player_items pi
+            JOIN item i ON i.id = pi.item_id
+            JOIN item_types it ON it.id = i.type_id
+            WHERE pi.player_id = ?
+        """, [player["player_id"]])
+
+        # Se não tem armas nem itens, pula este player
+        has_weapons = any(player_data["weapons"].values())
+        has_items = len(items) > 0
+        if not has_weapons and not has_items:
+            continue
+
+        # Mapas auxiliares
+        item_map = {item["id"]: dict(item) for item in items}
+        quantities = {item["id"]: item["quantity"] for item in items}
+
+        # Compatibilidade
+        compat = query_db("SELECT parent_item_id, child_item_id FROM item_compatibility")
+        compat_map = {}
+        for row in compat:
+            compat_map.setdefault(row["parent_item_id"], []).append(row["child_item_id"])
+
+        # Montar árvore de itens
+        used_items = set()
+        item_list = []
+
+        def build_item_json(item):
+            return {
+                "name_type": item["name_type"],
+                "type_name": item["type_name"],
+                "slots": item["slots"],
+                "width": item["width"],
+                "height": item["height"],
+                "storage_slots": item["storage_slots"],
+                "storage_width": item["storage_width"],
+                "storage_height": item["storage_height"],
+                "localization": item["localization"],
+                "subitem": None
+            }
+
+        def build_item_tree(item, compat_map, item_map, used_items, depth=0, max_depth=5, ancestry=None):
+            if depth >= max_depth:
+                return build_item_json(item)
+
+            ancestry = ancestry or set()
+            ancestry.add(item["id"])
+
+            item_json = build_item_json(item)
+
+            children = compat_map.get(item["id"], [])
+            for child_id in children:
+                if child_id in used_items or child_id in ancestry:
+                    continue
+
+                child_item = item_map.get(child_id)
+                if not child_item:
+                    continue
+
+                used_items.add(child_id)
+                item_json["subitem"] = build_item_tree(
+                    child_item, compat_map, item_map, used_items,
+                    depth + 1, max_depth, ancestry.copy()
+                )
+                break  # só um subitem por item
+
+            return item_json
+
+        for item_id, quantity in quantities.items():
+            for _ in range(quantity):
+                if item_id in used_items:
+                    continue
+                used_items.add(item_id)
+                item = item_map[item_id]
+                item_list.append(build_item_tree(item, compat_map, item_map, used_items))
+
+        player_data["items"] = item_list
+
+        # Só adiciona ao JSON final se tem dados válidos
         full_data[player_id] = player_data
 
-    # Salva em arquivo
+    # Salvar JSON
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2)
 
     return True
+
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
@@ -1476,8 +1608,8 @@ def player_loadout_weapons(player_id):
         attachments=attachments_by_slot
     )
 
-@app.route('/delete_loadout/<player_id>', methods=['GET'])
-def delete_loadout(player_id):
+@app.route('/delete_loadout_weapons/<player_id>', methods=['GET'])
+def delete_loadout_weapons(player_id):
     conn = get_db_connection()
     
     try:
@@ -2101,6 +2233,24 @@ def update_item_quantity(player_id, item_id):
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+@app.route('/delete_loadout_items/<player_id>', methods=['GET'])
+def delete_loadout_items(player_id):
+    conn = get_db_connection()
+    
+    try:
+        # Depois deleta o loadout principal
+        conn.execute('DELETE FROM player_items WHERE player_id = ?', (player_id,))
+        
+        conn.commit()
+        flash('Loadout excluído com sucesso!', 'success')
+    except Exception as e:
+        conn.rollback()
+        flash(f'Erro ao excluir loadout: {str(e)}', 'danger')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('player_loadout_items', player_id=player_id))
 
 
 @app.route('/login', methods=['GET', 'POST'])

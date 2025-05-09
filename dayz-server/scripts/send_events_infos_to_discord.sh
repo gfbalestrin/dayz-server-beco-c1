@@ -19,7 +19,7 @@ update_symlink() {
 }
 
 function MonitorLog() {
-	tail -n +1 -F "$LogFileName" | grep -n --line-buffered -e "is connected" -e "Shutting down in 60 seconds" -e "Invalid number -nan" -e "kicked from server" -e "Termination successfully completed" -e "Mission script has no main function" -e "Player connect enabled" | while IFS='' read -r Line; do
+	tail -n +1 -F "$LogFileName" | grep -n --line-buffered -e "is connected" -e "Shutting down in 120 seconds" -e "Invalid number -nan" -e "kicked from server" -e "Termination successfully completed" -e "Mission script has no main function" -e "Player connect enabled" | while IFS='' read -r Line; do
 		CurrentDate=$(date "+%d/%m/%Y %H:%M:%S")
 		Content=$(echo $Line | cut -c 15-)
 		INSERT_RPT_LOG "$Line" "INFO"
@@ -67,10 +67,8 @@ function MonitorLog() {
 			fi
 			
 			continue
-		elif [[ "$Content" == *"Shutting down in 60 seconds"* ]]; then
-			if [[ "$DayzDeathmatch" -eq "1" ]]; then
-				"$AppFolder/$AppScriptUpdateGeneralKillfeed" &
-				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET" &				
+		elif [[ "$Content" == *"Shutting down in 120 seconds"* ]]; then
+			if [[ "$DayzDeathmatch" -eq "1" ]]; then							
 
 				DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
 				MapaOld=$(jq -r '.[] | select(.Active == true) | .Region' $DeathMatchCoords)
@@ -104,6 +102,9 @@ function MonitorLog() {
 				NEXT_REGION=$(jq -r ".[$NEXT_INDEX].Region" "$DeathMatchCoords")
 				MessagesXmlFile="$DayzServerFolder/$DayzMessagesXmlFile";
 				sed -i "s|<text>.*</text>|<text>O servidor vai ser reiniciado em #tmin minutos. Próximo mapa: $NEXT_REGION</text>|" $MessagesXmlFile
+
+				"$AppFolder/$AppScriptUpdateGeneralKillfeed" &
+				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET" &
 				continue
 			fi
 			"$AppFolder/$AppScriptExtractPlayersStatsFile" &

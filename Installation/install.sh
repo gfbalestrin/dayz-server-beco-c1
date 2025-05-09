@@ -330,9 +330,9 @@ fi
 echo "Configurando script de update $DayzFolder/scripts/update.sh ..."
 echo "#!/bin/bash" > "$DayzFolder/scripts/update.sh"
 if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
-    echo "sleep 10 && cd $DayzFolder/scripts && ./wipe.sh && sleep 10" >> "$DayzFolder/scripts/update.sh"
+    echo "cd $DayzFolder/scripts && ./wipe.sh && sleep 10" >> "$DayzFolder/scripts/update.sh"
 fi
-echo "cd $DayzFolder/scripts && /home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir $DayzFolder/ +login $SteamAccount +app_update 223350 +quit" >> "$DayzFolder/scripts/update.sh"
+echo "cd $DayzFolder && /home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir $DayzFolder/ +login $SteamAccount +app_update 223350 +quit" >> "$DayzFolder/scripts/update.sh"
 chmod +x "$DayzFolder/scripts/update.sh"
 
 echo "Configurando script de pós inicialização $DayzFolder/scripts/execute_script_pos.sh ..."

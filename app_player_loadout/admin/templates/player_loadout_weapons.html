@@ -328,7 +328,7 @@
                 <a href="{{ url_for('loadout_players') }}" class="btn btn-secondary">Voltar</a>
 
             </div>
-            <a href="{{ url_for('delete_loadout', player_id=player.PlayerID) }}" class="btn btn-danger"
+            <a href="{{ url_for('delete_loadout_weapons', player_id=player.PlayerID) }}" class="btn btn-danger"
                 onclick="return confirm('Tem certeza que deseja excluir?');">Resetar Loadout</a>
         </div>
     </form>
