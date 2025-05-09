@@ -13,7 +13,8 @@
 <body class="container py-4">
     <!-- Título com destaque -->
     <h2 class="mt-4">
-        Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID }}</span>
+        Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID
+            }}</span>
     </h2>
 
     <!-- Botões de ação com layout aprimorado -->
@@ -189,24 +190,28 @@
             }
 
             const groupedByType = {};
-            const groupedByLocalization = {};
 
-            // Agrupar itens por tipo e dentro por localization
             for (const item of allItems) {
                 if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) continue;
-
                 if (!groupedByType[item.type_name]) groupedByType[item.type_name] = {};
-
-                if (!groupedByType[item.type_name][item.localization]) {
-                    groupedByType[item.type_name][item.localization] = [];
-                }
+                if (!groupedByType[item.type_name][item.localization]) groupedByType[item.type_name][item.localization] = [];
                 groupedByType[item.type_name][item.localization].push(item);
             }
 
             const container = document.getElementById('availableItemsContainer');
-            container.innerHTML = '';
 
-            // Accordion para os itens disponíveis
+            // 🔍 Salva os IDs dos accordions abertos
+            const openAccordions = Array.from(container.querySelectorAll('.accordion-collapse.show'))
+                .map(el => el.id);
+
+            // 🔍 Salva scroll dos carrosséis
+            const scrollPositions = {};
+            container.querySelectorAll('[data-scroll-id]').forEach(el => {
+                scrollPositions[el.dataset.scrollId] = el.scrollLeft;
+            });
+
+            container.innerHTML = ''; // Limpa o container
+
             const accordion = document.createElement('div');
             accordion.className = 'accordion';
             accordion.id = 'availableItemsAccordion';
@@ -216,48 +221,58 @@
                 const totalPages = Math.ceil(Object.values(locItems).flat().length / ITEMS_PER_PAGE);
                 const pageItems = Object.values(locItems).flat().slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-                // Accordion item para cada tipo
                 const accordionItem = document.createElement('div');
                 accordionItem.className = 'accordion-item';
                 const itemId = `itemType-${typeName.replace(/\s+/g, '-').toLowerCase()}`;
+                const isOpen = openAccordions.includes(`collapse-${itemId}`);
 
                 accordionItem.innerHTML = `
             <h2 class="accordion-header" id="heading-${itemId}">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${itemId}" aria-expanded="true" aria-controls="collapse-${itemId}">
+                <button class="accordion-button ${isOpen ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse-${itemId}" aria-expanded="${isOpen}" aria-controls="collapse-${itemId}">
                     ${typeName}
                 </button>
             </h2>
-            <div id="collapse-${itemId}" class="accordion-collapse collapse" aria-labelledby="heading-${itemId}" data-bs-parent="#availableItemsAccordion">
+            <div id="collapse-${itemId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}"
+                 aria-labelledby="heading-${itemId}" data-bs-parent="#availableItemsAccordion">
                 <div class="accordion-body">
                     ${Object.entries(locItems).map(([localization, items]) => {
-                    // Se não houver itens para uma localização, pule.
                     if (items.length === 0) return '';
-
                     const locName = localizationParse(localization) || "Não especificado";
-
+                    const scrollId = `${itemId}-${localization}`;
                     return `
-                            <h5>${locName}</h5>
-                            <div class="d-flex flex-row flex-nowrap overflow-auto gap-3">
-                                ${items.map(item => {
+  <h5>${locName}</h5>
+  <div class="position-relative">
+      <button class="btn btn-light position-absolute top-50 start-0 translate-middle-y z-3"
+              onclick="scrollCarousel('${scrollId}', -200)">
+          ‹
+      </button>
+      <div class="d-flex flex-row flex-nowrap overflow-auto gap-3 px-5"
+           data-scroll-id="${scrollId}" style="scroll-behavior: smooth;">
+          ${items.map(item => {
                         const count = countMap[item.id] || 0;
-
                         return `
-                                        <div class="card p-2 text-center bg-light" style="min-width: 160px;">
-                                            <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
-                                            <div class="card-body p-2">
-                                                <h6 class="card-title small">${item.name}</h6>
-                                                ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
-                                                <button class="btn btn-sm btn-primary mt-1" onclick="addItemToPlayerDirect(${item.id})" ${count > 0 ? 'disabled' : ''}>
-                                                    Adicionar
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
+                  <div class="card p-2 text-center bg-light" style="min-width: 160px;">
+                      <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
+                      <div class="card-body p-2">
+                          <h6 class="card-title small">${item.name}</h6>
+                          ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
+                          <button class="btn btn-sm btn-primary mt-1"
+                                  onclick="addItemToPlayerDirect(${item.id})"
+                                  ${count > 0 ? 'disabled' : ''}>
+                              Adicionar
+                          </button>
+                      </div>
+                  </div>`;
                     }).join('')}
-                            </div>
-                        `;
+      </div>
+      <button class="btn btn-light position-absolute top-50 end-0 translate-middle-y z-3"
+              onclick="scrollCarousel('${scrollId}', 200)">
+          ›
+      </button>
+  </div>
+`;
                 }).join('')}
-                    
                 </div>
             </div>
         `;
@@ -266,8 +281,13 @@
             }
 
             container.appendChild(accordion);
-        }
 
+            // 🔍 Reaplica scroll salvo
+            Object.entries(scrollPositions).forEach(([id, scrollLeft]) => {
+                const el = container.querySelector(`[data-scroll-id="${id}"]`);
+                if (el) el.scrollLeft = scrollLeft;
+            });
+        }
 
         async function addItemToPlayerDirect(itemId) {
             try {
@@ -296,6 +316,12 @@
                 alert('Erro ao atualizar quantidade: ' + err.message);
             }
         }
+
+        function scrollCarousel(id, amount) {
+            const el = document.querySelector(`[data-scroll-id="${id}"]`);
+            if (el) el.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
