@@ -174,65 +174,6 @@ class WeaponData {
 	ref WeaponMagazine magazine;
 	ref array<ref WeaponAttachment> attachments;
 }
-class Item {
-	string name_type;
-	string type_name;
-	int slots;
-	int width;
-	int height;
-	int storage_slots;
-	int storage_width;
-	int storage_height;
-	string localization;
-	ref array<ref SubItem1> subitem;
-};
-class SubItem1 {
-	string name_type;
-	string type_name;
-	int slots;
-	int width;
-	int height;
-	int storage_slots;
-	int storage_width;
-	int storage_height;
-	string localization;
-	ref array<ref SubItem2> subitem;
-};
-class SubItem2 {
-	string name_type;
-	string type_name;
-	int slots;
-	int width;
-	int height;
-	int storage_slots;
-	int storage_width;
-	int storage_height;
-	string localization;
-    ref array<ref SubItem3> subitem;
-};
-class SubItem3 {
-	string name_type;
-	string type_name;
-	int slots;
-	int width;
-	int height;
-	int storage_slots;
-	int storage_width;
-	int storage_height;
-	string localization;
-    ref array<ref SubItem4> subitem;
-};
-class SubItem4 {
-	string name_type;
-	string type_name;
-	int slots;
-	int width;
-	int height;
-	int storage_slots;
-	int storage_width;
-	int storage_height;
-	string localization;
-};
 class Weapons {
 	ref WeaponData primary_weapon;
     ref WeaponData secondary_weapon;
@@ -242,7 +183,6 @@ class Weapons {
 class LoadoutData {
 	ref Weapons weapons;
     ref array<ref LoadoutItem> items;
-    //ref array<ref Item> items;
 }
 
 bool GiveCustomLoadout(PlayerBase player, string playerId)
@@ -337,29 +277,6 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
             player.SetQuickBarEntityShortcut(weaponSmallEntity, 2, true);
         }
     }
-
-	// if (data.items) {
-	// 	foreach (Item item : data.items) {
-    //         if (!item) {
-	// 			WriteToLog("Item inválido no loadout");
-	// 			continue;
-	// 		}
-    //         WriteToLog("Analisando item " + item.name_type);
-
-    //         EntityAI itemEntity = player.GetInventory().CreateInInventory(item.name_type);
-    //         if (!itemEntity) {
-    //             WriteToLog("Falha ao criar item: " + item.name_type);
-    //             continue;
-    //         }
-
-    //         if (item.subitem1) {
-    //             EntityAI subitem1Entity = itemEntity.GetInventory().CreateAttachment(item.subitem.name_type);
-    //             if (!subitem1Entity) {
-    //                 Error("Falha ao criar subitem: " + item.subitem.name_type);
-    //             }
-    //         }
-	// 	}
-	// }
 
     if (data.items) {
         foreach (LoadoutItem li : data.items) {
