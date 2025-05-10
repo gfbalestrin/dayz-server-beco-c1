@@ -139,6 +139,13 @@ void GiveAdminLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("BalaclavaMask_Black");
 }
 
+class Explosive {
+	string name_type;
+	int slots;
+	int width;
+	int height;
+    int quantity;
+}
 
 class WeaponAttachment {
 	string name_type;
@@ -182,6 +189,7 @@ class Weapons {
 
 class LoadoutData {
 	ref Weapons weapons;
+    ref array<ref Explosive> explosives;
     ref array<ref LoadoutItem> items;
 }
 
@@ -288,6 +296,15 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                 }
             } 
             player.SetQuickBarEntityShortcut(weaponSmallEntity, 2, true);
+        }
+    }
+
+    // Explosivos
+    if (data.explosives) {
+        foreach (Explosive explosive : data.explosives) {
+            for (int e = 0; e < explosive.quantity; e++) {
+                player.GetInventory().CreateAttachment(explosive.name_type);
+            }
         }
     }
 

@@ -10,11 +10,6 @@ import json
 import sqlite3
 import traceback
 
-
-USERS = {
-    "admin": generate_password_hash("xxxxxxxxxxxxxxx")
-}
-
 app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
 
@@ -169,11 +164,27 @@ def export_loadouts_json():
                 weapon_data["small_ammo_id"],
                 attachments_by_slot["small"]
             )
+            explosives = query_db("SELECT a.name_type, a.slots, a.width, a.height, plwa.quantity as quantity FROM player_loadouts_weapon_explosives plwa JOIN explosives a ON plwa.explosive_id = a.id WHERE plwa.player_loadouts_weapons_id = ? LIMIT 1", [weapon_data["id"]])
+            if explosives:
+                explosive_list = []
+                for exp in explosives:                    
+                    explosive_list.append({
+                        "name_type": exp["name_type"],
+                        "slots": exp["slots"],
+                        "width": exp["width"],
+                        "height": exp["height"],
+                        "quantity": exp["quantity"]
+                    })
+                player_data["explosives"] = explosive_list
+            else:
+                player_data["explosives"] = None 
+                
         else:
             # Preenche None caso o jogador não tenha armas
             player_data["weapons"]["primary_weapon"] = None
             player_data["weapons"]["secondary_weapon"] = None
             player_data["weapons"]["small_weapon"] = None
+            player_data["explosives"] = None       
 
         # Buscar itens do jogador
         items = query_db("""
@@ -260,7 +271,7 @@ def export_loadouts_json():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=10)
     scheduler.start()
 
     # Garante que o scheduler pare quando o app parar
