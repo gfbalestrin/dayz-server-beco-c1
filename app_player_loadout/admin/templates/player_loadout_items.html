@@ -76,7 +76,6 @@
         let cachedItems = null;
         let cachedPlayerItems = null;
 
-
         const ruleDefault = { limit: 1 };
         const rules = [
             { name_type: "", type_name: "roupas", localization: "head", limit: 1 },
@@ -88,8 +87,29 @@
             { name_type: "", type_name: "roupas", localization: "foot", limit: 1 },
             { name_type: "", type_name: "roupas", localization: "face", limit: 1 },
             { name_type: "", type_name: "roupas", localization: "torso", limit: 1 },
+            { name_type: "", type_name: "coletes", localization: "torso", limit: 1 },
+            { name_type: "", type_name: "mochilas", localization: "torso", limit: 1 },
             { name_type: "Battery9V", type_name: "", localization: "", limit: 5 }
         ]
+        const itemsConflict = [
+            { items: [ "Mich2001Helmet", "NVGHeadstrap" ] }
+        ]
+        function hasConflict(newItem, playerItems, conflictRules) {
+            const newItemType = newItem.name_type;
+
+            for (const rule of conflictRules) {
+                if (rule.items.includes(newItemType)) {
+                    for (const playerItem of playerItems) {
+                        if (rule.items.includes(playerItem.name_type)) {
+                            // Conflito encontrado
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         function getApplicableRule(item) {
             const rule = rules.find(r =>
                 (r.name_type === "" || r.name_type.toLowerCase() === item.name_type.toLowerCase()) &&
@@ -99,8 +119,10 @@
             return rule || ruleDefault;
         }
 
-        function shouldDisableAddButton(item) {
-            // Normaliza valores para comparação (ex: Roupas → roupas)
+        function shouldDisableAddButton(item) {            
+            if (hasConflict(item, cachedPlayerItems, itemsConflict))
+                return true;
+
             const itemType = item.type_name?.toLowerCase() || '';
             const itemLoc = item.localization?.toLowerCase() || '';
             const itemNameType = item.name_type || '';
