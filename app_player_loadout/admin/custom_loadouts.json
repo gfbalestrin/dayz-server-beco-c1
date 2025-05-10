@@ -545,15 +545,112 @@
     },
     "items": [
       {
-        "name_type": "Mich2001Helmet",
+        "name_type": "M65Jacket_Black",
         "type_name": "Roupas",
         "slots": 12,
         "width": 4,
         "height": 3,
+        "storage_slots": 24,
+        "storage_width": 6,
+        "storage_height": 4,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "CargoPants_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 20,
+        "storage_width": 5,
+        "storage_height": 4,
+        "localization": "legs",
+        "subitems": []
+      },
+      {
+        "name_type": "BalaclavaMask_Blackskull",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "face",
+        "subitems": []
+      },
+      {
+        "name_type": "JungleBoots_Black",
+        "type_name": "Roupas",
+        "slots": 16,
+        "width": 4,
+        "height": 4,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "foot",
+        "subitems": []
+      },
+      {
+        "name_type": "PlateCarrierVest",
+        "type_name": "Coletes",
+        "slots": 25,
+        "width": 5,
+        "height": 5,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "torso",
+        "subitems": [
+          {
+            "name_type": "PlateCarrierPouches",
+            "type_name": "Coletes",
+            "slots": 30,
+            "width": 6,
+            "height": 5,
+            "storage_slots": 20,
+            "storage_width": 5,
+            "storage_height": 4,
+            "localization": "torso",
+            "subitems": []
+          },
+          {
+            "name_type": "PlateCarrierHolster",
+            "type_name": "Coletes",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
+      },
+      {
+        "name_type": "WitchHat",
+        "type_name": "Roupas",
+        "slots": 6,
+        "width": 3,
+        "height": 2,
         "storage_slots": 0,
         "storage_width": 0,
         "storage_height": 0,
         "localization": "head",
+        "subitems": []
+      },
+      {
+        "name_type": "WoolGlovesFingerless_Black",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "hands",
         "subitems": []
       }
     ]

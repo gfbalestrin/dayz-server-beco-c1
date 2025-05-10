@@ -80,6 +80,14 @@
         const ruleDefault = { limit: 1 };
         const rules = [
             { name_type: "", type_name: "roupas", localization: "head", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "waist", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "back", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "hands", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "eyes", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "legs", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "foot", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "face", limit: 1 },
+            { name_type: "", type_name: "roupas", localization: "torso", limit: 1 },
             { name_type: "Battery9V", type_name: "", localization: "", limit: 5 }
         ]
         function getApplicableRule(item) {
@@ -268,7 +276,7 @@
                 msg.classList.toggle('d-none', items.length > 0);
 
                 const row = document.createElement('div');
-                row.className = 'd-flex flex-row flex-nowrap overflow-auto gap-3 mb-3';
+                row.className = 'd-flex flex-row flex-wrap overflow-auto gap-3 mb-3';
                 row.style.width = '100%';
 
                 items.forEach(item => {

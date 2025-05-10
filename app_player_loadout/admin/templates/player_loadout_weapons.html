@@ -651,6 +651,14 @@
                 });
             });
         });
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                // Usa o método do Bootstrap para fechar o alert
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            });
+        }, 10000); // 5000ms = 5 segundos
     });
 </script>
 </body>
