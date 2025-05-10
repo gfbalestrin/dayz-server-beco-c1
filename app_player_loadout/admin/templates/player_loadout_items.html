@@ -31,7 +31,7 @@
         </a>
     </div>
 
-    
+
 
     <div class="card mt-4 shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -39,7 +39,8 @@
         </div>
         <div class="card-body">
             <div id="groupedItemsGrid"></div>
-            <div id="noItemsMsg" class="alert alert-warning d-none text-center">Nenhum item configurado para este jogador.</div>
+            <div id="noItemsMsg" class="alert alert-warning d-none text-center">Nenhum item configurado para este
+                jogador.</div>
         </div>
     </div>
 
@@ -51,16 +52,45 @@
             <div class="mb-2">
                 <input type="text" id="itemSearchInput" class="form-control" placeholder="Buscar itens por nome..."
                     oninput="loadAvailableItemsGrouped()">
-            </div>    
+            </div>
             <div id="availableItemsContainer" class="mb-4"></div>
         </div>
     </div>
-    
+
+    <div class="modal fade" id="subItemModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Subitens</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="subItemModalBody"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const playerId = "{{ player.PlayerID }}";
         const ITEMS_PER_PAGE = 6;
         const groupPageState = {};
+        let cachedItems = null;
+
+
+        const ruleDefault = { limit: 1 };
+        const rules = [
+            { name_type: "", type_name: "roupas", localization: "legs", limit: 2 },
+            { name_type: "Battery9V", type_name: "", localization: "", limit: 5 }
+        ]
+        function getApplicableRule(item) {
+            // Busca a primeira regra que corresponda
+            const rule = rules.find(r =>
+                (r.name_type === "" || r.name_type.toLowerCase() === item.name_type.toLowerCase()) &&
+                (r.type_name === "" || r.type_name.toLowerCase() === item.type_name.toLowerCase()) &&
+                (r.localization === "" || r.localization.toLowerCase() === (item.localization || '').toLowerCase())
+            );
+
+            return rule || ruleDefault;
+        }
 
         window.onload = async () => {
             await loadPlayerItems();
@@ -188,7 +218,7 @@
         //         msg.textContent = 'Erro ao carregar itens do jogador.';
         //     }
         // }
-        
+
         async function loadPlayerItems() {
             const container = document.getElementById('groupedItemsGrid');
             const msg = document.getElementById('noItemsMsg');
@@ -211,6 +241,10 @@
                         ? `${item.storage_width}x${item.storage_height} (${item.storage_slots} slots)`
                         : "Não possui";
 
+                    // 🔍 Buscar regra aplicável
+                    const rule = getApplicableRule(item);
+                    const maxReached = rule ? item.quantity >= rule.limit : false;
+
                     cardItem.innerHTML = `
                         <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
                         <div class="card-body p-2">
@@ -218,15 +252,24 @@
                             <p class="small text-muted">${item.name_type}</p>
                             <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
                             <p class="small m-0">Armazenamento: ${armazenamento}</p>
+                            <p class="small m-0">Localization: ${item.localization}</p>
+                            <p class="small m-0">Tipo: ${item.type_name}</p>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div class="input-group" style="max-width: 130px;">
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, -1)" ${item.quantity <= 1 ? 'disabled' : ''}>
                                         <i class="fas fa-minus"></i>
                                     </button>
                                     <input class="form-control form-control-sm text-center" value="${item.quantity}" disabled>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
+                                    ${maxReached
+                            ? `<span data-bs-toggle="tooltip" data-bs-placement="top" title="Limite máximo atingido">
+                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </span>`
+                            : `<button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(${item.id}, 1)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>`
+                        }
                                 </div>
                                 <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(${item.id})">
                                     Remover
@@ -234,6 +277,7 @@
                             </div>
                         </div>
                     `;
+
                     row.appendChild(cardItem);
                 });
 
@@ -242,6 +286,9 @@
                 msg.classList.remove('d-none');
                 msg.textContent = 'Erro ao carregar itens do jogador.';
             }
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
         }
 
 
@@ -258,7 +305,9 @@
 
         async function loadAvailableItemsGrouped() {
             const searchTerm = document.getElementById('itemSearchInput').value.trim().toLowerCase();
-            const allItems = await fetchJSON('/items');
+            if (!cachedItems) {
+                cachedItems = await fetchJSON('/items');
+            }
             const playerItems = await fetchJSON(`/players/${playerId}/items`);
             const countMap = {};
 
@@ -268,7 +317,7 @@
 
             const groupedByType = {};
 
-            for (const item of allItems) {
+            for (const item of cachedItems) {
                 if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) continue;
                 if (!groupedByType[item.type_name]) groupedByType[item.type_name] = {};
                 if (!groupedByType[item.type_name][item.localization]) groupedByType[item.type_name][item.localization] = [];
@@ -318,37 +367,38 @@
                     const locName = localizationParse(localization) || "Não especificado";
                     const scrollId = `${itemId}-${localization}`;
                     return `
-  <h5>${locName}</h5>
-  <div class="position-relative">
-      <button class="btn btn-light position-absolute top-50 start-0 translate-middle-y z-3"
-              onclick="scrollCarousel('${scrollId}', -200)">
-          ‹
-      </button>
-      <div class="d-flex flex-row flex-nowrap overflow-auto gap-3 px-5"
-           data-scroll-id="${scrollId}" style="scroll-behavior: smooth;">
-          ${items.map(item => {
+                    <h5>${locName}</h5>
+                    <div class="position-relative">
+                        <button class="btn btn-light position-absolute top-50 start-0 translate-middle-y z-3"
+                                onclick="scrollCarousel('${scrollId}', -200)">
+                            ‹
+                        </button>
+                        <div class="d-flex flex-row flex-nowrap overflow-auto gap-3 px-5"
+                            data-scroll-id="${scrollId}" style="scroll-behavior: smooth;">
+                            ${items.map(item => {
                         const count = countMap[item.id] || 0;
                         return `
-                  <div class="card p-2 text-center bg-light" style="min-width: 160px;">
-                      <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
-                      <div class="card-body p-2">
-                          <h6 class="card-title small">${item.name}</h6>
-                          ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
-                          <button class="btn btn-sm btn-primary mt-1"
-                                  onclick="addItemToPlayerDirect(${item.id})"
-                                  ${count > 0 ? 'disabled' : ''}>
-                              Adicionar
-                          </button>
-                      </div>
-                  </div>`;
+                                    <div class="card p-2 text-center bg-light" style="min-width: 160px;">
+                                        <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title small">${item.name}</h6>
+                                            ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
+                                            <button class="btn btn-sm btn-primary mt-1"
+                                                    onclick="addItemToPlayerDirect(${item.id})"
+                                                    ${count > 0 ? 'disabled' : ''}>
+                                                Adicionar
+                                            </button>
+                                            ${item.subitems ? `<button class="btn btn-sm btn-secondary mt-1" onclick="showSubitems(${item.id})">+ Subitens</button>` : ''}
+                                        </div>
+                                    </div>`;
                     }).join('')}
-      </div>
-      <button class="btn btn-light position-absolute top-50 end-0 translate-middle-y z-3"
-              onclick="scrollCarousel('${scrollId}', 200)">
-          ›
-      </button>
-  </div>
-`;
+                        </div>
+                        <button class="btn btn-light position-absolute top-50 end-0 translate-middle-y z-3"
+                                onclick="scrollCarousel('${scrollId}', 200)">
+                            ›
+                        </button>
+                    </div>
+                    `;
                 }).join('')}
                 </div>
             </div>
@@ -365,6 +415,133 @@
                 if (el) el.scrollLeft = scrollLeft;
             });
         }
+
+        async function showSubitems(item_id) {
+            const body = document.getElementById("subItemModalBody");
+            body.innerHTML = ''; // Limpa conteúdo anterior
+            const modal = new bootstrap.Modal(document.getElementById('subItemModal'));
+            modal.show();
+
+            // Se não tiver o cachedItems, pega da API
+            if (!cachedItems) {
+                cachedItems = await fetchJSON('/items');
+            }
+
+            const rootItem = cachedItems.find(i => i.id === item_id);
+            if (!rootItem || !rootItem.subitems || rootItem.subitems.length === 0) {
+                body.innerHTML = '<p class="text-muted">Este item não possui subitens.</p>';
+                return;
+            }
+
+            // Buscar os itens do jogador e criar o countMap
+            const playerItems = await fetchJSON(`/players/${playerId}/items`);
+            const countMap = {};
+
+            for (const item of playerItems) {
+                countMap[item.id] = (countMap[item.id] || 0) + 1;
+            }
+
+            // Passar o countMap para a renderização dos subitens
+            renderSubitemsRecursive(rootItem.subitems, body, cachedItems, 0, countMap);
+        }
+
+        function renderSubitemsRecursive(subitems, container, cachedItems, level, countMap) {
+            console.log("Entrou em renderSubitemsRecursive");
+            const indent = level * 20;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-flex flex-wrap gap-3 mb-3';
+            wrapper.style.marginLeft = `${indent}px`;
+
+            for (const sub of subitems) {
+                console.log("sub", sub);
+
+                const card = document.createElement('div');
+                card.className = 'card p-2 text-center bg-light';
+                card.style.minWidth = '160px';
+
+                const img = document.createElement('img');
+                img.src = sub.img;
+                img.alt = sub.name;
+                img.className = 'card-img-top mx-auto';
+                img.style.maxHeight = '100px';
+                img.style.objectFit = 'contain';
+                card.appendChild(img);
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body p-2';
+
+                const title = document.createElement('h6');
+                title.className = 'card-title small';
+                title.textContent = sub.name;
+
+                const subtitle = document.createElement('p');
+                subtitle.className = 'small text-muted';
+                subtitle.textContent = sub.name_type;
+
+                const addButton = document.createElement('button');
+                addButton.className = 'btn btn-sm btn-primary mt-1';
+                addButton.textContent = 'Adicionar';
+
+                // Verificação de 'countMap'
+                const count = countMap[sub.id] || 0;
+                addButton.onclick = () => addItemToPlayerDirect(sub.id);
+                addButton.disabled = count > 0; // Desabilita o botão se já adicionado
+
+                cardBody.appendChild(title);
+                cardBody.appendChild(subtitle);
+                cardBody.appendChild(addButton);
+
+                const hasChildren = sub.subitems && sub.subitems.length > 0;
+                if (hasChildren) {
+                    const subBtn = document.createElement('button');
+                    subBtn.className = 'btn btn-sm btn-secondary mt-1';
+                    subBtn.textContent = '+ Subitens';
+                    subBtn.onclick = function () {
+                        expandSubitems(sub.id, this, level + 1, countMap); // ← PASSA countMap
+                    };
+                    cardBody.appendChild(subBtn);
+
+                    // Criar o contêiner real no DOM para subitens
+                    const subContainer = document.createElement('div');
+                    subContainer.id = `subitems-container-${sub.id}`;
+                    subContainer.className = 'mt-2';
+                    cardBody.appendChild(subContainer);
+                }
+
+                card.appendChild(cardBody);
+                wrapper.appendChild(card);
+            }
+
+            container.appendChild(wrapper);
+        }
+
+        async function expandSubitems(item_id, button, level, countMap) {
+            button.disabled = true;
+
+            if (!cachedItems) {
+                cachedItems = await fetchJSON('/items');
+            }
+
+            const item = findItemByIdRecursive(cachedItems, item_id);
+            if (item && item.subitems && item.subitems.length > 0) {
+                const subContainer = document.getElementById(`subitems-container-${item_id}`);
+                if (subContainer) {
+                    renderSubitemsRecursive(item.subitems, subContainer, cachedItems, level, countMap); // ← PASSA countMap
+                }
+            }
+        }
+
+        function findItemByIdRecursive(items, id) {
+            for (const item of items) {
+                if (item.id === id) return item;
+                if (item.subitems && item.subitems.length > 0) {
+                    const found = findItemByIdRecursive(item.subitems, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
 
         async function addItemToPlayerDirect(itemId) {
             try {

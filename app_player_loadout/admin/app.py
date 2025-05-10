@@ -1926,17 +1926,64 @@ def save_loadout_weapons(player_id):
     return redirect(url_for('player_loadout_weapons', player_id=player_id))
 
 # Items
+# @app.route('/items', methods=['GET'])
+# @login_required
+# def get_items():
+#     conn = get_db_connection()
+#     items = conn.execute('''
+#         SELECT item.*, item_types.name AS type_name
+#         FROM item
+#         JOIN item_types ON item.type_id = item_types.id
+#     ''').fetchall()
+#     conn.close()
+#     return jsonify([dict(item) for item in items])
+
+# Com subitem
 @app.route('/items', methods=['GET'])
 @login_required
 def get_items():
     conn = get_db_connection()
+
+    # Buscar todos os itens com seus tipos
     items = conn.execute('''
         SELECT item.*, item_types.name AS type_name
         FROM item
         JOIN item_types ON item.type_id = item_types.id
     ''').fetchall()
+
+    # Buscar as relações de compatibilidade (parent -> child)
+    compat_rows = conn.execute('SELECT parent_item_id, child_item_id FROM item_compatibility').fetchall()
     conn.close()
-    return jsonify([dict(item) for item in items])
+
+    # Mapear itens por ID
+    item_dict = {item['id']: dict(item) for item in items}
+
+    # Inicializar subitems vazios
+    for item in item_dict.values():
+        item['subitems'] = []
+
+    # Criar mapa de compatibilidade: parent_id -> [child_id1, child_id2, ...]
+    compat_map = {}
+    for row in compat_rows:
+        compat_map.setdefault(row['parent_item_id'], []).append(row['child_item_id'])
+
+    # Função recursiva para montar árvore de subitens
+    def build_subtree(item_id):
+        item = item_dict[item_id]
+        children = compat_map.get(item_id, [])
+        item['subitems'] = [build_subtree(child_id) for child_id in children] if children else None
+        return item
+
+    # Identificar os itens que são apenas "pais" (não são filhos de ninguém)
+    child_ids = {row['child_item_id'] for row in compat_rows}
+    top_level_ids = [item_id for item_id in item_dict if item_id not in child_ids]
+
+    # Montar lista final com subitens recursivos
+    result = [build_subtree(item_id) for item_id in top_level_ids]
+
+    return jsonify(result)
+
+
 
 @app.route('/items_pagination', methods=['GET'])
 @login_required
