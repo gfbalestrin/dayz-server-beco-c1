@@ -90,16 +90,21 @@
             margin-top: 5px;
             text-overflow: ellipsis;
         }
+
         .btn-hover-effect {
             transition: all 0.3s ease;
         }
+
         .btn-hover-effect:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .btn-active {
-            background-color: #0e1330; /* Cor de fundo quando o botão está ativo */
-            color: white; /* Cor do texto */
+            background-color: #0e1330;
+            /* Cor de fundo quando o botão está ativo */
+            color: white;
+            /* Cor do texto */
         }
     </style>
 </head>
@@ -107,7 +112,8 @@
 <body class="container-fluid py-4">
     <!-- Título com destaque -->
     <h2 class="mt-4">
-        Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID }}</span>
+        Loadout de Itens de <span id="playerName" class="text-primary fw-bold">{{ player.PlayerName or player.PlayerID
+            }}</span>
     </h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -129,7 +135,8 @@
         </a>
 
         <!-- Botão de reset com confirmação -->
-        <a href="{{ url_for('delete_loadout_weapons', player_id=player.PlayerID) }}" class="btn btn-outline-danger btn-lg"
+        <a href="{{ url_for('delete_loadout_weapons', player_id=player.PlayerID) }}"
+            class="btn btn-outline-danger btn-lg"
             onclick="return confirm('Tem certeza que deseja excluir o loadout deste jogador?');">
             <i class="bi bi-trash3-fill me-2"></i> Resetar Loadout
         </a>
@@ -138,163 +145,175 @@
     <form method="post" action="{{ url_for('save_loadout_weapons', player_id=player.PlayerID) }}">
         <div class="row g-3 mb-4">
             <!-- Botão para Configurar Arma Primária -->
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrimary" aria-expanded="false" aria-controls="collapsePrimary">
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapsePrimary" aria-expanded="false" aria-controls="collapsePrimary">
                     <i class="fas fa-gun me-2"></i> Configurar arma primária
                 </button>
             </div>
-            
+
             <!-- Botão para Configurar Arma Secundária -->
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecundary" aria-expanded="false" aria-controls="collapseSecundary">
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseSecundary" aria-expanded="false" aria-controls="collapseSecundary">
                     <i class="fas fa-gun me-2"></i> Configurar arma secundária
                 </button>
             </div>
-            
+
             <!-- Botão para Configurar Arma Pequena -->
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSmall" aria-expanded="false" aria-controls="collapseSmall">
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseSmall" aria-expanded="false" aria-controls="collapseSmall">
                     <i class="fas fa-gun me-2"></i> Configurar arma pequena
-                </button>                
-            </div>
-            
-        
-        <div class="collapse mt-0" id="collapsePrimary">
-            <!-- Seção Primary Weapon (existente) -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row mt-4" id="primary-weapon-list">
-                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
-                            <div class="col-md-3">
-                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
-                                    data-weapon-type="primary">
-                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                    <div class="card-body text-center">
-                                        <p class="card-text">{{ weapon.name }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
-                    </div>
-                </div>
+                </button>
             </div>
 
-            <div class="mb-3 d-none" id="div-primary-magazines">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Carregador Primário</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="primary-magazine-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
-                    </div>
-                </div>
+            <!-- Botão para Configurar Explosivos -->
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100 py-3 shadow-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseExplosives" aria-expanded="false" aria-controls="collapseExplosives">
+                    <i class="fas fa-gun me-2"></i> Configurar explosivos
+                </button>
             </div>
 
-            <div class="mb-3 d-none" id="div-primary-ammos">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Munição Primária</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="primary-ammo-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
-                    </div>
-                </div>
-            </div>
 
-            <div class="mb-3 d-none" id="div-primary-attachments">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Acessórios Primários</h4>
-                        <hr>
-                        <div id="primary-attachments-section" class="row"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="collapse mt-0" id="collapseSecundary">
-            <!-- Seção Secondary Weapon -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row mt-4" id="secondary-weapon-list">
-                            {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
-                            <div class="col-md-3">
-                                <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
-                                    data-weapon-type="secondary">
-                                    <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
-                                    <div class="card-body text-center">
-                                        <p class="card-text">{{ weapon.name }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <input type="hidden" name="secondary_weapon_id" id="secondary_weapon_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-magazines">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Carregador Secundário</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="secondary-magazine-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="secondary_magazine_id" id="secondary_magazine_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-ammos">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Munição Secundária</h4>
-                        <hr>
-                        <div class="d-flex flex-wrap" id="secondary-ammo-list">
-                            <p>Selecione uma arma primeiro</p>
-                        </div>
-                        <input type="hidden" name="secondary_ammo_id" id="secondary_ammo_id">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 d-none" id="div-secondary-attachments">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="text-primary mb-4 text-center">Acessórios Secundários</h4>
-                        <hr>
-                        <div id="secondary-attachments-section" class="row"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="collapse mt-0" id="collapseSmall">
-            <!-- Seção Small Weapon -->
-            <div class="mb-3">
-                <div class="card">
-                    <div class="card-body mt-4">
-                        <div class="row" id="small-weapon-list">
-                            {% for weapon in weapons if weapon.slots < 12 and not weapon.is_banned %} 
-                                <div class="col-md-3">
-                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}" data-weapon-type="small">
+            <div class="collapse mt-0" id="collapsePrimary">
+                <!-- Seção Primary Weapon (existente) -->
+                <div class="mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mt-4" id="primary-weapon-list">
+                                {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                                <div class="col-sm-12 col-md-3 col-lg-2">
+                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                        data-weapon-type="primary">
                                         <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
                                         <div class="card-body text-center">
                                             <p class="card-text">{{ weapon.name }}</p>
                                         </div>
                                     </div>
                                 </div>
-                        {% endfor %}
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="primary_weapon_id" id="primary_weapon_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-primary-magazines">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Carregador Primário</h4>
+                            <hr>
+                            <div class="d-flex flex-wrap" id="primary-magazine-list">
+                                <p>Selecione uma arma primeiro</p>
+                            </div>
+                            <input type="hidden" name="primary_magazine_id" id="primary_magazine_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-primary-ammos">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Munição Primária</h4>
+                            <hr>
+                            <div class="d-flex flex-wrap" id="primary-ammo-list">
+                                <p>Selecione uma arma primeiro</p>
+                            </div>
+                            <input type="hidden" name="primary_ammo_id" id="primary_ammo_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-primary-attachments">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Acessórios Primários</h4>
+                            <hr>
+                            <div id="primary-attachments-section" class="row"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse mt-0" id="collapseSecundary">
+                <!-- Seção Secondary Weapon -->
+                <div class="mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mt-4" id="secondary-weapon-list">
+                                {% for weapon in weapons if weapon.slots >= 12 and not weapon.is_banned %}
+                                <div class="col-sm-12 col-md-3 col-lg-2">
+                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                        data-weapon-type="secondary">
+                                        <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                        <div class="card-body text-center">
+                                            <p class="card-text">{{ weapon.name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="secondary_weapon_id" id="secondary_weapon_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-secondary-magazines">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Carregador Secundário</h4>
+                            <hr>
+                            <div class="d-flex flex-wrap" id="secondary-magazine-list">
+                                <p>Selecione uma arma primeiro</p>
+                            </div>
+                            <input type="hidden" name="secondary_magazine_id" id="secondary_magazine_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-secondary-ammos">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Munição Secundária</h4>
+                            <hr>
+                            <div class="d-flex flex-wrap" id="secondary-ammo-list">
+                                <p>Selecione uma arma primeiro</p>
+                            </div>
+                            <input type="hidden" name="secondary_ammo_id" id="secondary_ammo_id">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="div-secondary-attachments">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="text-primary mb-4 text-center">Acessórios Secundários</h4>
+                            <hr>
+                            <div id="secondary-attachments-section" class="row"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse mt-0" id="collapseSmall">
+                <!-- Seção Small Weapon -->
+                <div class="mb-3">
+                    <div class="card">
+                        <div class="card-body mt-4">
+                            <div class="row" id="small-weapon-list">
+                                {% for weapon in weapons if weapon.slots < 12 and not weapon.is_banned %} <div
+                                    class="col-sm-12 col-md-3 col-lg-2 p-4">
+                                    <div class="card weapon-card" data-weapon-id="{{ weapon.id }}"
+                                        data-weapon-type="small">
+                                        <img src="{{ weapon.img }}" class="card-img-top" alt="{{ weapon.name }}">
+                                        <div class="card-body text-center">
+                                            <p class="card-text">{{ weapon.name }}</p>
+                                        </div>
+                                    </div>
+                            </div>
+                            {% endfor %}
                         </div>
                         <input type="hidden" name="small_weapon_id" id="small_weapon_id">
                     </div>
@@ -337,9 +356,52 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-        
+        <div class="collapse mt-0" id="collapseExplosives">
+            <!-- Seção Primary Weapon (existente) -->
+            <div class="mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- <div class="d-flex flex-row flex-wrap overflow-auto gap-3 mb-3" style="width: 100%;" id="explosivesGrid">
+                            {% for explosive in explosives %}
+                            <div class="card p-2 text-center bg-light" style="min-width: 160px;">
+                                <img src="{{ explosive.img }}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small">{{ explosive.name }}</h6>
+                                    <p class="small text-muted">{{ explosive.name_type }}</p>
+                                    <p class="small m-0">{{ explosive.width }}x{{ explosive.height }} ({{ explosive.slots }} slots)</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="input-group" style="max-width: 130px;">
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="updateItemQuantity(6, -1)" disabled>
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input class="form-control form-control-sm text-center" value="1" disabled>
+                                            <span data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Limite máximo atingido" data-bs-original-title="Limite máximo atingido">
+                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItemFromPlayer(6)">
+                                            Remover
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div> -->
+                        <div id="explosivesGrid"></div>
+                        <div id="noExplosivesMsg" class="alert alert-warning d-none text-center">Nenhum explosivo
+                            encontrado.</div>
+
+                        <input type="hidden" name="explosives" id="explosivos-list">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-between mt-4">
             <div>
                 <button type="submit" class="btn btn-success">Salvar Loadout</button>
@@ -417,14 +479,38 @@
                     </div>
                 </div>
                 {% endfor %}
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="text-primary">Explosivos</h5>
+                        <div class="row g-3">
+                            {% for explosive in explosives %}
+                            <div class="col-md-4">
+                                <div class="card h-100 text-center">
+                                    <div class="card-body">
+                                        <p><strong>{{ explosive.name }}</strong></p>
+                                        <img src="{{ explosive.img }}" class="card-img-top" alt="arma"
+                                            style="max-height: 120px; object-fit: contain;">
+                                            <p>Total: {{ explosive.quantity }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
     <!-- JS do Bootstrap (com Popper incluído) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    
+
+
     <script>
+        
+
         document.addEventListener('DOMContentLoaded', function () {
             // Função genérica para lidar com a seleção de armas
             function setupWeaponSelection(weaponType) {
@@ -617,50 +703,208 @@
         });
     </script>
     <!-- Script para Alterar Estilo e Comportamento -->
-<script>
-    // Quando o colapso é mostrado ou ocultado, alteramos a aparência do botão
-    var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
-    
-    collapseElements.forEach(function(button) {
-        button.addEventListener('click', function() {
-            // Remover a classe 'btn-active' de todos os botões
-            collapseElements.forEach(function(btn) {
-                btn.classList.remove('btn-active');
+    <script>
+        // Quando o colapso é mostrado ou ocultado, alteramos a aparência do botão
+        var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+
+        collapseElements.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Remover a classe 'btn-active' de todos os botões
+                collapseElements.forEach(function (btn) {
+                    btn.classList.remove('btn-active');
+                });
+
+                // Adiciona a classe 'btn-active' no botão clicado
+                if (!button.classList.contains('btn-active')) {
+                    button.classList.add('btn-active');
+                }
             });
-
-            // Adiciona a classe 'btn-active' no botão clicado
-            if (!button.classList.contains('btn-active')) {
-                button.classList.add('btn-active');
-            }
         });
-    });
 
-    // Usando o "data-bs-parent" para garantir que apenas um colapso esteja aberto de cada vez
-    document.addEventListener('DOMContentLoaded', function () {
-        var collapseContainers = document.querySelectorAll('.collapse');
-        collapseContainers.forEach(function (collapse) {
-            collapse.addEventListener('show.bs.collapse', function () {
-                // Fecha outros colapsos
-                collapseContainers.forEach(function (otherCollapse) {
-                    if (otherCollapse !== collapse) {
-                        var bsCollapse = new bootstrap.Collapse(otherCollapse, {
-                            toggle: false
-                        });
-                        bsCollapse.hide();
-                    }
+        // Usando o "data-bs-parent" para garantir que apenas um colapso esteja aberto de cada vez
+        document.addEventListener('DOMContentLoaded', function () {
+            var collapseContainers = document.querySelectorAll('.collapse');
+            collapseContainers.forEach(function (collapse) {
+                collapse.addEventListener('show.bs.collapse', function () {
+                    // Fecha outros colapsos
+                    collapseContainers.forEach(function (otherCollapse) {
+                        if (otherCollapse !== collapse) {
+                            var bsCollapse = new bootstrap.Collapse(otherCollapse, {
+                                toggle: false
+                            });
+                            bsCollapse.hide();
+                        }
+                    });
                 });
             });
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    // Usa o método do Bootstrap para fechar o alert
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                });
+            }, 5000); // 5000ms = 5 segundos
         });
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                // Usa o método do Bootstrap para fechar o alert
-                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                bsAlert.close();
-            });
-        }, 10000); // 5000ms = 5 segundos
-    });
-</script>
+
+        // Explosivos
+        let explosivesSelecteds = []
+        let cachedExplosives = null;
+
+        // Regras fixas
+        const ruleDefault = { limit: 5 };
+        const rules = [
+            { name_type: "Claymore", limit: 1 }
+        ]
+        function getApplicableRule(item) {
+            const rule = rules.find(r =>
+                (r.name_type === "" || r.name_type.toLowerCase() === item.name_type.toLowerCase())
+            );
+            return rule || ruleDefault;
+        }
+        function shouldDisableAddButton(item) {
+            const itemNameType = item.name_type || '';
+
+            for (const rule of rules) {
+                const ruleNameType = rule.name_type || '';
+
+                const matchesRule =
+                    (!ruleNameType || ruleNameType === itemNameType)
+
+                if (matchesRule) {
+                    // Conta quantos itens do inventário do jogador também batem com essa regra
+                    const matchedCount = cachedPlayerItems.filter(pItem => {
+                        const pNameType = pItem.name_type || '';
+
+                        return (
+                            (!rule.name_type || rule.name_type === pNameType)
+                        );
+                    }).length;
+
+                    // Se já atingiu ou ultrapassou o limite, desabilita
+                    if (matchedCount >= rule.limit) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadExplosive()
+        });        
+
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, options);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Erro desconhecido');
+            }
+            return res.json();
+        }
+
+        async function loadExplosive() {
+            const container = document.getElementById('explosivesGrid');
+            const msg = document.getElementById('noExplosivesMsg');
+            container.innerHTML = '';
+
+            try {
+                let response = null;
+                if (!cachedExplosives)
+                {
+                    response = await fetchJSON(`/api/explosives_all`);
+                    cachedExplosives = response ? response.explosives : null
+                    msg.classList.toggle('d-none', response.length > 0);
+                }               
+
+                const row = document.createElement('div');
+                row.className = 'd-flex flex-row flex-wrap overflow-auto gap-3 mb-3';
+                row.style.width = '100%';
+
+                
+                cachedExplosives.forEach(item => {
+                    const cardItem = document.createElement('div');
+                    cardItem.className = 'card p-2 text-center bg-light';
+                    cardItem.style.minWidth = '160px';
+
+                    // 🔍 Buscar regra aplicável
+                    const rule = getApplicableRule(item);
+                    const maxReached = rule ? explosivesSelecteds.length >= rule.limit : false;
+
+                    const quantity = explosivesSelecteds.find(e => e.id === item.id)?.quantity || 0;
+
+                    cardItem.innerHTML = `
+                        <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
+                        <div class="card-body p-2">
+                            <h6 class="card-title small">${item.name}</h6>
+                            <p class="small text-muted">${item.name_type}</p>
+                            <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="input-group" style="max-width: 130px;">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateExplosiveQuantity(${item.id}, -1)" ${quantity <= 0 ? 'disabled' : ''}>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input class="form-control form-control-lg text-center" value="${quantity}" disabled>
+                                    ${maxReached
+                            ? `<span data-bs-toggle="tooltip" data-bs-placement="top" title="Limite máximo atingido">
+                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </span>`
+                            : `<button class="btn btn-sm btn-outline-secondary" onclick="updateExplosiveQuantity(${item.id}, 1)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>`
+                        }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    row.appendChild(cardItem);
+                });
+
+                container.appendChild(row);
+            } catch (err) {
+                msg.classList.remove('d-none');
+                msg.textContent = 'Erro ao carregar explosivos do jogador.';
+                console.error(err)
+            }
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+        }
+
+        function updateExplosiveQuantity(explosiveId, delta) {
+            event.preventDefault()
+            const index = explosivesSelecteds.findIndex(e => e.id === explosiveId);
+
+            if (index !== -1) {
+                // Já está na lista — atualiza a quantidade
+                explosivesSelecteds[index].quantity += delta;
+
+                // Remove se a quantidade for 0 ou menor
+                if (explosivesSelecteds[index].quantity <= 0) {
+                explosivesSelecteds.splice(index, 1);
+                }
+            } else if (delta > 0) {
+                // Se não está na lista e delta é positivo, adiciona com quantity = delta
+                const explosive = cachedExplosives.find(e => e.id === explosiveId);
+                if (explosive) {
+                explosivesSelecteds.push({ id: explosive.id, quantity: delta });
+                }
+            }
+            loadExplosive()
+            updateInputHiddenExplosives()
+        }
+
+        function updateInputHiddenExplosives()
+        {
+            document.getElementById("explosivos-list").value = JSON.stringify(explosivesSelecteds)
+        }
+
+
+    </script>
 </body>
 
 </html>

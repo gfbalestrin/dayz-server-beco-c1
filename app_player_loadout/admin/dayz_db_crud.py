@@ -17,6 +17,16 @@ def criar_tabelas():
         height INTEGER NOT NULL,
         img TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS explosives (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        name_type TEXT UNIQUE NOT NULL,
+        slots INTEGER NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        img TEXT NOT NULL
+    );
     
     CREATE TABLE IF NOT EXISTS calibers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,6 +135,15 @@ def criar_tabelas():
         FOREIGN KEY (player_loadouts_weapons_id) REFERENCES player_loadouts_weapons(id),
         FOREIGN KEY (attachment_id) REFERENCES attachments(id)
     );    
+
+    CREATE TABLE IF NOT EXISTS player_loadouts_weapon_explosives (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_loadouts_weapons_id INTEGER NOT NULL,
+        explosive_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        FOREIGN KEY (player_loadouts_weapons_id) REFERENCES player_loadouts_weapons(id),
+        FOREIGN KEY (explosive_id) REFERENCES explosives(id)
+    );   
     
     -- Tipos de item
     CREATE TABLE IF NOT EXISTS item_types (

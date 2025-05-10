@@ -139,6 +139,23 @@
     </div>
 
     <div class="container py-5">
+        <h1 class="mb-4">Lista de Explosivos</h1>
+        <a href="{{ url_for('add_explosive') }}" class="btn btn-success mb-3">Adicionar Novo Explosivo</a>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" id="explosiveSearchInput" class="form-control" placeholder="Buscar por nome ou tipo...">
+            </div>
+        </div>
+
+        <div class="row" id="explosiveListContainer"></div>
+
+        <nav>
+            <ul class="pagination justify-content-center mt-3" id="explosivePagination"></ul>
+        </nav>
+    </div>
+
+    <div class="container py-5">
         <h1 class="mb-4">Tipos de itens gerais</h1>
         <button class="btn btn-success mb-3" onclick="newItemType()">Adicionar Tipo de Item</button>
         <div id="itemTypesList" class="d-flex flex-wrap gap-2 mt-3"></div>
@@ -608,6 +625,70 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             fetchCalibers();
+        });
+    </script>
+
+    <!-- Explosivos -->
+    <script>
+        let currentExplosivePage = 1;
+        let currentExplosiveQuery = "";
+        let currentExplosiveFeedType = "";
+
+        function fetchExplosives(page = 1, query = "", feedType = "") {
+            fetch(`/api/explosives?page=${page}&q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("explosiveListContainer");
+                    const pagination = document.getElementById("explosivePagination");
+                    container.innerHTML = "";
+                    pagination.innerHTML = "";
+
+                    data.explosives.forEach(explosive => {
+                        const col = document.createElement("div");
+                        col.className = "col-md-4 mb-4";
+                        col.innerHTML = `
+              <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex align-items-center mb-3 flex-wrap">
+                    <img src="${explosive.img}" alt="${explosive.name}" class="img-thumbnail me-2" style="height: 75px;">
+                    <div>
+                      <h5 class="card-title mb-1">${explosive.name}</h5>
+                      <p class="text-muted small mb-0">(${explosive.name_type})</p>
+                      <p class="text-muted small">Slots: ${explosive.width}x${explosive.height} (${explosive.slots})</p>
+                    </div>
+                  </div>
+                  <div class="mt-auto text-end">
+                    <a href="/edit_explosive/${explosive.id}" class="btn btn-sm btn-primary me-1">Editar</a>
+                    <a href="/delete_explosive/${explosive.id}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</a>
+                  </div>
+                </div>
+              </div>
+            `;
+                        container.appendChild(col);
+                    });
+
+                    for (let i = 1; i <= data.total_pages; i++) {
+                        const li = document.createElement("li");
+                        li.className = "page-item" + (i === data.current_page ? " active" : "");
+                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                        li.querySelector("a").addEventListener("click", function (e) {
+                            e.preventDefault();
+                            currentExplosivePage = i;
+                            fetchExplosives(currentExplosivePage, currentExplosiveQuery);
+                        });
+                        pagination.appendChild(li);
+                    }
+                });
+        }
+
+        document.getElementById("explosiveSearchInput").addEventListener("input", function () {
+            currentExplosiveQuery = this.value;
+            fetchExplosives(1, currentExplosiveQuery);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchExplosives();
         });
     </script>
 

@@ -8,6 +8,8 @@ from functools import wraps
 import os
 import json
 import sqlite3
+import traceback
+
 
 USERS = {
     "admin": generate_password_hash("xxxxxxxxxxxxxxx")
@@ -258,7 +260,7 @@ def export_loadouts_json():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=10)
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
     scheduler.start()
 
     # Garante que o scheduler pare quando o app parar
@@ -592,6 +594,173 @@ def delete_weapon(id):
     except Exception as e:
         conn.rollback()
         flash(f'Ocorreu um erro ao excluir a arma: {str(e)}', 'danger')
+    
+    finally:
+        conn.close()
+
+    return redirect('/')
+
+# Explosivos
+@app.route("/api/explosives_all")
+@login_required
+def api_explosives_all():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    explosives = cur.execute(f"SELECT * FROM explosives").fetchall()
+    conn.close()
+
+    return jsonify({
+        "explosives": [dict(r) for r in explosives]
+    })
+
+@app.route("/api/explosives")
+@login_required
+def api_explosives():
+    page = int(request.args.get("page", 1))
+    query = request.args.get("q", "").strip()
+    feed_type = request.args.get("feed_type", "").strip().lower()
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    base_query = "SELECT * FROM explosives"
+    filters = []
+    params = []
+
+    if query:
+        filters.append("(name LIKE ? OR name_type LIKE ?)")
+        params.extend([f"%{query}%", f"%{query}%"])
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    count_query = f"SELECT COUNT(*) FROM ({base_query})"
+    total = cur.execute(count_query, params).fetchone()[0]
+    total_pages = (total + per_page - 1) // per_page
+
+    final_query = f"{base_query} LIMIT ? OFFSET ?"
+    rows = cur.execute(final_query, (*params, per_page, offset)).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "explosives": [dict(r) for r in rows],
+        "current_page": page,
+        "total_pages": total_pages
+    })
+
+@app.route('/add_explosive', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_explosive():
+    
+
+    if request.method == 'POST':
+        # Obter dados do formulário
+        name = request.form['name']
+        name_type = request.form['name_type']
+        slots = request.form['slots']
+        width = request.form['width']
+        height = request.form['height']
+        img = request.form['img']
+        
+        # Verificar se todos os campos necessários foram preenchidos
+        if not name or not name_type or not slots or not width or not height:
+            flash('Todos os campos são obrigatórios!', 'danger')
+            return redirect(url_for('add_weapon'))
+
+        # Validar o tipo de nome
+        if name_type not in type_names:
+            return jsonify({"error": f"'{name_type}' não é um item válido do types.xml."}), 400
+
+        try:
+            # Conectar ao banco de dados e adicionar a arma
+            conn = get_db_connection()
+            conn.execute('INSERT INTO explosives (name, name_type, slots, width, height, img) VALUES (?, ?, ?, ?, ?, ?)', 
+                         (name, name_type, slots, width, height, img))
+            conn.commit()
+            flash('Explosivo adicionado com sucesso!', 'success')
+
+        except Exception as e:
+            # Em caso de erro, enviar mensagem de erro
+            flash(f'Ocorreu um erro ao adicionar a explosivo: {str(e)}', 'danger')
+        
+        finally:
+            # Garantir que a conexão seja fechada
+            conn.close()
+
+        return redirect('/')
+
+    return render_template('add_explosive.html')
+
+@app.route('/edit_explosive/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_explosive(id):
+        
+    conn = get_db_connection()
+    
+    try:
+        # Verificar se a explosive existe
+        explosive = conn.execute('SELECT * FROM explosives WHERE id = ?', (id,)).fetchone()
+        if not explosive:
+            flash('Explosivo não encontrada!', 'danger')
+            return redirect('/')
+       
+        if request.method == 'POST':
+            name = request.form['name']
+            name_type = request.form['name_type']
+            
+            # Validação de tipo de nome
+            if name_type not in type_names:
+                return jsonify({"error": f"'{name_type}' não é um item válido do types.xml."}), 400
+            
+            slots = request.form['slots']
+            width = request.form['width']
+            height = request.form['height']
+            img = request.form['img']
+            
+            # Atualizar a arma no banco de dados
+            conn.execute('UPDATE explosives SET name = ?, name_type = ?, slots = ?, width = ?, height = ?, img = ? WHERE id = ?', 
+                         (name, name_type, slots, width, height, img, id))
+            conn.commit()
+            flash('Explosivo atualizada com sucesso!', 'success')
+            return redirect('/')
+        
+    except Exception as e:
+        flash(f'Ocorreu um erro ao editar a explosivo: {str(e)}', 'danger')
+    
+    finally:
+        conn.close()
+    
+    return render_template('edit_explosive.html', 
+                           explosive=explosive)
+
+@app.route('/delete_explosive/<int:id>')
+@login_required
+@admin_required
+def delete_explosive(id):
+        
+    conn = get_db_connection()
+    
+    try:
+        # Verifica se a arma existe antes de tentar excluir
+        explosive = conn.execute('SELECT * FROM explosives WHERE id = ?', (id,)).fetchone()
+        
+        if not weapon:
+            flash('Explosivo não encontrado!', 'danger')
+            return redirect('/')
+        
+        # Exclui a arma
+        conn.execute('DELETE FROM explosives WHERE id = ?', (id,))
+        conn.commit()
+        flash('Explosivo excluída com sucesso!', 'success')
+    
+    except Exception as e:
+        conn.rollback()
+        flash(f'Ocorreu um erro ao excluir a explosivo: {str(e)}', 'danger')
     
     finally:
         conn.close()
@@ -1724,6 +1893,14 @@ def player_loadout_weapons(player_id):
             slot = att['weapon_slot']
             if slot in attachments_by_slot:
                 attachments_by_slot[slot].append(att)
+    
+    # Buscar explosives apenas se houver um loadout_id
+    explosives = conn.execute('''
+            SELECT a.*, plwa.quantity
+            FROM player_loadouts_weapon_explosives plwa
+            JOIN explosives a ON plwa.explosive_id = a.id
+            WHERE plwa.player_loadouts_weapons_id = ?
+        ''', (loadout['loadout_id'],)).fetchall()
 
     player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
     rules = conn.execute('''
@@ -1740,7 +1917,8 @@ def player_loadout_weapons(player_id):
         weapons=weapons,
         loadout=loadout,
         rules=rules,
-        attachments=attachments_by_slot
+        attachments=attachments_by_slot,
+        explosives=explosives
     )
 
 @app.route('/delete_loadout_weapons/<player_id>', methods=['GET'])
@@ -1751,6 +1929,7 @@ def delete_loadout_weapons(player_id):
     try:
         # Primeiro deleta os attachments (se houver relacionamento)
         conn.execute('DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id IN (SELECT id FROM player_loadouts_weapons WHERE player_id = ?)', (player_id,))
+        conn.execute('DELETE FROM player_loadouts_weapon_explosives WHERE player_loadouts_weapons_id IN (SELECT id FROM player_loadouts_weapons WHERE player_id = ?)', (player_id,))
         
         # Depois deleta o loadout principal
         conn.execute('DELETE FROM player_loadouts_weapons WHERE player_id = ?', (player_id,))
@@ -1842,11 +2021,23 @@ def save_loadout_weapons(player_id):
         existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
 
         # Prepara a consulta para inserir ou atualizar
-        if existing_loadout:
+        if existing_loadout:            
+            print("Loadout ja existe")
+            player_loadouts_weapons_id = existing_loadout['id']
+            print("player_loadouts_weapons_id: " + str(player_loadouts_weapons_id))
+
             update_data = []
             update_query = "UPDATE player_loadouts_weapons SET "
 
+            # Se primary_weapon_id for diferente do existing_loadout['primary_weapon_id'] - atualize magazine, ammo e attachs (deletar tudo da tabela antes) mesmo que esteja nulos
+
             if primary_weapon_id:
+                if (primary_weapon_id != existing_loadout['primary_weapon_id']):
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'primary'", (player_loadouts_weapons_id,))
+                    update_query += "primary_magazine_id = ?, "
+                    update_data.append(parse(primary_magazine_id))
+                    update_query += "primary_ammo_id = ?, "
+                    update_data.append(parse(primary_ammo_id))
                 update_query += "primary_weapon_id = ?, "
                 update_data.append(parse(primary_weapon_id))
             if primary_magazine_id:
@@ -1855,8 +2046,22 @@ def save_loadout_weapons(player_id):
             if primary_ammo_id:
                 update_query += "primary_ammo_id = ?, "
                 update_data.append(parse(primary_ammo_id))
+            attachment_ids = request.form.getlist(f'primary_attachments')
+            if (attachment_ids):
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'primary'", (player_loadouts_weapons_id,))
+                for aid in attachment_ids:
+                    conn.execute(''' 
+                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        VALUES (?, ?, ?)
+                    ''', (player_loadouts_weapons_id, int(aid), "primary"))
 
             if secondary_weapon_id:
+                if (secondary_weapon_id != existing_loadout['secondary_weapon_id']):
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'secondary'", (player_loadouts_weapons_id,))
+                    update_query += "secondary_magazine_id = ?, "
+                    update_data.append(parse(secondary_magazine_id))
+                    update_query += "secondary_ammo_id = ?, "
+                    update_data.append(parse(secondary_ammo_id))
                 update_query += "secondary_weapon_id = ?, "
                 update_data.append(parse(secondary_weapon_id))
             if secondary_magazine_id:
@@ -1865,8 +2070,22 @@ def save_loadout_weapons(player_id):
             if secondary_ammo_id:
                 update_query += "secondary_ammo_id = ?, "
                 update_data.append(parse(secondary_ammo_id))
+            attachment_ids = request.form.getlist(f'secondary_attachments')
+            if (attachment_ids):
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'secondary'", (player_loadouts_weapons_id,))
+                for aid in attachment_ids:
+                    conn.execute(''' 
+                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        VALUES (?, ?, ?)
+                    ''', (player_loadouts_weapons_id, int(aid), "secondary"))
 
             if small_weapon_id:
+                if (small_weapon_id != existing_loadout['small_weapon_id']):
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'small'", (player_loadouts_weapons_id,))
+                    update_query += "small_magazine_id = ?, "
+                    update_data.append(parse(small_magazine_id))
+                    update_query += "small_ammo_id = ?, "
+                    update_data.append(parse(small_ammo_id))
                 update_query += "small_weapon_id = ?, "
                 update_data.append(parse(small_weapon_id))
             if small_magazine_id:
@@ -1875,14 +2094,41 @@ def save_loadout_weapons(player_id):
             if small_ammo_id:
                 update_query += "small_ammo_id = ?, "
                 update_data.append(parse(small_ammo_id))
+            attachment_ids = request.form.getlist(f'small_attachments')
+            if (attachment_ids):
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'small'", (player_loadouts_weapons_id,))
+                for aid in attachment_ids:
+                    conn.execute(''' 
+                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        VALUES (?, ?, ?)
+                    ''', (player_loadouts_weapons_id, int(aid), "small"))
+            explosives_json = request.form.get('explosives')
+            if (explosives_json):
+                conn.execute("DELETE FROM player_loadouts_weapon_explosives WHERE player_loadouts_weapons_id = ?", (player_loadouts_weapons_id,))              
+                explosives = json.loads(explosives_json) if explosives_json else []
+                for explosive in explosives:
+                    conn.execute('''
+                        INSERT INTO player_loadouts_weapon_explosives (player_loadouts_weapons_id, explosive_id, quantity)
+                        VALUES (?, ?, ?)
+                    ''', (
+                        player_loadouts_weapons_id,
+                        int(explosive['id']),
+                        int(explosive['quantity'])
+                    ))
+            
 
             # Remove a vírgula extra no final da consulta de atualização
-            update_query = update_query.rstrip(', ') + " WHERE player_id = ?"
+            update_query = update_query.rstrip(', ') + " WHERE player_id = ?"            
             update_data.append(player_id)
+            print("update_query: " + update_query)
 
             # Realiza o update
-            conn.execute(update_query, tuple(update_data))
+            if (update_query != "UPDATE player_loadouts_weapons SET WHERE player_id = ?"):
+                conn.execute(update_query, tuple(update_data))
+
+            print("Realizou update")
         else:
+            print("Loadout não ja existe")
             # Caso o loadout não exista, insere um novo
             conn.execute(''' 
                 INSERT INTO player_loadouts_weapons (
@@ -1896,28 +2142,37 @@ def save_loadout_weapons(player_id):
                 parse(secondary_weapon_id), parse(secondary_magazine_id), parse(secondary_ammo_id),
                 parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id)
             ))
+            # Recupera o ID do loadout
+            row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
+            player_loadouts_weapons_id = row['id']
+            # Loop para cada slot de arma
+            for slot in ['primary', 'secondary', 'small']:
+                attachment_ids = request.form.getlist(f'{slot}_attachments')
+                for aid in attachment_ids:
+                    conn.execute(''' 
+                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        VALUES (?, ?, ?)
+                    ''', (player_loadouts_weapons_id, int(aid), slot))  
 
-        # Recupera o ID do loadout
-        row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
-        player_loadouts_weapons_id = row['id']
-
-        # Remove os attachments antigos
-        conn.execute('DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ?', (player_loadouts_weapons_id,))
-
-        # Loop para cada slot de arma
-        for slot in ['primary', 'secondary', 'small']:
-            attachment_ids = request.form.getlist(f'{slot}_attachments')
-            for aid in attachment_ids:
-                conn.execute(''' 
-                    INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+            explosives_json = request.form.get('explosives')
+            explosives = json.loads(explosives_json) if explosives_json else []
+            for explosive in explosives:
+                conn.execute('''
+                    INSERT INTO player_loadouts_weapon_explosives (player_loadouts_weapons_id, explosive_id, quantity)
                     VALUES (?, ?, ?)
-                ''', (player_loadouts_weapons_id, int(aid), slot))
+                ''', (
+                    player_loadouts_weapons_id,
+                    int(explosive['id']),
+                    int(explosive['quantity'])
+                ))
 
         conn.commit()
         flash("Loadout salvo com sucesso!", "success")
 
     except Exception as e:
         conn.rollback()
+        traceback.print_exc()
+        print(f"Erro ao salvar loadout: {e}", "danger")
         flash(f"Erro ao salvar loadout: {e}", "danger")
 
     finally:

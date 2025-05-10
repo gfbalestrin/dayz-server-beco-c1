@@ -14,17 +14,15 @@
           "width": 2,
           "height": 3
         },
+        "ammunitions": {
+          "name_type": "Ammo_556x45",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
         "attachments": [
           {
-            "name_type": "ImprovisedSuppressor",
-            "type": "suppressor",
-            "slots": 3,
-            "width": 1,
-            "height": 3,
-            "battery": false
-          },
-          {
-            "name_type": "M4_MPHndgrd",
+            "name_type": "M4_PlasticHndgrd",
             "type": "handguard",
             "slots": 2,
             "width": 2,
@@ -46,14 +44,6 @@
             "width": 4,
             "height": 3,
             "battery": false
-          },
-          {
-            "name_type": "M68Optic",
-            "type": "scope",
-            "slots": 2,
-            "width": 2,
-            "height": 1,
-            "battery": true
           }
         ]
       },
@@ -103,6 +93,13 @@
         "slots": 8,
         "width": 4,
         "height": 2,
+        "magazine": {
+          "name_type": "Mag_MKII_10Rnd",
+          "capacity": 10,
+          "slots": 2,
+          "width": 1,
+          "height": 2
+        },
         "ammunitions": {
           "name_type": "Ammo_22",
           "slots": 1,
@@ -113,52 +110,42 @@
     },
     "items": [
       {
-        "name_type": "Battery9V",
-        "type_name": "Itens gerais",
-        "slots": 1,
-        "width": 1,
-        "height": 1,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": null,
-        "subitems": []
-      },
-      {
-        "name_type": "Battery9V",
-        "type_name": "Itens gerais",
-        "slots": 1,
-        "width": 1,
-        "height": 1,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": null,
-        "subitems": []
-      },
-      {
-        "name_type": "NVGoggles",
-        "type_name": "Itens gerais",
-        "slots": 4,
-        "width": 2,
-        "height": 2,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": null,
-        "subitems": []
-      },
-      {
-        "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
-        "slots": 9,
-        "width": 3,
+        "name_type": "Mich2001Helmet",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
         "height": 3,
         "storage_slots": 0,
         "storage_width": 0,
         "storage_height": 0,
         "localization": "head",
-        "subitems": []
+        "subitems": [
+          {
+            "name_type": "NVGoggles",
+            "type_name": "Itens gerais",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": null,
+            "subitems": [
+              {
+                "name_type": "Battery9V",
+                "type_name": "Itens gerais",
+                "slots": 1,
+                "width": 1,
+                "height": 1,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": null,
+                "subitems": []
+              }
+            ]
+          }
+        ]
       },
       {
         "name_type": "M65Jacket_Black",
@@ -206,7 +193,20 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "torso",
-        "subitems": []
+        "subitems": [
+          {
+            "name_type": "PlateCarrierHolster_Black",
+            "type_name": "Coletes",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
       },
       {
         "name_type": "WoolGlovesFingerless_Black",
@@ -233,18 +233,6 @@
         "subitems": []
       },
       {
-        "name_type": "GhillieHood_Mossy",
-        "type_name": "Roupas",
-        "slots": 12,
-        "width": 4,
-        "height": 3,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "head",
-        "subitems": []
-      },
-      {
         "name_type": "MimeMask_Male",
         "type_name": "Roupas",
         "slots": 6,
@@ -258,78 +246,29 @@
       }
     ]
   },
-  "dqIjescW5lbO7V5n_w35kpnr21p_2dKiLpoftWa-ZAg=": {
-    "weapons": {
-      "primary_weapon": null,
-      "secondary_weapon": null,
-      "small_weapon": null
-    },
-    "items": [
-      {
-        "name_type": "M65Jacket_Black",
-        "type_name": "Roupas",
-        "slots": 12,
-        "width": 4,
-        "height": 3,
-        "storage_slots": 24,
-        "storage_width": 6,
-        "storage_height": 4,
-        "localization": "torso",
-        "subitems": []
-      },
-      {
-        "name_type": "JungleBoots_Black",
-        "type_name": "Roupas",
-        "slots": 16,
-        "width": 4,
-        "height": 4,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "foot",
-        "subitems": []
-      },
-      {
-        "name_type": "SmershVest",
-        "type_name": "Coletes",
-        "slots": 9,
-        "width": 3,
-        "height": 3,
-        "storage_slots": 16,
-        "storage_width": 8,
-        "storage_height": 2,
-        "localization": "torso",
-        "subitems": []
-      },
-      {
-        "name_type": "PumpkinHelmet",
-        "type_name": "Roupas",
-        "slots": 4,
-        "width": 2,
-        "height": 2,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "head",
-        "subitems": []
-      },
-      {
-        "name_type": "WoolGlovesFingerless_Tan",
-        "type_name": "Roupas",
-        "slots": 4,
-        "width": 2,
-        "height": 2,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "hands",
-        "subitems": []
-      }
-    ]
-  },
-  "nRhBiJjrMtYme0c5mKk5khnwKSH5SjD40C8SBl9L4S4=": {
+  "Q8d7y1oog1xdI0b_QuQHGCY0pF1Kmx9tjwLHzyRxQDo=": {
     "weapons": {
       "primary_weapon": {
+        "name_type": "AKM",
+        "feed_type": "magazine",
+        "slots": 24,
+        "width": 8,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_AKM_Drum75Rnd",
+          "capacity": 75,
+          "slots": 9,
+          "width": 3,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_762x39",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        }
+      },
+      "secondary_weapon": {
         "name_type": "M14",
         "feed_type": "magazine",
         "slots": 27,
@@ -341,27 +280,36 @@
           "slots": 2,
           "width": 1,
           "height": 2
-        }
-      },
-      "secondary_weapon": {
-        "name_type": "B95",
-        "feed_type": "manual",
-        "slots": 27,
-        "width": 9,
-        "height": 3,
+        },
         "ammunitions": {
-          "name_type": "Ammo_308Win",
+          "name_type": "Ammo_762x54",
           "slots": 1,
           "width": 1,
           "height": 1
         },
         "attachments": [
           {
-            "name_type": "HuntingOptic",
+            "name_type": "ACOGOptic",
             "type": "scope",
-            "slots": 4,
-            "width": 4,
+            "slots": 2,
+            "width": 2,
             "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "ImprovisedSuppressor",
+            "type": "suppressor",
+            "slots": 3,
+            "width": 1,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "GhillieAtt_Woodland",
+            "type": "ghillie",
+            "slots": 12,
+            "width": 4,
+            "height": 3,
             "battery": false
           }
         ]
@@ -389,26 +337,55 @@
     },
     "items": [
       {
-        "name_type": "PlateCarrierVest",
-        "type_name": "Coletes",
-        "slots": 25,
-        "width": 5,
-        "height": 5,
+        "name_type": "Mich2001Helmet",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
         "storage_slots": 0,
         "storage_width": 0,
         "storage_height": 0,
-        "localization": "torso",
-        "subitems": []
-      }
-    ]
-  },
-  "pA9gYDTAn1YuK24X9Vpc6sIjdLXcyEBjlAfiDbkskKw=": {
-    "weapons": {
-      "primary_weapon": null,
-      "secondary_weapon": null,
-      "small_weapon": null
-    },
-    "items": [
+        "localization": "head",
+        "subitems": [
+          {
+            "name_type": "UniversalLight",
+            "type_name": "Itens gerais",
+            "slots": 2,
+            "width": 1,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": null,
+            "subitems": [
+              {
+                "name_type": "Battery9V",
+                "type_name": "Itens gerais",
+                "slots": 1,
+                "width": 1,
+                "height": 1,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": null,
+                "subitems": []
+              }
+            ]
+          },
+          {
+            "name_type": "NVGoggles",
+            "type_name": "Itens gerais",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": null,
+            "subitems": []
+          }
+        ]
+      },
       {
         "name_type": "M65Jacket_Black",
         "type_name": "Roupas",
@@ -495,10 +472,79 @@
         ]
       },
       {
-        "name_type": "WitchHat",
+        "name_type": "GhillieSuit_Mossy",
+        "type_name": "Mochilas",
+        "slots": 30,
+        "width": 5,
+        "height": 6,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "WoolGloves_Black",
         "type_name": "Roupas",
-        "slots": 6,
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "hands",
+        "subitems": []
+      }
+    ]
+  },
+  "dqIjescW5lbO7V5n_w35kpnr21p_2dKiLpoftWa-ZAg=": {
+    "weapons": {
+      "primary_weapon": null,
+      "secondary_weapon": null,
+      "small_weapon": null
+    },
+    "items": [
+      {
+        "name_type": "M65Jacket_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 24,
+        "storage_width": 6,
+        "storage_height": 4,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "JungleBoots_Black",
+        "type_name": "Roupas",
+        "slots": 16,
+        "width": 4,
+        "height": 4,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "foot",
+        "subitems": []
+      },
+      {
+        "name_type": "SmershVest",
+        "type_name": "Coletes",
+        "slots": 9,
         "width": 3,
+        "height": 3,
+        "storage_slots": 16,
+        "storage_width": 8,
+        "storage_height": 2,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "PumpkinHelmet",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
         "height": 2,
         "storage_slots": 0,
         "storage_width": 0,
@@ -507,7 +553,563 @@
         "subitems": []
       },
       {
-        "name_type": "WoolGlovesFingerless_Black",
+        "name_type": "WoolGlovesFingerless_Tan",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "hands",
+        "subitems": []
+      }
+    ]
+  },
+  "fUKOnNY9EPrnzQzSMwY2Nb2sCR829xYsLD1s1R7nDKM=": {
+    "weapons": {
+      "primary_weapon": {
+        "name_type": "M14",
+        "feed_type": "magazine",
+        "slots": 27,
+        "width": 9,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_M14_20Rnd",
+          "capacity": 20,
+          "slots": 2,
+          "width": 1,
+          "height": 2
+        },
+        "attachments": [
+          {
+            "name_type": "ImprovisedSuppressor",
+            "type": "suppressor",
+            "slots": 3,
+            "width": 1,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "GhillieAtt_Mossy",
+            "type": "ghillie",
+            "slots": 12,
+            "width": 4,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "StarlightOptic",
+            "type": "scope",
+            "slots": 12,
+            "width": 4,
+            "height": 3,
+            "battery": true
+          }
+        ]
+      },
+      "secondary_weapon": {
+        "name_type": "M4A1",
+        "feed_type": "magazine",
+        "slots": 24,
+        "width": 8,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_STANAG_60Rnd",
+          "capacity": 60,
+          "slots": 6,
+          "width": 2,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_556x45",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        }
+      },
+      "small_weapon": {
+        "name_type": "CZ75",
+        "feed_type": "magazine",
+        "slots": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "items": [
+      {
+        "name_type": "NVGHeadstrap",
+        "type_name": "Itens gerais",
+        "slots": 9,
+        "width": 3,
+        "height": 3,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "head",
+        "subitems": []
+      },
+      {
+        "name_type": "BallisticHelmet_Green",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "head",
+        "subitems": []
+      },
+      {
+        "name_type": "M65Jacket_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 24,
+        "storage_width": 6,
+        "storage_height": 4,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "CargoPants_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 20,
+        "storage_width": 5,
+        "storage_height": 4,
+        "localization": "legs",
+        "subitems": []
+      },
+      {
+        "name_type": "BalaclavaMask_Blackskull",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "face",
+        "subitems": []
+      },
+      {
+        "name_type": "JungleBoots_Black",
+        "type_name": "Roupas",
+        "slots": 16,
+        "width": 4,
+        "height": 4,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "foot",
+        "subitems": []
+      },
+      {
+        "name_type": "PlateCarrierVest_Black",
+        "type_name": "Coletes",
+        "slots": 25,
+        "width": 5,
+        "height": 5,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "torso",
+        "subitems": [
+          {
+            "name_type": "PlateCarrierPouches_Black",
+            "type_name": "Coletes",
+            "slots": 24,
+            "width": 6,
+            "height": 4,
+            "storage_slots": 15,
+            "storage_width": 5,
+            "storage_height": 3,
+            "localization": "torso",
+            "subitems": []
+          },
+          {
+            "name_type": "PlateCarrierHolster_Black",
+            "type_name": "Coletes",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
+      },
+      {
+        "name_type": "WoolGloves_Black",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "hands",
+        "subitems": []
+      }
+    ]
+  },
+  "nRhBiJjrMtYme0c5mKk5khnwKSH5SjD40C8SBl9L4S4=": {
+    "weapons": {
+      "primary_weapon": null,
+      "secondary_weapon": null,
+      "small_weapon": null
+    },
+    "items": [
+      {
+        "name_type": "GorkaHelmet",
+        "type_name": "Roupas",
+        "slots": 16,
+        "width": 4,
+        "height": 4,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "head",
+        "subitems": [
+          {
+            "name_type": "GorkaHelmetVisor",
+            "type_name": "Itens gerais",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "eyes",
+            "subitems": []
+          }
+        ]
+      },
+      {
+        "name_type": "PlateCarrierVest",
+        "type_name": "Coletes",
+        "slots": 25,
+        "width": 5,
+        "height": 5,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "torso",
+        "subitems": []
+      }
+    ]
+  },
+  "pA9gYDTAn1YuK24X9Vpc6sIjdLXcyEBjlAfiDbkskKw=": {
+    "weapons": {
+      "primary_weapon": {
+        "name_type": "M4A1",
+        "feed_type": "magazine",
+        "slots": 24,
+        "width": 8,
+        "height": 3,
+        "magazine": {
+          "name_type": "Mag_STANAG_60Rnd",
+          "capacity": 60,
+          "slots": 6,
+          "width": 2,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_556x45Tracer",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
+        "attachments": [
+          {
+            "name_type": "ImprovisedSuppressor",
+            "type": "suppressor",
+            "slots": 3,
+            "width": 1,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "M4_PlasticHndgrd",
+            "type": "handguard",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_CQBBttstck",
+            "type": "buttstock",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "UniversalLight",
+            "type": "flashlight",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": true
+          },
+          {
+            "name_type": "StarlightOptic",
+            "type": "scope",
+            "slots": 12,
+            "width": 4,
+            "height": 3,
+            "battery": true
+          }
+        ]
+      },
+      "secondary_weapon": {
+        "name_type": "ASVAL",
+        "feed_type": "magazine",
+        "slots": 32,
+        "width": 8,
+        "height": 4,
+        "magazine": {
+          "name_type": "Mag_Vikhr_30Rnd",
+          "capacity": 30,
+          "slots": 3,
+          "width": 1,
+          "height": 3
+        },
+        "ammunitions": {
+          "name_type": "Ammo_9x39",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        }
+      },
+      "small_weapon": {
+        "name_type": "Flaregun",
+        "feed_type": "manual",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "magazine": {
+          "name_type": "Mag_MKII_10Rnd",
+          "capacity": 10,
+          "slots": 2,
+          "width": 1,
+          "height": 2
+        },
+        "ammunitions": {
+          "name_type": "Ammo_22",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        }
+      }
+    },
+    "items": [
+      {
+        "name_type": "Mich2001Helmet",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "head",
+        "subitems": [
+          {
+            "name_type": "UniversalLight",
+            "type_name": "Itens gerais",
+            "slots": 2,
+            "width": 1,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": null,
+            "subitems": [
+              {
+                "name_type": "Battery9V",
+                "type_name": "Itens gerais",
+                "slots": 1,
+                "width": 1,
+                "height": 1,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": null,
+                "subitems": []
+              }
+            ]
+          },
+          {
+            "name_type": "NVGoggles",
+            "type_name": "Itens gerais",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": null,
+            "subitems": [
+              {
+                "name_type": "Battery9V",
+                "type_name": "Itens gerais",
+                "slots": 1,
+                "width": 1,
+                "height": 1,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": null,
+                "subitems": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name_type": "Battery9V",
+        "type_name": "Itens gerais",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": null,
+        "subitems": []
+      },
+      {
+        "name_type": "Battery9V",
+        "type_name": "Itens gerais",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": null,
+        "subitems": []
+      },
+      {
+        "name_type": "Battery9V",
+        "type_name": "Itens gerais",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": null,
+        "subitems": []
+      },
+      {
+        "name_type": "Battery9V",
+        "type_name": "Itens gerais",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": null,
+        "subitems": []
+      },
+      {
+        "name_type": "M65Jacket_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 24,
+        "storage_width": 6,
+        "storage_height": 4,
+        "localization": "torso",
+        "subitems": []
+      },
+      {
+        "name_type": "CargoPants_Black",
+        "type_name": "Roupas",
+        "slots": 12,
+        "width": 4,
+        "height": 3,
+        "storage_slots": 20,
+        "storage_width": 5,
+        "storage_height": 4,
+        "localization": "legs",
+        "subitems": []
+      },
+      {
+        "name_type": "Balaclava3Holes_Black",
+        "type_name": "Roupas",
+        "slots": 4,
+        "width": 2,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "face",
+        "subitems": []
+      },
+      {
+        "name_type": "JungleBoots_Black",
+        "type_name": "Roupas",
+        "slots": 16,
+        "width": 4,
+        "height": 4,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "foot",
+        "subitems": []
+      },
+      {
+        "name_type": "PlateCarrierVest_Camo",
+        "type_name": "Coletes",
+        "slots": 25,
+        "width": 5,
+        "height": 5,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "torso",
+        "subitems": [
+          {
+            "name_type": "PlateCarrierPouches_Camo",
+            "type_name": "Coletes",
+            "slots": 24,
+            "width": 6,
+            "height": 4,
+            "storage_slots": 15,
+            "storage_width": 5,
+            "storage_height": 3,
+            "localization": "torso",
+            "subitems": []
+          },
+          {
+            "name_type": "PlateCarrierHolster_Camo",
+            "type_name": "Coletes",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
+      },
+      {
+        "name_type": "WoolGloves_Black",
         "type_name": "Roupas",
         "slots": 4,
         "width": 2,
