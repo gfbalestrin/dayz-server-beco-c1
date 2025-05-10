@@ -74,22 +74,61 @@
         const ITEMS_PER_PAGE = 6;
         const groupPageState = {};
         let cachedItems = null;
+        let cachedPlayerItems = null;
 
 
         const ruleDefault = { limit: 1 };
         const rules = [
-            { name_type: "", type_name: "roupas", localization: "legs", limit: 2 },
+            { name_type: "", type_name: "roupas", localization: "head", limit: 1 },
             { name_type: "Battery9V", type_name: "", localization: "", limit: 5 }
         ]
         function getApplicableRule(item) {
-            // Busca a primeira regra que corresponda
             const rule = rules.find(r =>
                 (r.name_type === "" || r.name_type.toLowerCase() === item.name_type.toLowerCase()) &&
                 (r.type_name === "" || r.type_name.toLowerCase() === item.type_name.toLowerCase()) &&
                 (r.localization === "" || r.localization.toLowerCase() === (item.localization || '').toLowerCase())
             );
-
             return rule || ruleDefault;
+        }
+
+        function shouldDisableAddButton(item) {
+            // Normaliza valores para comparação (ex: Roupas → roupas)
+            const itemType = item.type_name?.toLowerCase() || '';
+            const itemLoc = item.localization?.toLowerCase() || '';
+            const itemNameType = item.name_type || '';
+
+            for (const rule of rules) {
+                const ruleType = rule.type_name?.toLowerCase() || '';
+                const ruleLoc = rule.localization?.toLowerCase() || '';
+                const ruleNameType = rule.name_type || '';
+
+                const matchesRule =
+                    (!ruleNameType || ruleNameType === itemNameType) &&
+                    (!ruleType || ruleType === itemType) &&
+                    (!ruleLoc || ruleLoc === itemLoc);
+
+                if (matchesRule) {
+                    // Conta quantos itens do inventário do jogador também batem com essa regra
+                    const matchedCount = cachedPlayerItems.filter(pItem => {
+                        const pType = pItem.type_name?.toLowerCase() || '';
+                        const pLoc = pItem.localization?.toLowerCase() || '';
+                        const pNameType = pItem.name_type || '';
+
+                        return (
+                            (!rule.name_type || rule.name_type === pNameType) &&
+                            (!rule.type_name || rule.type_name.toLowerCase() === pType) &&
+                            (!rule.localization || rule.localization.toLowerCase() === pLoc)
+                        );
+                    }).length;
+
+                    // Se já atingiu ou ultrapassou o limite, desabilita
+                    if (matchedCount >= rule.limit) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         window.onload = async () => {
@@ -308,10 +347,10 @@
             if (!cachedItems) {
                 cachedItems = await fetchJSON('/items');
             }
-            const playerItems = await fetchJSON(`/players/${playerId}/items`);
+            cachedPlayerItems = await fetchJSON(`/players/${playerId}/items`);
             const countMap = {};
 
-            for (const item of playerItems) {
+            for (const item of cachedPlayerItems) {
                 countMap[item.id] = (countMap[item.id] || 0) + 1;
             }
 
@@ -376,16 +415,16 @@
                         <div class="d-flex flex-row flex-nowrap overflow-auto gap-3 px-5"
                             data-scroll-id="${scrollId}" style="scroll-behavior: smooth;">
                             ${items.map(item => {
-                        const count = countMap[item.id] || 0;
+                        const count = countMap[item.id] || 0; 
                         return `
                                     <div class="card p-2 text-center bg-light" style="min-width: 160px;">
                                         <img src="${item.img}" class="card-img-top mx-auto" alt="${item.name}" style="max-height: 100px; object-fit: contain;">
                                         <div class="card-body p-2">
                                             <h6 class="card-title small">${item.name}</h6>
-                                            ${count > 0 ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
+                                            ${count > 0 || shouldDisableAddButton(item) ? `<p class="small text-muted mb-1">Já adicionado!</p>` : ''}
                                             <button class="btn btn-sm btn-primary mt-1"
                                                     onclick="addItemToPlayerDirect(${item.id})"
-                                                    ${count > 0 ? 'disabled' : ''}>
+                                                    ${count > 0 || shouldDisableAddButton(item) ? 'disabled' : ''}>
                                                 Adicionar
                                             </button>
                                             ${item.subitems ? `<button class="btn btn-sm btn-secondary mt-1" onclick="showSubitems(${item.id})">+ Subitens</button>` : ''}

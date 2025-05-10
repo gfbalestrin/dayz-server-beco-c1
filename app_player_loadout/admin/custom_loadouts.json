@@ -554,44 +554,6 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "head",
-        "subitems": [
-          {
-            "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
-            "slots": 4,
-            "width": 2,
-            "height": 2,
-            "storage_slots": 0,
-            "storage_width": 0,
-            "storage_height": 0,
-            "localization": null,
-            "subitems": [
-              {
-                "name_type": "Battery9V",
-                "type_name": "Itens gerais",
-                "slots": 1,
-                "width": 1,
-                "height": 1,
-                "storage_slots": 0,
-                "storage_width": 0,
-                "storage_height": 0,
-                "localization": null,
-                "subitems": []
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
-        "slots": 9,
-        "width": 3,
-        "height": 3,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "head",
         "subitems": []
       }
     ]
