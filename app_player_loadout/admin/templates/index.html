@@ -896,7 +896,7 @@
                     ul.appendChild(li);
                 }
 
-                const allItems = await fetchJSON('/items');
+                const allItems = await fetchJSON('/items_all');
                 const select = document.getElementById(`addSubitemSelect-${item.id}`);
                 allItems.forEach(opt => {
                     if (opt.id !== item.id && !subitems.some(s => s.id === opt.id)) {

@@ -164,10 +164,17 @@ def export_loadouts_json():
                 weapon_data["small_ammo_id"],
                 attachments_by_slot["small"]
             )
-            explosives = query_db("SELECT a.name_type, a.slots, a.width, a.height, plwa.quantity as quantity FROM player_loadouts_weapon_explosives plwa JOIN explosives a ON plwa.explosive_id = a.id WHERE plwa.player_loadouts_weapons_id = ? LIMIT 1", [weapon_data["id"]])
+
+            explosives = query_db("""
+                SELECT a.name_type, a.slots, a.width, a.height, plwa.quantity as quantity
+                FROM player_loadouts_weapon_explosives plwa
+                JOIN explosives a ON plwa.explosive_id = a.id
+                WHERE plwa.player_loadouts_weapons_id = ?
+            """, [weapon_data["id"]])
+
             if explosives:
                 explosive_list = []
-                for exp in explosives:                    
+                for exp in explosives:
                     explosive_list.append({
                         "name_type": exp["name_type"],
                         "slots": exp["slots"],
@@ -177,14 +184,13 @@ def export_loadouts_json():
                     })
                 player_data["explosives"] = explosive_list
             else:
-                player_data["explosives"] = None 
-                
+                player_data["explosives"] = None
+
         else:
-            # Preenche None caso o jogador não tenha armas
             player_data["weapons"]["primary_weapon"] = None
             player_data["weapons"]["secondary_weapon"] = None
             player_data["weapons"]["small_weapon"] = None
-            player_data["explosives"] = None       
+            player_data["explosives"] = None
 
         # Buscar itens do jogador
         items = query_db("""
@@ -195,18 +201,18 @@ def export_loadouts_json():
             WHERE pi.player_id = ?
         """, [player_id])
 
-        # Se o jogador tem pelo menos armas ou itens, ele é processado
+        # Se o jogador não tem nada, pula
         if len(items) == 0 and not any(player_data["weapons"].values()):
-            continue  # Nenhuma arma e nenhum item, então o jogador não é incluído
+            continue
 
-        # Montar mapa auxiliar
+        # Mapeamentos
         item_map = {item["id"]: dict(item) for item in items}
         quantities = {item["id"]: item["quantity"] for item in items}
 
-        # Relações de compatibilidade
-        compat = query_db("SELECT parent_item_id, child_item_id FROM item_compatibility")
+        # Compatibilidade de subitens
+        compat_rows = query_db("SELECT parent_item_id, child_item_id FROM item_compatibility")
         compat_map = {}
-        for row in compat:
+        for row in compat_rows:
             compat_map.setdefault(row["parent_item_id"], []).append(row["child_item_id"])
 
         used_counts = defaultdict(int)
@@ -234,8 +240,8 @@ def export_loadouts_json():
             ancestry.add(item["id"])
 
             item_json = build_item_json(item)
-
             children = compat_map.get(item["id"], [])
+
             for child_id in children:
                 if used_counts[child_id] >= quantities.get(child_id, 0) or child_id in ancestry:
                     continue
@@ -252,7 +258,13 @@ def export_loadouts_json():
                 item_json["subitems"].append(child_json)
 
             return item_json
-        for item_id, quantity in quantities.items():
+
+        # Filtrar apenas itens que são raízes (não são subitens)
+        all_child_ids = {row["child_item_id"] for row in compat_rows}
+        root_items = [item_id for item_id in item_map if item_id not in all_child_ids]
+
+        for item_id in root_items:
+            quantity = quantities.get(item_id, 0)
             for _ in range(quantity):
                 if used_counts[item_id] >= quantity:
                     continue
@@ -263,11 +275,13 @@ def export_loadouts_json():
         player_data["items"] = item_list
         full_data[player_id] = player_data
 
-    # Salvar JSON
+    # Salvar em JSON
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2)
 
     return True
+
+
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
@@ -2249,6 +2263,19 @@ def get_items():
 
     return jsonify(result)
 
+@app.route('/items_all', methods=['GET'])
+@login_required
+def get_items_all():
+    conn = get_db_connection()
+    query = f'''
+        SELECT item.*, item_types.name AS name_type
+        FROM item
+        JOIN item_types ON item.type_id = item_types.id
+    '''
+
+    items = conn.execute(query).fetchall()
+    conn.close()
+    return jsonify([dict(item) for item in items])
 
 
 @app.route('/items_pagination', methods=['GET'])

@@ -301,11 +301,16 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
 
     // Explosivos
     if (data.explosives) {
+        WriteToLog("Criando explosivos...");
         foreach (Explosive explosive : data.explosives) {
+            WriteToLog("Criando explosivo... " + explosive.name_type);
             for (int e = 0; e < explosive.quantity; e++) {
-                player.GetInventory().CreateAttachment(explosive.name_type);
+                WriteToLog("Número: " + e);
+                player.GetInventory().CreateInInventory(explosive.name_type);
             }
         }
+    } else {
+        WriteToLog("Nenhum explosivo foi encontrado");
     }
 
 	WriteToLog("Loadout carregado com sucesso para o jogador: " + playerId);
