@@ -394,6 +394,7 @@
                             </div>
                             {% endfor %}
                         </div> -->
+                        <h4 class="text-center mb-4" id="title-limite-total-explosivos"></h4>
                         <div id="explosivesGrid"></div>
                         <div id="noExplosivesMsg" class="alert alert-warning d-none text-center">Nenhum explosivo
                             encontrado.</div>
@@ -755,9 +756,25 @@
         let cachedExplosives = null;
 
         // Regras fixas
-        const ruleDefault = { limit: 5 };
+        const ruleDefault = { name_type: "", limit: 1 };
+        const ruleTotal = 5;
         const rules = [
-            { name_type: "Claymore", limit: 1 }
+            { name_type: "ClaymoreMine", limit: 1 },
+            { name_type: "FlashGrenade", limit: 3 },
+            { name_type: "Grenade_ChemGas", limit: 1 },
+            { name_type: "ImprovisedExplosive", limit: 1 },
+            { name_type: "LandMineTrap", limit: 3 },
+            { name_type: "M18SmokeGrenade_Green", limit: 3 },
+            { name_type: "M18SmokeGrenade_Purple", limit: 3 },
+            { name_type: "M18SmokeGrenade_Red", limit: 3 },
+            { name_type: "M18SmokeGrenade_White", limit: 3 },
+            { name_type: "M18SmokeGrenade_Yellow", limit: 3 },
+            { name_type: "M67Grenade", limit: 3 },
+            { name_type: "Plastic_Explosive", limit: 2 },
+            { name_type: "RDG2SmokeGrenade_Black", limit: 3 },
+            { name_type: "RDG2SmokeGrenade_White", limit: 3 },
+            { name_type: "RGD5Grenade", limit: 3 },
+            { name_type: "RemoteDetonator", limit: 1 }            
         ]
         function getApplicableRule(item) {
             const rule = rules.find(r =>
@@ -766,36 +783,71 @@
             return rule || ruleDefault;
         }
         function shouldDisableAddButton(item) {
-            const itemNameType = item.name_type || '';
-
-            for (const rule of rules) {
-                const ruleNameType = rule.name_type || '';
-
-                const matchesRule =
-                    (!ruleNameType || ruleNameType === itemNameType)
-
-                if (matchesRule) {
-                    // Conta quantos itens do inventário do jogador também batem com essa regra
-                    const matchedCount = cachedPlayerItems.filter(pItem => {
-                        const pNameType = pItem.name_type || '';
-
-                        return (
-                            (!rule.name_type || rule.name_type === pNameType)
-                        );
-                    }).length;
-
-                    // Se já atingiu ou ultrapassou o limite, desabilita
-                    if (matchedCount >= rule.limit) {
-                        return true;
-                    }
+            // Pega captura regra
+            const rule = getApplicableRule(item);
+            // Se existe regra para o item valida se items excedem o limite da regra
+            if (rule)
+            {   
+                console.log(`Item ${item.name_type} caiu na regra ${rule.name_type}`)
+                const itemSelected = explosivesSelecteds ? explosivesSelecteds.filter(e => e.name_type.toLowerCase() === rule.name_type.toLowerCase()) : null;
+                if (itemSelected.length)
+                {
+                    console.log(`Quantidade de explosivos selecionados ${itemSelected[0].quantity} e o limite é ${rule.limit}`)
+                    if (itemSelected[0].quantity >= rule.limit)
+                        return true
                 }
+                
             }
+            
+            let total = 0;
+            if (explosivesSelecteds)
+            {
+                for (i of explosivesSelecteds)
+                    total += i.quantity
+            }            
+            console.log(`Validando se a quantidade total selecionada de ${total} excede o limite total de ${ruleTotal}`)
+            if (total >= ruleTotal)
+                return true;
+            
+            console.log("Não excede!")
+            console.log('...')
+            // let maxReached = rule ? explosivesSelecteds.length >= rule.limit : false;
+            // if (maxReached)
+            //     return true
+            
+            // const itemNameType = item.name_type ? item.name_type.toLocaleLowerCase() : '';
+
+            // for (const rule of rules) {
+            //     const ruleNameType = rule.name_type || '';
+
+            //     const matchesRule =
+            //         (!ruleNameType || ruleNameType.toLocaleLowerCase() === itemNameType.toLocaleLowerCase() &&
+            //         explosivesSelecteds.find(e => e.id === item.id)?.quantity >= rule.limit)
+
+            //     if (matchesRule) {
+            //         // Conta quantos itens do inventário do jogador também batem com essa regra
+            //         console.log("Bateu na regra", ruleNameType)
+            //         const matchedCount = cachedExplosives.filter(pItem => {
+            //             const pNameType = pItem.name_type || '';
+
+            //             return (
+            //                 (!rule.name_type || rule.name_type === pNameType)
+            //             );
+            //         }).length;
+
+            //         // Se já atingiu ou ultrapassou o limite, desabilita
+            //         if (matchedCount >= rule.limit) {
+            //             return true;
+            //         }
+            //     }
+            // }
 
             return false;
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             loadExplosive()
+            document.getElementById("title-limite-total-explosivos").innerHTML = `Limite total: 0/${ruleTotal}`
         });        
 
         async function fetchJSON(url, options = {}) {
@@ -832,10 +884,13 @@
                     cardItem.style.minWidth = '160px';
 
                     // 🔍 Buscar regra aplicável
-                    const rule = getApplicableRule(item);
-                    const maxReached = rule ? explosivesSelecteds.length >= rule.limit : false;
-
+                    const maxReached = shouldDisableAddButton(item)   
                     const quantity = explosivesSelecteds.find(e => e.id === item.id)?.quantity || 0;
+
+                    const limitRule = rules.filter(rule => rule.name_type.toLowerCase() === item.name_type.toLowerCase())
+                    let msgLimit = ""
+                    if (limitRule.length)
+                        msgLimit = "Limite de " + limitRule[0].limit + " unidade(s)"
 
                     cardItem.innerHTML = `
                         <img src="${item.img}" class="card-img-top mx-auto" style="max-height: 100px; object-fit: contain;">
@@ -843,12 +898,13 @@
                             <h6 class="card-title small">${item.name}</h6>
                             <p class="small text-muted">${item.name_type}</p>
                             <p class="small m-0">${item.width}x${item.height} (${item.slots} slots)</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-danger">${msgLimit}</small>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
                                 <div class="input-group" style="max-width: 130px;">
                                     <button class="btn btn-sm btn-outline-secondary" onclick="updateExplosiveQuantity(${item.id}, -1)" ${quantity <= 0 ? 'disabled' : ''}>
                                         <i class="fas fa-minus"></i>
                                     </button>
-                                    <input class="form-control form-control-lg text-center" value="${quantity}" disabled>
+                                    <input class="form-control form-control-sm text-center" value="${quantity}" disabled>
                                     ${maxReached
                             ? `<span data-bs-toggle="tooltip" data-bs-placement="top" title="Limite máximo atingido">
                                                 <button class="btn btn-sm btn-outline-secondary" disabled>
@@ -888,15 +944,22 @@
 
                 // Remove se a quantidade for 0 ou menor
                 if (explosivesSelecteds[index].quantity <= 0) {
-                explosivesSelecteds.splice(index, 1);
+                    explosivesSelecteds.splice(index, 1);
                 }
             } else if (delta > 0) {
                 // Se não está na lista e delta é positivo, adiciona com quantity = delta
                 const explosive = cachedExplosives.find(e => e.id === explosiveId);
                 if (explosive) {
-                explosivesSelecteds.push({ id: explosive.id, quantity: delta });
+                    explosivesSelecteds.push({ id: explosive.id, quantity: delta, name_type: explosive.name_type });
                 }
             }
+            let total = 0;
+            if (explosivesSelecteds)
+            {
+                for (i of explosivesSelecteds)
+                    total += i.quantity
+            } 
+            document.getElementById("title-limite-total-explosivos").innerHTML = `Limite total: ${total}/${ruleTotal}`
             loadExplosive()
             updateInputHiddenExplosives()
         }
