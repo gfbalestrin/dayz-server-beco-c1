@@ -135,7 +135,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 	elif [[ "$Content" == *"is connected"* || "$Content" == *"has been disconnected"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de player conectado ou desconectado detectado!" "INFO" "$ScriptName"
 		PlayerId=$(echo $Content | awk -F'id=' '{print $2}' | awk -F')' '{print $1}')
-		PlayerName=$(echo $Content | awk -F'"' '{print $2}')
+		PlayerName=$(echo $Content | awk -F'"' '{print $2}' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
 
 		if [[ "$PlayerId" == "Unknown" ]]; then
 			INSERT_CUSTOM_LOG "PlayerId Unknown. Ignorando..." "INFO" "$ScriptName"

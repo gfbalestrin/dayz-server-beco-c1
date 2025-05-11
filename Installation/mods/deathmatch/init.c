@@ -17,6 +17,7 @@ void WriteToLog(string content, string logfile = "init.log")
 
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
 
 void main()
 {
@@ -56,9 +57,11 @@ class SafeZoneData {
     vector areaMin;
     vector areaMax;
     ref array<vector> safeZones;
+	ref array<vector> wallZones;
 
     void SafeZoneData() {
         safeZones = new array<vector>();
+		wallZones = new array<vector>();
     }
 }
 
@@ -77,6 +80,7 @@ class CustomMission: MissionServer
 	vector areaMin;
     vector areaMax;
     ref array<vector> safeZones;	
+	ref array<vector> wallZones;
 
 	void CustomMission()
 	{
@@ -89,6 +93,20 @@ class CustomMission: MissionServer
 			areaMin = szData.areaMin;
 			areaMax = szData.areaMax;
 			safeZones = szData.safeZones;
+			wallZones = szData.wallZones;
+			if (wallZones.Count() > 0)
+			{
+				WriteToLog("O mapa possui wallzones..." + wallZones.Count());
+				array<vector> points = new array<vector>;
+				for (int i = 0; i < wallZones.Count(); i++)
+				{
+					points.Insert(wallZones[i]); 
+				}
+				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
+				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
+				WriteToLog("Wallzones construidas!");
+			}
+
 			WriteToLog("Carregou region: " + regionStr);
 		}
 		else
@@ -252,6 +270,38 @@ class CustomMission: MissionServer
 								float y = parts[1].Trim().ToFloat();
 								float z = parts[2].Trim().ToFloat();
 								data.safeZones.Insert(Vector(x, y, z));
+							}
+							
+						}
+					}
+
+					// WallZones
+					int idxWall = objStr.IndexOf("\"WallZones\":");
+					if (idxWall != -1) {
+						string subWall = objStr.Substring(idxWall, objStr.Length() - idxWall);
+						int s4Rel = subWall.IndexOf("[");
+						int e4Rel = subWall.IndexOf("]");
+						int s4 = idxWall + s4Rel;
+						int e4 = idxWall + e4Rel;
+						string wallBlock = objStr.Substring(s4 + 1, e4 - s4 - 1);
+
+						array<string> entries2 = new array<string>();
+						wallBlock.Split(",", entries2);
+
+						for (int j = 0; j + 2 < entries2.Count(); j += 3) {
+							string vecStr2 = entries2[j] + "," + entries2[j + 1] + "," + entries2[j + 2];
+							vecStr2.Replace("\"", "");
+							vecStr2.Trim();
+							// Criar array para armazenar os valores separados
+							TStringArray parts2 = new TStringArray();
+							vecStr2.Split(",", parts2);
+
+							// Verificar se há exatamente 3 partes
+							if (parts2.Count() == 3) {
+								float x2 = parts2[0].Trim().ToFloat();
+								float y2 = parts2[1].Trim().ToFloat();
+								float z2 = parts2[2].Trim().ToFloat();
+								data.wallZones.Insert(Vector(x2, y2, z2));
 							}
 							
 						}
@@ -479,6 +529,59 @@ class CustomMission: MissionServer
 					target.MessageStatus("Posição atual: " + target.GetPosition().ToString());
 					WriteToLog(target.GetPosition().ToString(), "position.log");
 					break;
+				case "getposition":
+					target.MessageStatus("Posição atual: " + target.GetPosition().ToString());
+					WriteToLog(target.GetPosition().ToString(), "position.log");
+					break;
+				case "construct":
+					if (tokens.Count() >= 3)
+					{
+						float heightOffset = 1.0;
+						int containerCount = 4;
+						float containerLength = 6.0;
+						float rotationOffset = 0.0;
+
+						if (tokens.Count() >= 4)
+							heightOffset = tokens[3].ToFloat(); // Conversão correta de string para float
+
+						if (tokens.Count() >= 5)
+							containerCount = tokens[4].ToInt(); // Conversão correta de string para int
+						
+						if (tokens.Count() >= 6)
+							containerLength = tokens[5].ToFloat();
+
+						if (tokens.Count() >= 7)
+							rotationOffset = tokens[6].ToFloat();
+
+						string buildName = tokens[2];
+						CreateCustomObject(target, buildName, heightOffset, containerCount, containerLength, rotationOffset);
+					}
+					break;
+				case "construct_retangle":
+					// if (tokens.Count() >= 5)
+					// {	
+					// 	string minAreaStr = tokens[3];
+					// 	string maxAreaStr = tokens[4];
+
+					// 	minAreaStr.Replace(";", " ");
+					// 	maxAreaStr.Replace(";", " ");
+
+					// 	vector minArea = minAreaStr.ToVector();
+					// 	vector maxArea = maxAreaStr.ToVector();
+
+					// 	// Agora sim, passa vetores reais para a função
+					// 	CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 1.0);
+					// 	CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 3.5);
+					// }
+					array<vector> points = new array<vector>;
+					points.Insert("4187.81 0 10610.63".ToVector()); // inferior esquerdo
+					points.Insert("4336.88 0 10631.25".ToVector()); // inferior direito
+					points.Insert("4314.38 0 10800.94".ToVector()); // superior direito
+					points.Insert("4130.63 0 10757.81".ToVector()); // superior esquerdo
+					CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
+					CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
+					break;
+
 			}
 		}
 
