@@ -851,36 +851,15 @@
             "width": 2,
             "height": 1,
             "battery": false
-          },
-          {
-            "name_type": "ACOGOptic_6x",
-            "type": "scope",
-            "slots": 6,
-            "width": 3,
-            "height": 2,
-            "battery": false
           }
         ]
       },
       "secondary_weapon": {
-        "name_type": "M16A2",
+        "name_type": "M4A1",
         "feed_type": "magazine",
-        "slots": 27,
-        "width": 9,
-        "height": 3,
-        "magazine": {
-          "name_type": "Mag_STANAG_60Rnd",
-          "capacity": 60,
-          "slots": 6,
-          "width": 2,
-          "height": 3
-        },
-        "ammunitions": {
-          "name_type": "Ammo_556x45Tracer",
-          "slots": 1,
-          "width": 1,
-          "height": 1
-        }
+        "slots": 24,
+        "width": 8,
+        "height": 3
       },
       "small_weapon": {
         "name_type": "Glock19",
@@ -905,35 +884,21 @@
     },
     "explosives": [
       {
-        "name_type": "RDG2SmokeGrenade_White",
+        "name_type": "Grenade_ChemGas",
+        "slots": 1,
+        "width": 1,
+        "height": 1,
+        "quantity": 1
+      },
+      {
+        "name_type": "LandMineTrap",
         "slots": 2,
         "width": 2,
         "height": 4,
-        "quantity": 1
+        "quantity": 3
       },
       {
-        "name_type": "RDG2SmokeGrenade_Black",
-        "slots": 2,
-        "width": 2,
-        "height": 4,
-        "quantity": 1
-      },
-      {
-        "name_type": "M18SmokeGrenade_Green",
-        "slots": 1,
-        "width": 2,
-        "height": 2,
-        "quantity": 1
-      },
-      {
-        "name_type": "M18SmokeGrenade_Purple",
-        "slots": 1,
-        "width": 2,
-        "height": 2,
-        "quantity": 1
-      },
-      {
-        "name_type": "M18SmokeGrenade_Red",
+        "name_type": "M67Grenade",
         "slots": 1,
         "width": 2,
         "height": 2,

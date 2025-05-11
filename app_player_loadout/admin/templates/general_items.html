@@ -91,6 +91,11 @@
             <input id="filterMaxSlots" class="form-control" type="number" placeholder="Max slots"
                 oninput="loadItems(1)">
         </div>
+        <div class="row">
+            <div class="col-12">
+                <p id="info-total-itens"></p>
+            </div>
+        </div>
         <div class="row" id="itemsGrid"></div>
         <nav>
             <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
@@ -358,7 +363,8 @@
             const name = document.getElementById('filterName').value;
             const minSlots = document.getElementById('filterMinSlots').value;
             const maxSlots = document.getElementById('filterMaxSlots').value;
-
+            const infoTotalItens = document.getElementById('info-total-itens');
+            infoTotalItens.innerHTML = '';
             let url = `/items_pagination?page=${page}&per_page=6`;
             if (typeId) url += `&type_id=${typeId}`;
             if (name) url += `&name=${encodeURIComponent(name)}`;
@@ -369,13 +375,17 @@
             const items = data.items;
             const grid = document.getElementById('itemsGrid');
             grid.innerHTML = '';
+        //             "items": [dict(item) for item in items],
+        // "total": total,
+        // "page": page,
+        // "per_page": per_page
 
             if (items.length === 0) {
                 grid.innerHTML = '<p class="text-muted">Nenhum item encontrado.</p>';
                 document.getElementById('pagination').innerHTML = '';
                 return;
             }
-
+            infoTotalItens.innerHTML = `Exibindo página ${data.page} com ${data.per_page} itens no total de ${data.total}`;
             items.forEach(item => {
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-4';

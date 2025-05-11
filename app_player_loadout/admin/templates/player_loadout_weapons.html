@@ -12,12 +12,63 @@
             cursor: pointer;
             border: 2px solid transparent;
             transition: border 0.3s;
+            padding: 10px;
         }
 
         .weapon-card.selected {
-            border: 2px solid #198754;
-            /* verde Bootstrap */
-            box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+            border: 3px solid #28a745;
+            /* Verde mais vibrante */
+            box-shadow: 0 0 15px 4px rgba(40, 167, 69, 0.75);
+            animation: pulseGlow 1.5s infinite ease-in-out;
+            transform: scale(1.02);
+            /* Leve zoom */
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .magazine-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+            padding: 10px;
+        }
+
+        .magazine-card.selected {
+            border: 3px solid #28a745;
+            /* Verde mais vibrante */
+            box-shadow: 0 0 15px 4px rgba(40, 167, 69, 0.75);
+            animation: pulseGlow 1.5s infinite ease-in-out;
+            transform: scale(1.02);
+            /* Leve zoom */
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .ammo-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+            padding: 10px;
+        }
+
+        .ammo-card.selected {
+            border: 3px solid #28a745;
+            /* Verde mais vibrante */
+            box-shadow: 0 0 15px 4px rgba(40, 167, 69, 0.75);
+            animation: pulseGlow 1.5s infinite ease-in-out;
+            transform: scale(1.02);
+            /* Leve zoom */
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 15px 4px rgba(40, 167, 69, 0.75);
+            }
+
+            50% {
+                box-shadow: 0 0 25px 8px rgba(40, 167, 69, 1);
+            }
+
+            100% {
+                box-shadow: 0 0 15px 4px rgba(40, 167, 69, 0.75);
+            }
         }
 
         .magazine-card {
@@ -106,6 +157,7 @@
             color: white;
             /* Cor do texto */
         }
+
         .card-img-top {
             max-width: 250px;
         }
@@ -408,7 +460,7 @@
 
         <div class="d-flex justify-content-between mt-4">
             <div>
-                <button type="submit" class="btn btn-success">Salvar Loadout</button>
+                <button type="submit" class="btn btn-success" id="btn-salvar-loadout">Salvar Loadout</button>
             </div>
         </div>
     </form>
@@ -483,7 +535,7 @@
                     </div>
                 </div>
                 {% endfor %}
-                
+
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="text-primary">Explosivos</h5>
@@ -495,7 +547,7 @@
                                         <p><strong>{{ explosive.name }}</strong></p>
                                         <img src="{{ explosive.img }}" class="card-img-top" alt="arma"
                                             style="max-height: 120px; object-fit: contain;">
-                                            <p>Total: {{ explosive.quantity }}</p>
+                                        <p>Total: {{ explosive.quantity }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -504,18 +556,38 @@
 
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
     <!-- JS do Bootstrap (com Popper incluído) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <div class="modal fade" id="avisoMarcacaoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Atenção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center" >
+                    <div id="avisoMarcacaoBodyModal"></div>
+                    <h4 class="text-danger mt-4">Não esqueça de clicar em Salvar Loadout!</h4>
+                </div>
+                <div class="modal-footer">
+                    
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        
+        let modalAvisoContent = ""
 
         document.addEventListener('DOMContentLoaded', function () {
+           
+
             // Função genérica para lidar com a seleção de armas
             function setupWeaponSelection(weaponType) {
                 const weaponCards = document.querySelectorAll(`.weapon-card[data-weapon-type="${weaponType}"]`);
@@ -533,10 +605,22 @@
                 const attachmentsSection = document.getElementById(`${weaponType}-attachments-section`);
 
                 weaponCards.forEach(card => {
-                    card.addEventListener('click', function () {
+                    card.addEventListener('click', function () {     
+                        const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                       
+                        bodyModalAviso.innerHTML = ''; 
+                                const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
+                                    bodyModalAviso.innerHTML += `<div class="mb-3 text-center">
+    <h5 class="text-info">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      Algumas armas necessitam de um carregador, sempre verifique se você selecionou o carregador, a munição e os acessórios se disponíveis!
+    </h5>
+  </div>`;
+                                    if (!document.getElementById('avisoMarcacaoModal').classList.contains('show'))
+                                        modalModalAviso.show(); 
+
                         // Resetar seleções anteriores
                         document.querySelectorAll(`.weapon-card[data-weapon-type="${weaponType}"]`).forEach(c => c.classList.remove('selected'));
-                        this.classList.add('selected');
+                        this.classList.add('selected');  
 
                         const weaponId = this.dataset.weaponId;
                         weaponInput.value = weaponId;
@@ -552,10 +636,22 @@
                         fetch(`/get_magazines/${weaponId}`)
                             .then(res => res.json())
                             .then(data => {
+                                
                                 magazineList.innerHTML = '';
                                 if (data.length === 0) {
                                     magazineList.innerHTML = '<p>Nenhum carregador compatível.</p>';
                                 } else {
+//                                     const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                
+//                                 const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
+//                                     bodyModalAviso.innerHTML += `<div class="mb-3 text-center">
+//     <h5 class="text-info">
+//       <i class="bi bi-exclamation-triangle-fill me-2"></i>
+//       A arma escolhida necessita de um carregador. Escolha um disponível!
+//     </h5>
+//   </div>`;
+//                                     if (!document.getElementById('avisoMarcacaoModal').classList.contains('show'))
+//                                         modalModalAviso.show(); 
+
                                     divMagazines.classList.remove("d-none");
                                     data.forEach(mag => {
                                         const card = document.createElement('div');
@@ -603,11 +699,23 @@
                 fetch(`/get_ammos/${weaponId}`)
                     .then(res => res.json())
                     .then(data => {
+                        
                         ammoList.innerHTML = '';
                         if (data.length === 0) {
                             ammoList.innerHTML = '<p>Nenhuma munição compatível.</p>';
                             ammoInput.value = '';
                         } else {
+//                             const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                
+//                             const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
+//                             bodyModalAviso.innerHTML += `<div class="mb-3 text-center">
+//     <h5 class="text-info">
+//       <i class="bi bi-exclamation-triangle-fill me-2"></i>
+//       Você deve selecionar um tipo de munição!
+//     </h5>
+//   </div>`;
+//                             if (!document.getElementById('avisoMarcacaoModal').classList.contains('show'))
+//                                 modalModalAviso.show(); 
+
                             divAmmos.classList.remove("d-none");
                             data.forEach(ammo => {
                                 const card = document.createElement('div');
@@ -648,8 +756,21 @@
                     .then(data => {
                         if (data.length > 0) {
                             divAttachments.classList.remove("d-none");
+//                             const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                
+//                             const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
+//                             bodyModalAviso.innerHTML += `<div class="text-center">
+//     <h5 class="text-info">
+//       <i class="bi bi-info-circle-fill me-2"></i>
+//       A arma possui acessórios. Você pode selecionar vários!
+//     </h5>
+//   </div>`;
+//                             if (!document.getElementById('avisoMarcacaoModal').classList.contains('show'))
+//                                 modalModalAviso.show(); 
                         }
                         data.forEach(att => {
+                            
+
+
                             const card = document.createElement('div');
                             card.className = 'attachment-card col-sm-12 col-lg-3';
                             card.setAttribute('data-id', att.id);
@@ -774,7 +895,7 @@
             { name_type: "RDG2SmokeGrenade_Black", limit: 3 },
             { name_type: "RDG2SmokeGrenade_White", limit: 3 },
             { name_type: "RGD5Grenade", limit: 3 },
-            { name_type: "RemoteDetonator", limit: 1 }            
+            { name_type: "RemoteDetonator", limit: 1 }
         ]
         function getApplicableRule(item) {
             const rule = rules.find(r =>
@@ -786,35 +907,32 @@
             // Pega captura regra
             const rule = getApplicableRule(item);
             // Se existe regra para o item valida se items excedem o limite da regra
-            if (rule)
-            {   
+            if (rule) {
                 console.log(`Item ${item.name_type} caiu na regra ${rule.name_type}`)
                 const itemSelected = explosivesSelecteds ? explosivesSelecteds.filter(e => e.name_type.toLowerCase() === rule.name_type.toLowerCase()) : null;
-                if (itemSelected.length)
-                {
+                if (itemSelected.length) {
                     console.log(`Quantidade de explosivos selecionados ${itemSelected[0].quantity} e o limite é ${rule.limit}`)
                     if (itemSelected[0].quantity >= rule.limit)
                         return true
                 }
-                
+
             }
-            
+
             let total = 0;
-            if (explosivesSelecteds)
-            {
+            if (explosivesSelecteds) {
                 for (i of explosivesSelecteds)
                     total += i.quantity
-            }            
+            }
             console.log(`Validando se a quantidade total selecionada de ${total} excede o limite total de ${ruleTotal}`)
             if (total >= ruleTotal)
                 return true;
-            
+
             console.log("Não excede!")
             console.log('...')
             // let maxReached = rule ? explosivesSelecteds.length >= rule.limit : false;
             // if (maxReached)
             //     return true
-            
+
             // const itemNameType = item.name_type ? item.name_type.toLocaleLowerCase() : '';
 
             // for (const rule of rules) {
@@ -848,7 +966,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             loadExplosive()
             document.getElementById("title-limite-total-explosivos").innerHTML = `Limite total: 0/${ruleTotal}`
-        });        
+        });
 
         async function fetchJSON(url, options = {}) {
             const res = await fetch(url, options);
@@ -866,25 +984,24 @@
 
             try {
                 let response = null;
-                if (!cachedExplosives)
-                {
+                if (!cachedExplosives) {
                     response = await fetchJSON(`/api/explosives_all`);
                     cachedExplosives = response ? response.explosives : null
                     msg.classList.toggle('d-none', response.length > 0);
-                }               
+                }
 
                 const row = document.createElement('div');
                 row.className = 'd-flex flex-row flex-wrap overflow-auto gap-3 mb-3';
                 row.style.width = '100%';
 
-                
+
                 cachedExplosives.forEach(item => {
                     const cardItem = document.createElement('div');
                     cardItem.className = 'card p-2 text-center bg-light';
                     cardItem.style.minWidth = '160px';
 
                     // 🔍 Buscar regra aplicável
-                    const maxReached = shouldDisableAddButton(item)   
+                    const maxReached = shouldDisableAddButton(item)
                     const quantity = explosivesSelecteds.find(e => e.id === item.id)?.quantity || 0;
 
                     const limitRule = rules.filter(rule => rule.name_type.toLowerCase() === item.name_type.toLowerCase())
@@ -954,18 +1071,16 @@
                 }
             }
             let total = 0;
-            if (explosivesSelecteds)
-            {
+            if (explosivesSelecteds) {
                 for (i of explosivesSelecteds)
                     total += i.quantity
-            } 
+            }
             document.getElementById("title-limite-total-explosivos").innerHTML = `Limite total: ${total}/${ruleTotal}`
             loadExplosive()
             updateInputHiddenExplosives()
         }
 
-        function updateInputHiddenExplosives()
-        {
+        function updateInputHiddenExplosives() {
             document.getElementById("explosivos-list").value = JSON.stringify(explosivesSelecteds)
         }
 
