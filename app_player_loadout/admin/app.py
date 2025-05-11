@@ -285,7 +285,7 @@ def export_loadouts_json():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=10)
+    scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
     scheduler.start()
 
     # Garante que o scheduler pare quando o app parar
@@ -2263,6 +2263,11 @@ def get_items():
 
     return jsonify(result)
 
+@app.route('/general_items', methods=['GET'])
+@login_required
+def general_items():
+    return render_template('general_items.html')
+
 @app.route('/items_all', methods=['GET'])
 @login_required
 def get_items_all():
@@ -2270,7 +2275,7 @@ def get_items_all():
     query = f'''
         SELECT item.*, item_types.name AS name_type
         FROM item
-        JOIN item_types ON item.type_id = item_types.id
+        JOIN item_types ON item.type_id = item_types.id ORDER BY item.name COLLATE NOCASE
     '''
 
     items = conn.execute(query).fetchall()
