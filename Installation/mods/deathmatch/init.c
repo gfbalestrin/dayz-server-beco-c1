@@ -73,7 +73,7 @@ class CustomMission: MissionServer
 	float m_AdminCheckCooldown60 = 60.0;
 	float m_AdminCheckTimer60 = 0.0;
 	string FixedMessage1 = "Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade";
-	string FixedMessage2 = "Acesse o discord para personalizar seu loadout";
+	string FixedMessage2 = "";
 
 	string regionStr;
 	string customMessage;
@@ -376,6 +376,9 @@ class CustomMission: MissionServer
 
 	void AppendMessage(string message)
 	{
+		if (message == "")
+			return;
+
 		string path = "$mission:messages_to_send.txt";
 		FileHandle file = OpenFile(path, FileMode.APPEND);
 
@@ -491,12 +494,12 @@ class CustomMission: MissionServer
 					break;
 				case "ghostmode":
 					target.SetInvisible(true);
-					target.DisableSimulation(true);
+					//target.DisableSimulation(true);
 					target.MessageStatus("🕵️ Você está invisível e com simulacao desativada");
 					break;
 				case "unghostmode":
 					target.SetInvisible(false);
-					target.DisableSimulation(false);
+					//target.DisableSimulation(false);
 					target.MessageStatus("👁️ Você está visível e com simulacao ativada");
 					break;
 				case "kick":
