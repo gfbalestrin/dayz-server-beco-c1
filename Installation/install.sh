@@ -233,6 +233,7 @@ if ! grep -q "$stringSearchMaxCores" "$DayzSettingXmlFile"; then
     echo "Copie o arquivo server-defaults/dayzsetting.cfg para $DayzSettingXmlFile e reincie o script com as flags --skip-user e --skip-steam."
     exit 1
 fi
+sed -i "s#$stringSearchMaxCores#$stringReplaceMaxCores#g" "$DayzSettingXmlFile"
 
 stringSearchReservedcores="reservedcores=\"1\""
 stringReplaceReservedcores="reservedcores=\"$DayzPcCpuReservedcores\""
@@ -241,6 +242,7 @@ if ! grep -q "$stringSearchReservedcores" "$DayzSettingXmlFile"; then
     echo "Copie o arquivo server-defaults/dayzsetting.cfg para $DayzSettingXmlFile e reincie o script com as flags --skip-user e --skip-steam."
     exit 1
 fi
+sed -i "s#$stringSearchReservedcores#$stringReplaceReservedcores#g" "$DayzSettingXmlFile"
 
 echo "Arquivo $DayzSettingXmlFile editado com sucesso."
 
@@ -274,22 +276,6 @@ awk -v dl="$DayzRestartMinutes" '
 
 echo "Arquivo $DayzMpmissionMessagesXml editado com sucesso."
 
-if [[ $$DayzDeathmatch == "1" ]]; then
-    echo "Ativando o modo Deathmatch ..."
-    sleep $DELAY
-    cp -R mods/deathmatch/* $DayzFolder/mpmissions/$DayzMpmission/
-    chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/"
-
-    DayzMpmissionGlobalsXml="$DayzFolder/mpmissions/$DayzMpmission/db/globals.xml"
-    cp -Rap $DayzMpmissionGlobalsXml "$DayzFolder/mpmissions/$DayzMpmission/db/globals.xml.bkp"
-    echo "Editando arquivo $DayzMpmissionGlobalsXml ..."
-    sleep $DELAY
-    sed -i "s#<var name=\"CleanupLifetimeDeadPlayer\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadPlayer\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
-    sed -i "s#<var name=\"CleanupLifetimeDeadAnimal\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadAnimal\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
-    sed -i "s#<var name=\"CleanupLifetimeDeadInfected\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadInfected\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
-    sed -i "s#<var name=\"TimeLogin\" type=\"0\" value=\"3600\"/>#<var name=\"TimeLogin\" type=\"0\" value=\"5\"/>#g" "$DayzMpmissionGlobalsXml"
-fi
-
 DayzServerServiceFile="/etc/systemd/system/dayz-server.service"
 echo "Configurando serviço no systemd $DayzServerServiceFile ..."
 sleep $DELAY
@@ -305,17 +291,7 @@ After=syslog.target network.target nss-lookup.target network-online.target
 ExecStartPre=${DayzFolder}/scripts/update.sh
 
 # Inicialização principal do servidor
-ExecStart=${DayzFolder}/DayZServer \
-    -config=${DayzFolder}/serverDZ.cfg \
-    -port=2302 \
-    -BEpath=${DayzFolder}/battleye \
-    -profiles=${DayzFolder}/profiles \
-    -dologs \
-    -adminlog \
-    -netlog \
-    -freezecheck \
-    -cpuCount=${DayzPcCpuMaxCores} \
-    -limitFPS=${DayzLimitFPS}
+ExecStart=${DayzFolder}/DayZServer -config=${DayzFolder}/serverDZ.cfg -port=2302 -BEpath=${DayzFolder}/battleye -profiles=${DayzFolder}/profiles -dologs -adminlog -netlog -freezecheck -cpuCount=${DayzPcCpuMaxCores} -limitFPS=${DayzLimitFPS}
 
 # Script pós-inicialização
 ExecStartPost=+${DayzFolder}/scripts/execute_script_pos.sh
@@ -346,6 +322,8 @@ StandardError=append:${DayzFolder}/profiles/dayz-server.err
 WantedBy=multi-user.target
 EOF
 
+mkdir -p "${DayzFolder}/profiles"
+chown -R "$LinuxUserName:$LinuxUserName" "${DayzFolder}/profiles"
 
 mkdir -p "$DayzFolder/scripts"
 chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/scripts"
@@ -358,7 +336,7 @@ cat <<EOF > "$DayzFolder/scripts/wipe.sh"
 #!/bin/bash
 echo "=== Realizando wipe do servidor DayZ ==="
 echo "PROFILE_DIR: $PROFILE_DIR"
-rm -rf "$PROFILE_DIR"
+rm -rf "$PROFILE_DIR/*"
 echo "Wipe completo!"
 sleep 10
 EOF
@@ -368,19 +346,19 @@ fi
 
 echo "Configurando script de update $DayzFolder/scripts/update.sh ..."
 
-cat <<'EOF' > "$DayzFolder/scripts/update.sh"
+cat <<EOF > "$DayzFolder/scripts/update.sh"
 #!/bin/bash
 
+source $DayzFolder/scripts/config.sh
 set -euo pipefail
 
 echo "[INFO] Iniciando update do servidor DayZ..."
 
 # Executa o wipe se estiver habilitado
-if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
+if [[ "\$DayzWipeOnRestart" -eq "1" ]]; then
     echo "[INFO] Executando wipe..."
     cd "$DayzFolder/scripts" && ./wipe.sh
     echo "[INFO] Wipe concluído."
-    sleep 10
 fi
 
 # Atualiza o servidor via SteamCMD
@@ -388,8 +366,20 @@ echo "[INFO] Atualizando servidor via SteamCMD..."
 cd "$DayzFolder"
 /home/$LinuxUserName/servers/steamcmd/steamcmd.sh +force_install_dir "$DayzFolder/" +login $SteamAccount +app_update 223350 validate +quit
 
+cd "$DayzFolder/mpmissions/$DayzMpmission/"
+rm init.c
+if [[ "$DayzDeathmatch" == "1" ]]; then
+echo "Baixando init.c para Deathmatch..."
+curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/init.c
+else
+echo "Baixando init.c..."
+curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/$DayzMpmission/init.c
+fi
+chown "$LinuxUserName:$LinuxUserName" init.c
+
 echo "[INFO] Update concluído com sucesso."
 EOF
+
 
 chmod +x "$DayzFolder/scripts/update.sh"
 
@@ -417,9 +407,6 @@ echo ""
 echo "$DayzMpmissionMessagesXml ..."
 echo ""
 
-echo "$DayzMpmissionMessagesXml ..."
-echo ""
-
 echo "$DayzServerServiceFile ..."
 echo ""
 
@@ -437,9 +424,11 @@ if [[ "$DayzWipeOnRestart" == "1" ]]; then
     echo ""
 fi
 
- systemctl stop dayz-server.service
+systemctl stop dayz-server.service
 
 sleep 10
+
+source ./install_log_admin.sh
 
 echo "Para iniciar o servidor digite o comando: systemctl start dayz-server.service"
 echo "Para visualizar os logs do servidor digite o comando: journalctl -f -u dayz-server.service"

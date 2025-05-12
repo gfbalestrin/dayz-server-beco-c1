@@ -4,17 +4,21 @@ DELAY=5
 
 # Função de ajuda
 usage() {
-  echo "Uso: $0 [--skip-discord]"
+  echo "Uso: $0 [--skip-discord] [--skip-loadout]"
   exit 1
 }
 
 SKIP_DISCORD=0
-
+SKIP_LOADOUT=0
 # Processa os argumentos
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
     --skip-discord)
       SKIP_DISCORD=1
+      shift
+      ;;
+    --skip-loadout)
+      SKIP_LOADOUT=1
       shift
       ;;
     *)
@@ -68,6 +72,22 @@ export CONFIG_FILE
 
 # Executa config.sh
 source "$CONFIG_SCRIPT"
+
+if [[ $$DayzDeathmatch == "1" ]]; then
+    echo "Ativando o modo Deathmatch ..."
+    sleep $DELAY
+    cp -R mods/deathmatch/* $DayzFolder/mpmissions/$DayzMpmission/
+    chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/"
+
+    DayzMpmissionGlobalsXml="$DayzFolder/mpmissions/$DayzMpmission/db/globals.xml"
+    cp -Rap $DayzMpmissionGlobalsXml "$DayzFolder/mpmissions/$DayzMpmission/db/globals.xml.bkp"
+    echo "Editando arquivo $DayzMpmissionGlobalsXml ..."
+    sleep $DELAY
+    sed -i "s#<var name=\"CleanupLifetimeDeadPlayer\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadPlayer\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
+    sed -i "s#<var name=\"CleanupLifetimeDeadAnimal\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadAnimal\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
+    sed -i "s#<var name=\"CleanupLifetimeDeadInfected\" type=\"0\" value=\"3600\"/>#<var name=\"CleanupLifetimeDeadInfected\" type=\"0\" value=\"10\"/>#g" "$DayzMpmissionGlobalsXml"
+    sed -i "s#<var name=\"TimeLogin\" type=\"0\" value=\"3600\"/>#<var name=\"TimeLogin\" type=\"0\" value=\"5\"/>#g" "$DayzMpmissionGlobalsXml"
+fi
 
 DayzFolder="/home/$LinuxUserName/servers/dayz-server"
 echo "Diretório do servidor: $DayzFolder"
@@ -161,6 +181,7 @@ sqlite3 "server_beco_c1_logs.db" < "server_beco_c1_logs.sql"
 echo "✔ Banco server_beco_c1_logs.db criado com sucesso."
 
 chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/scripts/databases"
 
 echo "" > "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt"
 chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/admin_ids.txt"
@@ -168,8 +189,71 @@ chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/
 echo "" > "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt"
 chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/admin_cmds.txt"
 
-
 echo "✔ Scripts configurados com sucesso."
+
+cd "$DayzFolder/mpmissions/$DayzMpmission/"
+rm init.c
+if [[ "$DayzDeathmatch" == "1" ]]; then
+  echo "Baixando init.c para Deathmatch..."
+  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/init.c
+else
+  echo "Baixando init.c..."
+  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/$DayzMpmission/init.c
+fi
+chown "$LinuxUserName:$LinuxUserName" init.c
+mkdir -p admin
+cd admin
+if [[ "$DayzDeathmatch" == "1" ]]; then
+  echo "Baixando Construction.c para Deathmatch..."
+  curl -o Construction.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/admin/Construction.c
+  echo "Baixando PlayersLoadout.c para Deathmatch..."
+  curl -o PlayersLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/admin/PlayersLoadout.c
+else
+  echo "Baixando AdminLoadout.c..."
+  curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/$DayzMpmission/admin/AdminLoadout.c
+  chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
+fi
+
+curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/$DayzMpmission/admin/VehicleSpawner.c
+chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
+
+echo > "$DayzFolder/mpmissions/$DayzMpmission/messages_to_send.txt"
+echo > "$DayzFolder/profiles/init.log"
+echo > "$DayzFolder/profiles/position.log"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/profiles"
+chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/admin"
+
+if [[ "$DayzDeathmatch" == "1" ]]; then
+  curl -o "$DayzFolder/mpmissions/$DayzMpmission/deathmatch_config.json" https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/deathmatch_config.json
+  chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/mpmissions/$DayzMpmission/deathmatch_config.json"
+fi
+
+
+if [[ "$SKIP_LOADOUT" == "0" ]]; then
+  echo "Configurando aplicação logout..."
+  exit 0
+  APP_LOADOUT_FOLDER="$AppFolder/app_player_loadout"
+  mkdir -p "$APP_LOADOUT_FOLDER"
+  cd "$APP_LOADOUT_FOLDER"  
+  apt -y install git python3 python3-pip python3.11-venv
+  rm -rf /tmp/dayz-server-beco-c1
+  git clone https://github.com/gfbalestrin/dayz-server-beco-c1.git /tmp/dayz-server-beco-c1
+  cp -Rap /tmp/dayz-server-beco-c1/app_player_loadout/admin/templates .
+  cp -Rap /tmp/dayz-server-beco-c1/app_player_loadout/admin/app.py .
+  ls -lh
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install Flask requests filelock apscheduler
+
+  chown -R "$LinuxUserName:$LinuxUserName" "$APP_LOADOUT_FOLDER"
+fi
+exit 0
+source ${DayzFolder}/scripts/update.sh
+
+sleep 5
+
+
+
 echo "Configurando serviço de logs..."
 sleep 5
 
@@ -229,34 +313,6 @@ systemctl enable dayz-infos-logs-discord.service
 
 echo "Serviços criados e habilitados com sucesso."
 
-cd "$DayzFolder/mpmissions/$DayzMpmission/"
-rm init.c
-if [[ "$DayzDeathmatch" == "1" ]]; then
-  echo "Baixando init.c para Deathmatch..."
-  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/init.c
-else
-  echo "Baixando init.c..."
-  curl -o init.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/init.c
-fi
-chown "$LinuxUserName:$LinuxUserName" init.c
-mkdir -p admin
-cd admin
-if [[ "$DayzDeathmatch" == "1" ]]; then
-  echo "Baixando AdminLoadout.c para Deathmatch..."
-  curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/Installation/mods/deathmatch/admin/AdminLoadout.c
-else
-  echo "Baixando AdminLoadout.c..."
-  curl -o AdminLoadout.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/AdminLoadout.c
-fi
-
-chown "$LinuxUserName:$LinuxUserName" AdminLoadout.c
-curl -o VehicleSpawner.c https://raw.githubusercontent.com/gfbalestrin/dayz-server-beco-c1/refs/heads/main/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c
-chown "$LinuxUserName:$LinuxUserName" VehicleSpawner.c
-
-echo > "$DayzFolder/mpmissions/$DayzMpmission/messages_to_send.txt"
-echo > "$DayzFolder/profiles/init.log"
-echo > "$DayzFolder/profiles/position.log"
-chown -R "$LinuxUserName:$LinuxUserName" "$DayzFolder/profiles"
 
 echo "Para iniciar o servidor digite o comando: "
 echo "systemctl start dayz-server && systemctl start dayz-logs-discord.service && systemctl start dayz-infos-logs-discord.service"

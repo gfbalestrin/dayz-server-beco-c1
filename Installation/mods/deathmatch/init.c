@@ -65,6 +65,7 @@ class SafeZoneData {
     }
 }
 
+ref array<string> FixedMessages;
 
 class CustomMission: MissionServer
 {
@@ -72,7 +73,6 @@ class CustomMission: MissionServer
 	float m_AdminCheckTimer10 = 0.0;
 	float m_AdminCheckCooldown60 = 60.0;
 	float m_AdminCheckTimer60 = 0.0;
-	ref array<string> FixedMessages = ["Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade"];
 
 	string regionStr;
 	string customMessage;
@@ -84,6 +84,9 @@ class CustomMission: MissionServer
 	void CustomMission()
 	{
 		WriteToLog("Entrou no construtor CustomMission");
+		FixedMessages = new array<string>;
+        FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade");
+
 		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
 		if (szData)
 		{
@@ -178,7 +181,9 @@ class CustomMission: MissionServer
 			{
 				AppendMessage(customMessage);
 				foreach (string msgFixed : FixedMessages)
+				{
 					AppendMessage(msgFixed);
+				}
 					
 			}			
 
