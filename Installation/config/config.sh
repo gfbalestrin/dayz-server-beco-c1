@@ -75,6 +75,14 @@ if [[ -z "$DayzPcCpuReservedcores" ]]; then
 fi
 export DayzPcCpuReservedcores
 
+DayzRestartMinutes=$(jq -r '.DayZ.RestartMinutes // empty' "$CONFIG_FILE")
+if [[ -z "$DayzRestartMinutes" ]]; then
+    echo "Erro: RestartMinutes não encontrado no arquivo JSON."
+    return 1
+fi
+export DayzRestartMinutes
+
+
 DayzRConPassword=$(jq -r '.DayZ.RConPassword // empty' "$CONFIG_FILE")
 if [[ -z "$DayzRConPassword" ]]; then
     echo "Erro: Senha RCon não encontrada no arquivo JSON."

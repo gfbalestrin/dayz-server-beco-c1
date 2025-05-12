@@ -72,8 +72,7 @@ class CustomMission: MissionServer
 	float m_AdminCheckTimer10 = 0.0;
 	float m_AdminCheckCooldown60 = 60.0;
 	float m_AdminCheckTimer60 = 0.0;
-	string FixedMessage1 = "Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade";
-	string FixedMessage2 = "";
+	ref array<string> FixedMessages = ["Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade"];
 
 	string regionStr;
 	string customMessage;
@@ -99,9 +98,8 @@ class CustomMission: MissionServer
 				WriteToLog("O mapa possui wallzones..." + wallZones.Count());
 				array<vector> points = new array<vector>;
 				for (int i = 0; i < wallZones.Count(); i++)
-				{
 					points.Insert(wallZones[i]); 
-				}
+
 				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
 				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
 				WriteToLog("Wallzones construidas!");
@@ -116,8 +114,8 @@ class CustomMission: MissionServer
 	}
 
 
-	// Classe global
-	ref map<Object, float> m_DeadBodies = new map<Object, float>();
+	// Classe global (não necessário se alterar o globals.xml)
+	//ref map<Object, float> m_DeadBodies = new map<Object, float>();
 
 	override void OnUpdate(float timeslice)
 	{
@@ -145,28 +143,31 @@ class CustomMission: MissionServer
 					{
 						player.MessageImportant(msg);
 					}
-					if (!player.IsAlive() && !m_DeadBodies.Contains(player))
-					{
-						float removalTime = GetGame().GetTime() + 30000; // 30 segundos no futuro
-						m_DeadBodies.Insert(player, removalTime);
-					}
+					//(não necessário se alterar o globals.xml)
+					// if (!player.IsAlive() && !m_DeadBodies.Contains(player))
+					// {
+					// 	float removalTime = GetGame().GetTime() + 30000; // 30 segundos no futuro
+					// 	m_DeadBodies.Insert(player, removalTime);
+					// }
 				}
-			}		
-			// Fora do loop, após processar jogadores
-			array<Object> toDelete = new array<Object>();
-			foreach (Object obj, float expireTime : m_DeadBodies)
-			{
-				if (GetGame().GetTime() >= expireTime)
-				{
-					toDelete.Insert(obj);
-				}
-			}
-
-			foreach (Object objToDelete : toDelete)
-			{
-				GetGame().ObjectDelete(objToDelete);
-				m_DeadBodies.Remove(objToDelete);
 			}	
+
+			//(não necessário se alterar o globals.xml)	
+			// // Fora do loop, após processar jogadores
+			// array<Object> toDelete = new array<Object>();
+			// foreach (Object obj, float expireTime : m_DeadBodies)
+			// {
+			// 	if (GetGame().GetTime() >= expireTime)
+			// 	{
+			// 		toDelete.Insert(obj);
+			// 	}
+			// }
+
+			// foreach (Object objToDelete : toDelete)
+			// {
+			// 	GetGame().ObjectDelete(objToDelete);
+			// 	m_DeadBodies.Remove(objToDelete);
+			// }	
 		}
 		// Cada 1 min
 		m_AdminCheckTimer60 += timeslice;
@@ -176,8 +177,9 @@ class CustomMission: MissionServer
 			if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
 			{
 				AppendMessage(customMessage);
-				AppendMessage(FixedMessage1);
-				AppendMessage(FixedMessage2);				
+				foreach (string msgFixed : FixedMessages)
+					AppendMessage(msgFixed);
+					
 			}			
 
 			m_AdminCheckTimer60 = 0.0;

@@ -17,6 +17,7 @@
         "Folder": "/etc/servers/dayz-server/scripts",
         "PlayerBecoC1DbFile": "databases/players_beco_c1.db",
         "ServerBecoC1LogsDbFile": "databases/server_beco_c1_logs.db",
+        "DayzItemsDbFile": "databases/dayz_items.db",
         "ScriptUpdatePlayersOnlineFile": "atualiza_players_online.sh",
         "ScriptExtractPlayersStatsFile": "extrai_players_stats.sh",
         "ScriptUpdateGeneralKillfeed": "monta_killfeed_geral.sh",
