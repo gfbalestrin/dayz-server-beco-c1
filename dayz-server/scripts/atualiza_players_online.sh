@@ -150,7 +150,17 @@ fi
 
 
 NUM_REGISTROS=$(sqlite3 "$PLAYERS_BECO_C1_DB" "SELECT COUNT(*) FROM players_online;")
-CONTENT="**($NUM_REGISTROS/60) Usuários online (atualizado em $CURRENT_DATE)**\n\n"
+
+if [[ "$DayzDeathmatch" -eq "1" ]]; then
+    DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
+    CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+    NEXT_REGION=$(jq -r ".[$CURRENT_INDEX].Region" "$DeathMatchCoords")  
+    CONTENT="**($NUM_REGISTROS/60) Usuários online (atualizado em $CURRENT_DATE)**\n"  
+    CONTENT="${CONTENT}**Mapa atual: ${NEXT_REGION}** \n\n"
+else
+    CONTENT="**($NUM_REGISTROS/60) Usuários online (atualizado em $CURRENT_DATE)**\n\n"
+fi
+
 if [[ $NUM_REGISTROS -eq 0 ]]; then
     SincronizaDiscord
     exit 0

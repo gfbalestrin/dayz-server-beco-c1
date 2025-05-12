@@ -292,6 +292,48 @@ def start_scheduler():
     import atexit
     atexit.register(lambda: scheduler.shutdown())
 
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form['current_password'].strip()
+        new_password = request.form['new_password'].strip()
+        confirm_password = request.form['confirm_password'].strip()
+
+        if not current_password or not new_password or not confirm_password:
+            flash('Todos os campos são obrigatórios.', 'danger')
+            return render_template('change_password.html')
+
+        if new_password != confirm_password:
+            flash('A nova senha e a confirmação não coincidem.', 'danger')
+            return render_template('change_password.html')
+
+        if len(new_password) < 8:
+            flash('A nova senha deve ter pelo menos 8 caracteres.', 'danger')
+            return render_template('change_password.html')
+
+        # Obter senha atual do banco de dados
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM player_logins WHERE player_id = ?", (session.get('player_id'),))
+        row = cursor.fetchone()
+
+        if row is None or not check_password_hash(row['password'], current_password):
+            flash('Senha atual incorreta.', 'danger')
+            conn.close()
+            return render_template('change_password.html')
+
+        # Atualizar com nova senha
+        hashed_new_password = generate_password_hash(new_password)
+        cursor.execute("UPDATE player_logins SET password = ? WHERE player_id = ?", (hashed_new_password, session.get('player_id')))
+        conn.commit()
+        conn.close()
+
+        flash('Senha alterada com sucesso!', 'success')
+        return redirect(url_for('login'))  # ou outro endpoint desejado
+
+    return render_template('change_password.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 @login_required
 @admin_required

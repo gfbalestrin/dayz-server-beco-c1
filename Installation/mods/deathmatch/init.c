@@ -115,10 +115,13 @@ class CustomMission: MissionServer
 		}
 	}
 
+
+	// Classe global
+	ref map<Object, float> m_DeadBodies = new map<Object, float>();
+
 	override void OnUpdate(float timeslice)
 	{
 		super.OnUpdate(timeslice);
-		// A cada 30 segundos
 		m_AdminCheckTimer10 += timeslice;
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
@@ -142,8 +145,28 @@ class CustomMission: MissionServer
 					{
 						player.MessageImportant(msg);
 					}
+					if (!player.IsAlive() && !m_DeadBodies.Contains(player))
+					{
+						float removalTime = GetGame().GetTime() + 30000; // 30 segundos no futuro
+						m_DeadBodies.Insert(player, removalTime);
+					}
+				}
+			}		
+			// Fora do loop, após processar jogadores
+			array<Object> toDelete = new array<Object>();
+			foreach (Object obj, float expireTime : m_DeadBodies)
+			{
+				if (GetGame().GetTime() >= expireTime)
+				{
+					toDelete.Insert(obj);
 				}
 			}
+
+			foreach (Object objToDelete : toDelete)
+			{
+				GetGame().ObjectDelete(objToDelete);
+				m_DeadBodies.Remove(objToDelete);
+			}	
 		}
 		// Cada 1 min
 		m_AdminCheckTimer60 += timeslice;
@@ -160,6 +183,7 @@ class CustomMission: MissionServer
 			m_AdminCheckTimer60 = 0.0;
 		}
 	}
+	
 
 	ref SafeZoneData LoadActiveRegionData(string path)
 	{

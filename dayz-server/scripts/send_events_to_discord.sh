@@ -135,7 +135,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 	elif [[ "$Content" == *"is connected"* || "$Content" == *"has been disconnected"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de player conectado ou desconectado detectado!" "INFO" "$ScriptName"
 		PlayerId=$(echo $Content | awk -F'id=' '{print $2}' | awk -F')' '{print $1}')
-		PlayerName=$(echo $Content | awk -F'"' '{print $2}' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
+		PlayerName=$(echo $Content | awk -F'"' '{print $2}' | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
 
 		if [[ "$PlayerId" == "Unknown" ]]; then
 			INSERT_CUSTOM_LOG "PlayerId Unknown. Ignorando..." "INFO" "$ScriptName"
@@ -155,9 +155,9 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			continue
 		fi
 
-		PlayerName=$(echo "$PlayerExists" | cut -d'|' -f1)
+		PlayerName=$(echo "$PlayerExists" | cut -d'|' -f1 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
 		SteamID=$(echo "$PlayerExists" | cut -d'|' -f2)
-		SteamName=$(echo "$PlayerExists" | cut -d'|' -f3)		
+		SteamName=$(echo "$PlayerExists" | cut -d'|' -f3 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)		
 
 		if [[ -f "$DayzServerFolder/$DayzAdminIdsFile" ]] && grep -q "$PlayerId" "$DayzServerFolder/$DayzAdminIdsFile"; then
 			INSERT_CUSTOM_LOG "Ignorando conta do administrador e matando player para renascer com loot admin..." "INFO" "$ScriptName"
