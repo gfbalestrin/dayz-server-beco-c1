@@ -46,6 +46,7 @@ void WriteToLog(string content, string logfile = "init.log")
 		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
 	}
 }
+ref array<Object> m_CreatedObjects = new array<Object>;
 
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
