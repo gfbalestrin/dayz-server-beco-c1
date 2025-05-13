@@ -329,7 +329,7 @@ class CustomMission: MissionServer
 			if (endObj == -1) break;
 
 			string objStr = content.Substring(startObj, endObj - startObj + 1);
-			WriteToLog("LoadActiveRegionData: Analisando bloco -> " + objStr);
+			WriteToLog("Analisando bloco JSON: " + objStr);
 
 			if (IsJsonValueTrue(objStr, "\"Active\":"))
 			{
@@ -345,30 +345,33 @@ class CustomMission: MissionServer
 				if (maxStr != "") data.areaMax = maxStr.ToVector();
 
 				string safeBlock = ExtractArrayBlock(objStr, "\"SafeZones\":");
-				ParseVectorArray(safeBlock, data.safeZones);
+				array<vector> parsedSafe = new array<vector>();
+				ParseVectorArray(safeBlock, parsedSafe);
+				data.safeZones = parsedSafe;
 
 				string wallBlock = ExtractArrayBlock(objStr, "\"WallZones\":");
-				ParseVectorArray(wallBlock, data.wallZones);
+				array<vector> parsedWall = new array<vector>();
+				ParseVectorArray(wallBlock, parsedWall);
+				data.wallZones = parsedWall;
 
-				WriteToLog("LoadActiveRegionData: SafeZoneData carregado com sucesso.");
+				WriteToLog("LoadActiveRegionData: SafeZoneData carregado.");
 				return data;
 			}
 
 			startObj = content.IndexOf("{", endObj);
 		}
 
-		WriteToLog("LoadActiveRegionData: Nenhuma região ativa encontrada.");
+		WriteToLog("Nenhuma zona ativa encontrada.");
 		return null;
 	}
 
-	// --- Funções auxiliares ---
 
 	bool IsJsonValueTrue(string source, string key)
 	{
 		int idx = source.IndexOf(key);
 		if (idx == -1) return false;
 
-		string rest = source.Substring(idx + key.Length(), 5);
+		string rest = source.Substring(idx + key.Length());
 		rest.ToLower();
 		return rest.Contains("true");
 	}
@@ -379,14 +382,14 @@ class CustomMission: MissionServer
 		if (idx == -1) return "";
 
 		string rest = source.Substring(idx + key.Length());
-		int startQuote = rest.IndexOf("\"") + 1;
-		if (startQuote <= 0 || startQuote >= rest.Length()) return "";
+		int startQuote = rest.IndexOf("\"");
+		if (startQuote == -1) return "";
 
-		string rest2 = rest.Substring(startQuote);
-		int endQuote = rest2.IndexOf("\"");
+		string afterStart = rest.Substring(startQuote + 1);
+		int endQuote = afterStart.IndexOf("\"");
 		if (endQuote == -1) return "";
 
-		return rest2.Substring(0, endQuote);
+		return afterStart.Substring(0, endQuote);
 	}
 
 	string ExtractArrayBlock(string source, string key)
@@ -401,24 +404,29 @@ class CustomMission: MissionServer
 		return source.Substring(start + 1, end - start - 1);
 	}
 
-	void ParseVectorArray(string csvBlock, ref array<vector> outArray)
+	void ParseVectorArray(string csvBlock, out array<vector> outArray)
 	{
+		outArray = new array<vector>();
 		if (csvBlock == "") return;
 
 		array<string> entries = new array<string>();
 		csvBlock.Split(",", entries);
 
 		for (int i = 0; i + 2 < entries.Count(); i += 3) {
-			string xStr = entries[i].Trim().Replace("\"", "");
-			string yStr = entries[i + 1].Trim().Replace("\"", "");
-			string zStr = entries[i + 2].Trim().Replace("\"", "");
+			string xStr = entries[i];
+			string yStr = entries[i + 1];
+			string zStr = entries[i + 2];
 
-			if (xStr != "" && yStr != "" && zStr != "") {
-				vector vec = Vector(xStr.ToFloat(), yStr.ToFloat(), zStr.ToFloat());
-				outArray.Insert(vec);
-			}
+			xStr.Replace("\"", ""); yStr.Replace("\"", ""); zStr.Replace("\"", "");
+
+			float x = xStr.ToFloat();
+			float y = yStr.ToFloat();
+			float z = zStr.ToFloat();
+
+			outArray.Insert(Vector(x, y, z));
 		}
 	}
+
 
 
 	vector GetRandomSafeSpawnPosition()
