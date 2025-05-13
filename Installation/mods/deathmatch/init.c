@@ -136,20 +136,21 @@ class CustomMission: MissionServer
 		m_ServerShuttingDown = true;
 		WriteToLog("Servidor em shutdown...");
 
-		// 🔁 Destrói objetos criados manualmente
+		// Limpeza de objetos criados manualmente
 		if (m_CreatedObjects)
 		{
 			foreach (Object obj : m_CreatedObjects)
 			{
-				if (obj && obj.IsValid())
+				if (obj) // Verifica se o objeto ainda é válido
 				{
-					GetGame().ObjectDelete(obj);
+					GetGame().ObjectDelete(obj); // Deleta o objeto
 				}
 			}
-			m_CreatedObjects.Clear();
+			m_CreatedObjects.Clear(); // Limpa a lista
 			WriteToLog("Objetos criados foram removidos com sucesso.");
 		}
 	}
+
 
 
 	override void OnUpdate(float timeslice)
@@ -691,20 +692,20 @@ class CustomMission: MissionServer
 		} else {
 			m_player.SetAllowDamage(false);
 
-			if (!GiveCustomLoadout(m_player, identity.GetId()))
-				GiveDefaultLoadout(m_player);
-
-			m_player.SetHealth("", "", 100);
-			m_player.SetHealth("GlobalHealth", "Blood", 5000);
-			m_player.SetHealth("GlobalHealth", "Shock", 0);
-			m_player.GetStatEnergy().Set(4000);
-			m_player.GetStatWater().Set(4000);
-
 			// Obtenha uma posição aleatória da zona segura
 			vector safePosition = GetRandomSafeSpawnPosition();
 
 			// Define a posição do jogador para a coordenada da zona segura
 			m_player.SetPosition(safePosition);
+
+			if (!GiveCustomLoadout(m_player, identity.GetId()))
+				GiveDefaultLoadout(m_player);			
+			
+			m_player.SetHealth("", "", 100);
+			m_player.SetHealth("GlobalHealth", "Blood", 5000);
+			m_player.SetHealth("GlobalHealth", "Shock", 0);
+			m_player.GetStatEnergy().Set(4000);
+			m_player.GetStatWater().Set(4000);
 
 			m_player.SetAllowDamage(true);
 		}
