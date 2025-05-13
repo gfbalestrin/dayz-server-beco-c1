@@ -48,7 +48,7 @@ void WriteToLog(string content, string logfile = "init.log")
 }
 
 // Armazena objetos criados, útil para deletar depois
-ref array<Object> CreatedWallObjects = new array<Object>();
+
 
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
@@ -73,6 +73,8 @@ class SafeZoneData {
 
 class CustomMission: MissionServer
 {
+	ref array<Object> CreatedWallObjects = new array<Object>();
+	
 	float m_AdminCheckCooldown10 = 10.0;
 	float m_AdminCheckTimer10 = 0.0;
 	float m_AdminCheckCooldown60 = 60.0;
@@ -197,7 +199,69 @@ class CustomMission: MissionServer
 			}
 		}
 	}
+	// Cria objetos ao longo de uma linha entre dois pontos
+void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
+{
+    if (!GetGame()) return;
 
+    vector direction = endPos - startPos;
+    float length = direction.Length();
+    int count = Math.Floor(length / spacing);
+
+    int maxObjects = 1000; // Limite de segurança
+    if (count > maxObjects)
+    {
+        WriteToLog("CreateObjectsAlongLine: Tentativa de criar muitos objetos (" + count + "). Limitando para " + maxObjects);
+        count = maxObjects;
+    }
+
+    direction.Normalize();
+    float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
+
+    for (int i = 0; i <= count; i++)
+    {
+        vector pos = startPos + (direction * (i * spacing));
+        pos[1] = GetGame().SurfaceY(pos[0], pos[2]) + heightOffset;
+
+        Object obj = GetGame().CreateObject(objectName, pos, false, true);
+        if (obj)
+        {
+            obj.SetPosition(pos);
+            obj.SetOrientation(Vector(angle, 0, 0));
+            CreatedWallObjects.Insert(obj);
+        }
+    }
+}
+
+// Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
+void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
+{
+    if (!GetGame() || points.Count() < 2) return;
+
+    for (int i = 0; i < points.Count() - 1; i++)
+    {
+        CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset);
+    }
+
+    // Fecha o polígono ligando o último ao primeiro
+    CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
+}
+
+// Opcional: limpa todos os objetos criados
+void CleanupCreatedWallObjects()
+{
+    if (!GetGame()) return;
+
+    if (CreatedWallObjects)
+    {
+        foreach (Object obj : CreatedWallObjects)
+        {
+            if (obj)
+                GetGame().ObjectDelete(obj);
+        }
+        CreatedWallObjects.Clear();
+    }
+}
 	
 
 	ref SafeZoneData LoadActiveRegionData(string path)
