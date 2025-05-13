@@ -84,8 +84,6 @@ class CustomMission: MissionServer
     ref array<vector> safeZones;	
 	ref array<vector> wallZones;
 
-	bool m_ServerShuttingDown = false;
-
 	void CustomMission()
 	{
 		WriteToLog("Entrou no construtor CustomMission");
@@ -120,15 +118,6 @@ class CustomMission: MissionServer
 			WriteToLog("Erro ao carregar dados da zona segura.");
 		}
 	}
-	// void ~CustomMission()
-	// {
-	// 	WriteToLog("Destruindo CustomMission...");
-	// 	FixedMessages = null;
-	// 	safeZones = null;
-	// 	wallZones = null;
-	// }
-	
-	
 
 	override void OnMissionFinish()
 	{
@@ -136,19 +125,6 @@ class CustomMission: MissionServer
 		m_ServerShuttingDown = true;
 		WriteToLog("Servidor em shutdown...");
 
-		// Limpeza de objetos criados manualmente
-		if (m_CreatedObjects)
-		{
-			foreach (Object obj : m_CreatedObjects)
-			{
-				if (obj) // Verifica se o objeto ainda é válido
-				{
-					GetGame().ObjectDelete(obj); // Deleta o objeto
-				}
-			}
-			m_CreatedObjects.Clear(); // Limpa a lista
-			WriteToLog("Objetos criados foram removidos com sucesso.");
-		}
 	}
 
 

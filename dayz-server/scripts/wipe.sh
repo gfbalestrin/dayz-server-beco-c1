@@ -19,5 +19,4 @@ INSERT_CUSTOM_LOG "PROFILE_DIR: $PROFILE_DIR" "INFO" "$ScriptName"
 rm -rf "$PROFILE_DIR"
 
 echo "Wipe completo!"
-sleep 10
 

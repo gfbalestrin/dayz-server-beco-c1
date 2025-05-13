@@ -127,11 +127,9 @@ void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, f
         {
             obj.SetPosition(pos);
             obj.SetOrientation(Vector(angle, 0, 0));
-            if (m_CreatedObjects) m_CreatedObjects.Insert(obj); // rastreia
         }
     }
 }
-
 
 // Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
 void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
@@ -146,7 +144,6 @@ void CreateLinePathFromPoints(array<vector> points, string objectName, float spa
     // Fecha o polígono ligando o último ao primeiro
     CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
 }
-
 
 
 

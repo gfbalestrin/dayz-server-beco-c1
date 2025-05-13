@@ -336,9 +336,8 @@ cat <<EOF > "$DayzFolder/scripts/wipe.sh"
 #!/bin/bash
 echo "=== Realizando wipe do servidor DayZ ==="
 echo "PROFILE_DIR: $PROFILE_DIR"
-rm -rf "$PROFILE_DIR/*"
+rm -rf $PROFILE_DIR/*
 echo "Wipe completo!"
-sleep 10
 EOF
 chmod +x "$DayzFolder/scripts/wipe.sh"
 
