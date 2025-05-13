@@ -107,8 +107,7 @@ void CreateCustomObject(PlayerBase player, string buildName, float heightOffset 
     }
 }
 
-// Armazena objetos criados, útil para deletar depois
-ref array<Object> CreatedWallObjects = new array<Object>();
+
 
 // Cria objetos ao longo de uma linha entre dois pontos
 void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)

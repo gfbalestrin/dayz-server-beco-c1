@@ -47,6 +47,9 @@ void WriteToLog(string content, string logfile = "init.log")
 	}
 }
 
+// Armazena objetos criados, útil para deletar depois
+ref array<Object> CreatedWallObjects = new array<Object>();
+
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
@@ -130,7 +133,7 @@ class CustomMission: MissionServer
 		super.OnMissionFinish();
 		WriteToLog("Servidor em shutdown...");
 		// Limpa containers/walls criados
-    	//CleanupCreatedWallObjects();
+    	CleanupCreatedWallObjects();
 	}
 
 	override void OnUpdate(float timeslice)
