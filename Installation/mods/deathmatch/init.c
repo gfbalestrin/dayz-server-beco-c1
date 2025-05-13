@@ -307,12 +307,41 @@ class CustomMission: MissionServer
 
 	
 
+	// Função auxiliar para extrair valor entre aspas
+	string ExtractQuotedValue(string source, int startIndex)
+	{
+		int firstQuote = source.IndexOf("\"");
+		if (firstQuote == -1) return "";
+
+		string sub = source.Substring(firstQuote + 1, source.Length() - firstQuote - 1);
+		int secondQuote = sub.IndexOf("\"");
+		if (secondQuote == -1) return "";
+
+		return sub.Substring(0, secondQuote);
+	}
+
+	// Função auxiliar para extrair vetor string -> Vector
+	vector ExtractVectorFromString(string str)
+	{
+		str.Replace("\"", "");
+		TStringArray parts = new TStringArray();
+		str.Split(",", parts);
+		if (parts.Count() == 3)
+		{
+			float x = parts[0].Trim().ToFloat();
+			float y = parts[1].Trim().ToFloat();
+			float z = parts[2].Trim().ToFloat();
+			return Vector(x, y, z);
+		}
+		return "0 0 0";
+	}
+
 	ref SafeZoneData LoadActiveRegionData(string path)
 	{
-		WriteToLog("LoadActiveRegionData: Lendo arquivo " + path);
+		WriteToLog("Entrou em LoadActiveRegionData");
 		FileHandle file = OpenFile(path, FileMode.READ);
 		if (!file) {
-			WriteToLog("LoadActiveRegionData: Arquivo não encontrado.");
+			WriteToLog("Arquivo não encontrado: " + path);
 			return null;
 		}
 
@@ -323,109 +352,126 @@ class CustomMission: MissionServer
 		CloseFile(file);
 
 		int startObj = content.IndexOf("{");
+
 		while (startObj != -1)
 		{
-			int endObj = content.IndexOf("}", startObj);
-			if (endObj == -1) break;
+			// Extrair objeto JSON entre { e }
+			string rest = content.Substring(startObj, content.Length() - startObj);
+			int relEnd = rest.IndexOf("}");
+			if (relEnd == -1) break;
 
-			string objStr = content.Substring(startObj, endObj - startObj + 1);
-			WriteToLog("Analisando bloco JSON: " + objStr);
+			int endObj = startObj + relEnd;
+			string objStr = content.Substring(startObj, relEnd + 1);
+			WriteToLog("Processando bloco JSON: " + objStr);
 
-			if (IsJsonValueTrue(objStr, "\"Active\":"))
+			// Verificar se Active está definido como true
+			int idxActive = objStr.IndexOf("\"Active\":");
+			if (idxActive != -1)
 			{
-				SafeZoneData data = new SafeZoneData();
+				string subActive = objStr.Substring(idxActive + 9, objStr.Length() - idxActive - 9);
+				if (subActive.Contains("true"))
+				{
+					auto data = new SafeZoneData();
 
-				data.regionStr = ExtractQuotedValue(objStr, "\"Region\":");
-				data.customMessage = ExtractQuotedValue(objStr, "\"CustomMessage\":");
+					// Region
+					int idxRegion = objStr.IndexOf("\"Region\":");
+					if (idxRegion != -1)
+					{
+						string subRegion = objStr.Substring(idxRegion + 9, objStr.Length() - idxRegion - 9);
+						data.regionStr = ExtractQuotedValue(subRegion, 0);
+						WriteToLog("Region: " + data.regionStr);
+					}
 
-				string minStr = ExtractQuotedValue(objStr, "\"AreaMin\":");
-				if (minStr != "") data.areaMin = minStr.ToVector();
+					// CustomMessage
+					int idxMsg = objStr.IndexOf("\"CustomMessage\":");
+					if (idxMsg != -1)
+					{
+						string subMsg = objStr.Substring(idxMsg + 16, objStr.Length() - idxMsg - 16);
+						data.customMessage = ExtractQuotedValue(subMsg, 0);
+						WriteToLog("CustomMessage: " + data.customMessage);
+					}
 
-				string maxStr = ExtractQuotedValue(objStr, "\"AreaMax\":");
-				if (maxStr != "") data.areaMax = maxStr.ToVector();
+					// AreaMin
+					int idxMin = objStr.IndexOf("\"AreaMin\":");
+					if (idxMin != -1)
+					{
+						string subMin = objStr.Substring(idxMin + 10, objStr.Length() - idxMin - 10);
+						string vecStr = ExtractQuotedValue(subMin, 0);
+						data.areaMin = ExtractVectorFromString(vecStr);
+						WriteToLog("AreaMin: " + data.areaMin.ToString());
+					}
 
-				string safeBlock = ExtractArrayBlock(objStr, "\"SafeZones\":");
-				array<vector> parsedSafe = new array<vector>();
-				ParseVectorArray(safeBlock, parsedSafe);
-				data.safeZones = parsedSafe;
+					// AreaMax
+					int idxMax = objStr.IndexOf("\"AreaMax\":");
+					if (idxMax != -1)
+					{
+						string subMax = objStr.Substring(idxMax + 10, objStr.Length() - idxMax - 10);
+						string vecStr = ExtractQuotedValue(subMax, 0);
+						data.areaMax = ExtractVectorFromString(vecStr);
+						WriteToLog("AreaMax: " + data.areaMax.ToString());
+					}
 
-				string wallBlock = ExtractArrayBlock(objStr, "\"WallZones\":");
-				array<vector> parsedWall = new array<vector>();
-				ParseVectorArray(wallBlock, parsedWall);
-				data.wallZones = parsedWall;
+					// SafeZones
+					int idxSafe = objStr.IndexOf("\"SafeZones\":");
+					if (idxSafe != -1)
+					{
+						int open = objStr.IndexOf("[");
+						int close = objStr.IndexOf("]");
+						if (open != -1 && close != -1 && close > open)
+						{
+							string block = objStr.Substring(open + 1, close - open - 1);
+							array<string> entries = new array<string>();
+							block.Split(",", entries);
 
-				WriteToLog("LoadActiveRegionData: SafeZoneData carregado.");
-				return data;
+							for (int i = 0; i + 2 < entries.Count(); i += 3)
+							{
+								string vecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
+								vector v = ExtractVectorFromString(vecStr);
+								data.safeZones.Insert(v);
+							}
+							WriteToLog("SafeZones carregadas: " + data.safeZones.Count().ToString());
+						}
+					}
+
+					// WallZones
+					int idxWall = objStr.IndexOf("\"WallZones\":");
+					if (idxWall != -1)
+					{
+						int open2 = objStr.IndexOf("[");
+						int close2 = objStr.IndexOf("]");
+						if (open2 != -1 && close2 != -1 && close2 > open2)
+						{
+							string block = objStr.Substring(open2 + 1, close2 - open2 - 1);
+							array<string> entries2 = new array<string>();
+							block.Split(",", entries2);
+
+							for (int j = 0; j + 2 < entries2.Count(); j += 3)
+							{
+								string vecStr = entries2[j] + "," + entries2[j + 1] + "," + entries2[j + 2];
+								vector v = ExtractVectorFromString(vecStr);
+								data.wallZones.Insert(v);
+							}
+							WriteToLog("WallZones carregadas: " + data.wallZones.Count().ToString());
+						}
+					}
+
+					return data;
+				}
 			}
 
-			startObj = content.IndexOf("{", endObj);
+			// Buscar próximo objeto
+			string rem = content.Substring(endObj + 1, content.Length() - endObj - 1);
+			int relNext = rem.IndexOf("{");
+			if (relNext != -1)
+				startObj = endObj + 1 + relNext;
+			else
+				startObj = -1;
 		}
 
-		WriteToLog("Nenhuma zona ativa encontrada.");
+		WriteToLog("Nenhum SafeZone ativo encontrado.");
 		return null;
 	}
 
-
-	bool IsJsonValueTrue(string source, string key)
-	{
-		int idx = source.IndexOf(key);
-		if (idx == -1) return false;
-
-		string rest = source.Substring(idx + key.Length());
-		rest.ToLower();
-		return rest.Contains("true");
-	}
-
-	string ExtractQuotedValue(string source, string key)
-	{
-		int idx = source.IndexOf(key);
-		if (idx == -1) return "";
-
-		string rest = source.Substring(idx + key.Length());
-		int startQuote = rest.IndexOf("\"");
-		if (startQuote == -1) return "";
-
-		string afterStart = rest.Substring(startQuote + 1);
-		int endQuote = afterStart.IndexOf("\"");
-		if (endQuote == -1) return "";
-
-		return afterStart.Substring(0, endQuote);
-	}
-
-	string ExtractArrayBlock(string source, string key)
-	{
-		int idx = source.IndexOf(key);
-		if (idx == -1) return "";
-
-		int start = source.IndexOf("[", idx);
-		int end = source.IndexOf("]", idx);
-		if (start == -1 || end == -1 || end <= start) return "";
-
-		return source.Substring(start + 1, end - start - 1);
-	}
-
-	void ParseVectorArray(string csvBlock, out array<vector> outArray)
-	{
-		outArray = new array<vector>();
-		if (csvBlock == "") return;
-
-		array<string> entries = new array<string>();
-		csvBlock.Split(",", entries);
-
-		for (int i = 0; i + 2 < entries.Count(); i += 3) {
-			string xStr = entries[i];
-			string yStr = entries[i + 1];
-			string zStr = entries[i + 2];
-
-			xStr.Replace("\"", ""); yStr.Replace("\"", ""); zStr.Replace("\"", "");
-
-			float x = xStr.ToFloat();
-			float y = yStr.ToFloat();
-			float z = zStr.ToFloat();
-
-			outArray.Insert(Vector(x, y, z));
-		}
-	}
 
 
 
