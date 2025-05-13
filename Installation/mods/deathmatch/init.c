@@ -415,23 +415,20 @@ class CustomMission: MissionServer
 					int idxSafe = objStr.IndexOf("\"SafeZones\":");
 					if (idxSafe != -1)
 					{
-						int open = objStr.IndexOf("[");
-						int close = objStr.IndexOf("]");
-						if (open != -1 && close != -1 && close > open)
+						int openSafe = objStr.IndexOf("[", idxSafe);
+						int closeSafe = objStr.IndexOf("]", idxSafe);
+						if (openSafe != -1 && closeSafe != -1 && closeSafe > openSafe)
 						{
-							string safeBlock = objStr.Substring(open + 1, close - open - 1);
-							array<string> entries = new array<string>();
-							safeBlock.Split(",", entries);
+							string safeBlockContent = objStr.Substring(openSafe + 1, closeSafe - openSafe - 1);
+							array<string> safeEntries = new array<string>();
+							safeBlockContent.Split(",", safeEntries);
 
-							string safeVecStr;
-							vector safeVec;
-							for (int i = 0; i + 2 < entries.Count(); i += 3)
+							for (int i = 0; i + 2 < safeEntries.Count(); i += 3)
 							{
-								safeVecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
-								safeVec = ExtractVectorFromString(safeVecStr);
+								string safeVecStr = safeEntries[i] + "," + safeEntries[i + 1] + "," + safeEntries[i + 2];
+								vector safeVec = ExtractVectorFromString(safeVecStr);
 								data.safeZones.Insert(safeVec);
 							}
-							WriteToLog("SafeZones carregadas: " + data.safeZones.Count().ToString());
 						}
 					}
 
@@ -439,25 +436,23 @@ class CustomMission: MissionServer
 					int idxWall = objStr.IndexOf("\"WallZones\":");
 					if (idxWall != -1)
 					{
-						int openW = objStr.IndexOf("[", idxWall);
-						int closeW = objStr.IndexOf("]", idxWall);
-						if (openW != -1 && closeW != -1 && closeW > openW)
+						int openWall = objStr.IndexOf("[", idxWall);
+						int closeWall = objStr.IndexOf("]", idxWall);
+						if (openWall != -1 && closeWall != -1 && closeWall > openWall)
 						{
-							string wallBlock = objStr.Substring(openW + 1, closeW - openW - 1);
-							array<string> entriesW = new array<string>();
-							wallBlock.Split(",", entriesW);
+							string wallBlockContent = objStr.Substring(openWall + 1, closeWall - openWall - 1);
+							array<string> wallEntries = new array<string>();
+							wallBlockContent.Split(",", wallEntries);
 
-							string wallVecStr;
-							vector wallVec;
-							for (int j = 0; j + 2 < entriesW.Count(); j += 3)
+							for (int j = 0; j + 2 < wallEntries.Count(); j += 3)
 							{
-								wallVecStr = entriesW[j] + "," + entriesW[j + 1] + "," + entriesW[j + 2];
-								wallVec = ExtractVectorFromString(wallVecStr);
+								string wallVecStr = wallEntries[j] + "," + wallEntries[j + 1] + "," + wallEntries[j + 2];
+								vector wallVec = ExtractVectorFromString(wallVecStr);
 								data.wallZones.Insert(wallVec);
 							}
-							WriteToLog("WallZones carregadas: " + data.wallZones.Count().ToString());
 						}
 					}
+
 
 
 					return data;
@@ -475,6 +470,21 @@ class CustomMission: MissionServer
 
 		WriteToLog("Nenhum SafeZone ativo encontrado.");
 		return null;
+	}
+	vector ExtractVectorFromString(string vecStr)
+	{
+		vecStr.Replace("\"", "");
+		vecStr.Trim();
+		TStringArray parts = new TStringArray();
+		vecStr.Split(",", parts);
+		if (parts.Count() == 3)
+		{
+			float x = parts[0].Trim().ToFloat();
+			float y = parts[1].Trim().ToFloat();
+			float z = parts[2].Trim().ToFloat();
+			return Vector(x, y, z);
+		}
+		return "0 0 0";
 	}
 
 
