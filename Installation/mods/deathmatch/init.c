@@ -119,13 +119,11 @@ class CustomMission: MissionServer
 		}
 	}
 
-	override void OnMissionFinish()
-	{
-		super.OnMissionFinish();
-		WriteToLog("Servidor em shutdown...");
-	}
-
-
+	// override void OnMissionFinish()
+	// {
+	// 	super.OnMissionFinish();
+	// 	WriteToLog("Servidor em shutdown...");
+	// }
 
 	override void OnUpdate(float timeslice)
 	{
