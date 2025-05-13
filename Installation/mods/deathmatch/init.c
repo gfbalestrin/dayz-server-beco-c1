@@ -134,6 +134,20 @@ class CustomMission: MissionServer
 		super.OnMissionFinish();
 		m_ServerShuttingDown = true;
 		WriteToLog("Servidor em shutdown...");
+
+		// 🔁 Destrói objetos criados manualmente
+		if (m_CreatedObjects)
+		{
+			foreach (Object obj : m_CreatedObjects)
+			{
+				if (obj && obj.IsValid())
+				{
+					GetGame().ObjectDelete(obj);
+				}
+			}
+			m_CreatedObjects.Clear();
+			WriteToLog("Objetos criados foram removidos com sucesso.");
+		}
 	}
 
 
