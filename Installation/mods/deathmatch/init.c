@@ -264,10 +264,16 @@ void CleanupCreatedWallObjects()
             }
         }
 
-        foreach (Object obj2 : validObjects)
-        {
-            GetGame().ObjectDelete(obj2);
-        }
+        WriteToLog("CleanupCreatedWallObjects() - Iniciando limpeza");
+
+		foreach (Object delObj : toDelete)
+		{
+			WriteToLog("Deletando objeto: " + delObj.ToString());
+			GetGame().ObjectDelete(delObj);
+		}
+
+		WriteToLog("CleanupCreatedWallObjects() - Limpeza finalizada");
+
 
         CreatedWallObjects.Clear();
     }
