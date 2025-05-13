@@ -74,7 +74,7 @@ class SafeZoneData {
 class CustomMission: MissionServer
 {
 	ref array<Object> CreatedWallObjects = new array<Object>();
-	
+
 	float m_AdminCheckCooldown10 = 10.0;
 	float m_AdminCheckTimer10 = 0.0;
 	float m_AdminCheckCooldown60 = 60.0;
@@ -252,16 +252,27 @@ void CleanupCreatedWallObjects()
 {
     if (!GetGame()) return;
 
-    if (CreatedWallObjects)
+    if (CreatedWallObjects && CreatedWallObjects.Count() > 0)
     {
+        array<Object> toDelete = new array<Object>;
+
         foreach (Object obj : CreatedWallObjects)
         {
-            if (obj)
-                GetGame().ObjectDelete(obj);
+            if (obj && !obj.IsBeingDeleted())
+            {
+                toDelete.Insert(obj);
+            }
         }
+
+        foreach (Object delObj : toDelete)
+        {
+            GetGame().ObjectDelete(delObj);
+        }
+
         CreatedWallObjects.Clear();
     }
 }
+
 	
 
 	ref SafeZoneData LoadActiveRegionData(string path)
