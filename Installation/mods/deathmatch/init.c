@@ -252,26 +252,27 @@ void CleanupCreatedWallObjects()
 {
     if (!GetGame()) return;
 
-    if (CreatedWallObjects && CreatedWallObjects.Count() > 0)
+    if (CreatedWallObjects)
     {
-        array<Object> toDelete = new array<Object>;
+        array<Object> validObjects = new array<Object>();
 
         foreach (Object obj : CreatedWallObjects)
         {
-            if (obj != null)
+            if (obj && obj != null && !obj.IsInherited(BuildingBase)) // ou alguma verificação adicional
             {
-                toDelete.Insert(obj);
+                validObjects.Insert(obj);
             }
         }
 
-        foreach (Object delObj : toDelete)
+        foreach (Object obj : validObjects)
         {
-            GetGame().ObjectDelete(delObj);
+            GetGame().ObjectDelete(obj);
         }
 
         CreatedWallObjects.Clear();
     }
 }
+
 
 
 	
