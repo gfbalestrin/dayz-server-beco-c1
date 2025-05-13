@@ -162,7 +162,7 @@ class CustomMission: MissionServer
 				foreach (Man man : players)
 				{
 					PlayerBase player = PlayerBase.Cast(man);
-					if (player && !player.IsDeleted())
+					if (player)
 					{
 						CheckPlayerArea(player);
 
