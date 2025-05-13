@@ -264,9 +264,9 @@ void CleanupCreatedWallObjects()
             }
         }
 
-        foreach (Object obj : validObjects)
+        foreach (Object obj2 : validObjects)
         {
-            GetGame().ObjectDelete(obj);
+            GetGame().ObjectDelete(obj2);
         }
 
         CreatedWallObjects.Clear();
