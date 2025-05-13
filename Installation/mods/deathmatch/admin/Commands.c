@@ -1,11 +1,6 @@
 // Forward declaration para evitar erro de função indefinida
 void CreateRectangleFromCoords(vector minArea, vector maxArea, string objectType, float spacing, float heightOffset);
 
-void LogAdminAction(string playerID, string action, string details = "")
-{
-    WriteToLog("AdminCmd [" + playerID + "] " + action + " " + details, "admin.log");
-}
-
 void CheckAdminCommands()
 {
     string path = "$mission:admin_cmds.txt";
@@ -49,7 +44,7 @@ void CheckAdminCommands()
                     vector posT = Vector(tokens[2].ToFloat(), tokens[3].ToFloat(), tokens[4].ToFloat());
                     target.SetPosition(posT);
                     target.MessageStatus("🚀 Você foi teleportado");
-                    LogAdminAction(playerID, "teleport", posT.ToString());
+                    WriteToLog("teleport " + posT.ToString());
                 }
                 break;
 
@@ -60,25 +55,25 @@ void CheckAdminCommands()
                 target.GetStatEnergy().Set(4000);
                 target.GetStatWater().Set(4000);
                 target.MessageStatus("❤️ Você foi curado");
-                LogAdminAction(playerID, "heal");
+                WriteToLog("heal");
                 break;
 
             case "kill":
                 target.SetHealth("", "", 0);
                 target.MessageStatus("💀 Você foi eliminado");
-                LogAdminAction(playerID, "kill");
+                WriteToLog("kill");
                 break;
 
             case "godmode":
                 target.SetAllowDamage(false);
                 target.MessageStatus("⚡ God Mode ativado");
-                LogAdminAction(playerID, "godmode");
+                WriteToLog("godmode");
                 break;
 
             case "ungodmode":
                 target.SetAllowDamage(true);
                 target.MessageStatus("🔓 God Mode desativado");
-                LogAdminAction(playerID, "ungodmode");
+                WriteToLog("ungodmode");
                 break;
 
             case "giveitem":
@@ -92,12 +87,12 @@ void CheckAdminCommands()
                     if (item)
                     {
                         target.MessageStatus("🎁 Item recebido: " + itemName);
-                        LogAdminAction(playerID, "giveitem", itemName);
+                        WriteToLog("giveitem");
                     }
                     else
                     {
                         target.MessageStatus("⚠️ Erro ao criar item: " + itemName);
-                        LogAdminAction(playerID, "giveitem_failed", itemName);
+                        WriteToLog("giveitem_failed");
                     }
                 }
                 break;
@@ -107,27 +102,27 @@ void CheckAdminCommands()
                 {
                     string vehicleType = tokens[2];
                     SpawnVehicleWithParts(target, vehicleType);
-                    LogAdminAction(playerID, "spawnvehicle", vehicleType);
+                    WriteToLog("spawnvehicle");
                 }
                 break;
 
             case "ghostmode":
                 target.SetInvisible(true);
                 target.MessageStatus("🕵️ Você está invisível");
-                LogAdminAction(playerID, "ghostmode");
+                WriteToLog("ghostmode");
                 break;
 
             case "unghostmode":
                 target.SetInvisible(false);
                 target.MessageStatus("👁️ Você está visível");
-                LogAdminAction(playerID, "unghostmode");
+                WriteToLog("unghostmode");
                 break;
 
             case "kick":
                 PlayerIdentity identity = target.GetIdentity();
                 target.MessageStatus("Seu jogador está bugado. Realizando ajuste...");
                 GetGame().DisconnectPlayer(identity);
-                LogAdminAction(playerID, "kick");
+                WriteToLog("kick");
                 break;
 
             case "desbug":
@@ -140,14 +135,14 @@ void CheckAdminCommands()
                 target.SetOrientation(target.GetOrientation());
                 target.Update();
                 target.MessageStatus("Posição ajustada: " + newPos.ToString());
-                LogAdminAction(playerID, "desbug", newPos.ToString());
+                WriteToLog("desbug", newPos.ToString());
                 break;
 
             case "getposition":
                 vector posP = target.GetPosition();
                 target.MessageStatus("Posição atual: " + posP.ToString());
                 WriteToLog(posP.ToString(), "position.log");
-                LogAdminAction(playerID, "getposition", posP.ToString());
+                WriteToLog("getposition", posP.ToString());
                 break;
 
             case "construct":
@@ -172,7 +167,7 @@ void CheckAdminCommands()
 
                     string buildName = tokens[2];
                     CreateCustomObject(target, buildName, heightOffset, containerCount, containerLength, rotationOffset);
-                    LogAdminAction(playerID, "construct", buildName);
+                    WriteToLog("construct", buildName);
                 }
                 break;
 
@@ -190,7 +185,7 @@ void CheckAdminCommands()
 
                     CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 1.0);
                     CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 3.5);
-                    LogAdminAction(playerID, "construct_retangle", minArea.ToString() + " -> " + maxArea.ToString());
+                    WriteToLog("construct_retangle", minArea.ToString() + " -> " + maxArea.ToString());
                 }
                 else
                 {
@@ -203,7 +198,7 @@ void CheckAdminCommands()
 
                     CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
                     CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
-                    LogAdminAction(playerID, "construct_retangle", "usou pontos fixos");
+                    WriteToLog("construct_retangle", "usou pontos fixos");
                 }
                 break;
         }
