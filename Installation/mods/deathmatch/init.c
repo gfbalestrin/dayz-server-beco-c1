@@ -130,7 +130,7 @@ class CustomMission: MissionServer
 		super.OnMissionFinish();
 		WriteToLog("Servidor em shutdown...");
 		// Limpa containers/walls criados
-    	CleanupCreatedWallObjects();
+    	//CleanupCreatedWallObjects();
 	}
 
 	override void OnUpdate(float timeslice)
