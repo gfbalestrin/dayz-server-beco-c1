@@ -107,8 +107,43 @@ void CreateCustomObject(PlayerBase player, string buildName, float heightOffset 
     }
 }
 
+// Cria objetos ao longo de uma linha entre dois pontos
+void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
+{
+    vector direction = endPos - startPos;
+    float length = direction.Length();
+    int count = Math.Floor(length / spacing);
+    direction.Normalize();
 
+    float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
 
+    for (int i = 0; i <= count; i++)
+    {
+        vector pos = startPos + (direction * (i * spacing));
+        pos[1] = GetGame().SurfaceY(pos[0], pos[2]) + heightOffset;
+
+        Object obj = GetGame().CreateObject(objectName, pos, false, true);
+        if (obj)
+        {
+            obj.SetPosition(pos);
+            obj.SetOrientation(Vector(angle, 0, 0));
+        }
+    }
+}
+
+// Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
+void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
+{
+    if (points.Count() < 2) return;
+
+    for (int i = 0; i < points.Count() - 1; i++)
+    {
+        CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset);
+    }
+
+    // Fecha o polígono ligando o último ao primeiro
+    CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
+}
 
 
 
