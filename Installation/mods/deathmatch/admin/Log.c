@@ -1,15 +1,23 @@
-void WriteToLog(string content, string logfile = "init.log")
+void WriteToLog(string content, string logfile = "init.log", bool internalCall = false)
 {
-	string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
+	string fileName = "$profile:" + logfile;
 	FileHandle file = OpenFile(fileName, FileMode.APPEND);
 
 	if (file != 0)
 	{
-		FPrintln(file, content); // Escreve a string com quebra de linha
+		int year, month, day, hour, minute;
+		GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+
+		string timestamp = "[" + year.ToString() + "-" + month.ToString() + "-" + day.ToString() + " " + hour.ToString() + ":" + minute.ToString() + "]";
+		FPrintln(file, timestamp + " " + content);
 		CloseFile(file);
 	}
 	else
 	{
-		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
+		if (!internalCall)
+		{
+			Print("WriteToLog ERROR: Não foi possível abrir o arquivo de log: " + fileName);
+			WriteToLog("Erro ao abrir o arquivo para escrita.", logfile, true);
+		}
 	}
 }
