@@ -66,28 +66,38 @@ class CustomMission: MissionServer
 		{
 			customMessage = szData.customMessage;
 			regionStr = szData.regionStr;
-			areaMin = szData.areaMin;
-			areaMax = szData.areaMax;
-			safeZones = szData.safeZones;
-			wallZones = szData.wallZones;
-			if (wallZones.Count() > 0)
+
+			if (szData.areaMin && szData.areaMax)
+			{
+				areaMin = szData.areaMin;
+				areaMax = szData.areaMax;
+			}
+
+			if (szData.safeZones)
+				safeZones = szData.safeZones;
+			else
+				safeZones = new array<vector>; // evita null
+
+			if (szData.wallZones)
+				wallZones = szData.wallZones;
+			else
+				wallZones = new array<vector>;
+
+			if (wallZones && wallZones.Count() > 0)
 			{
 				WriteToLog("O mapa possui wallzones..." + wallZones.Count());
 				array<vector> points = new array<vector>;
 				for (int i = 0; i < wallZones.Count(); i++)
-					points.Insert(wallZones[i]); 
+				{
+					points.Insert(wallZones[i]);
+				}
 
 				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
 				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
 				WriteToLog("Wallzones construidas!");
 			}
+		}
 
-			WriteToLog("Carregou region: " + regionStr);
-		}
-		else
-		{
-			WriteToLog("Erro ao carregar dados da zona segura.");
-		}
 	}
 
 
@@ -108,14 +118,18 @@ class CustomMission: MissionServer
 			foreach (Man man : players)
 			{
 				PlayerBase player = PlayerBase.Cast(man);
-				if (player)
+				if (player && player.GetIdentity())
 				{
-					CheckPlayerArea(player, areaMin, areaMax);	
+					if (areaMin && areaMax)
+						CheckPlayerArea(player, areaMin, areaMax);	
 
-					// Envia mensagens
-					foreach (string msg : msgs)
+					if (msgs)
 					{
-						player.MessageImportant(msg);
+						foreach (string msg : msgs)
+						{
+							if (msg != "")
+								player.MessageImportant(msg);
+						}
 					}
 				}
 			}	
@@ -123,17 +137,12 @@ class CustomMission: MissionServer
 		// Cada 1 min
 		m_AdminCheckTimer60 += timeslice;
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
-		{
-			
-			if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
+		{			
+			AppendMessage(customMessage);
+			foreach (string msgFixed : FixedMessages)
 			{
-				AppendMessage(customMessage);
-				foreach (string msgFixed : FixedMessages)
-				{
-					AppendMessage(msgFixed);
-				}
-					
-			}			
+				AppendMessage(msgFixed);
+			}		
 
 			m_AdminCheckTimer60 = 0.0;
 		}
@@ -182,11 +191,21 @@ class CustomMission: MissionServer
 
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
-		Entity playerEnt;
-		playerEnt = GetGame().CreatePlayer( identity, characterName, pos, 0, "NONE" );
-		Class.CastTo( m_player, playerEnt );
+		Entity playerEnt = GetGame().CreatePlayer(identity, characterName, pos, 0, "NONE");
+		if (!playerEnt)
+		{
+			WriteToLog("Erro ao criar player!");
+			return null;
+		}
 
-		GetGame().SelectPlayer( identity, m_player );
+		Class.CastTo(m_player, playerEnt);
+		if (!m_player)
+		{
+			WriteToLog("Erro ao fazer cast para PlayerBase");
+			return null;
+		}
+
+		GetGame().SelectPlayer(identity, m_player);
 
 		array<string> adminIDs = LoadAdminIDs("$mission:admin_ids.txt");
 		if (adminIDs.Find(identity.GetId()) != -1)
