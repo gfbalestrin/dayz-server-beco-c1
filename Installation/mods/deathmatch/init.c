@@ -81,6 +81,8 @@ class CustomMission: MissionServer
     ref array<vector> safeZones;	
 	ref array<vector> wallZones;
 
+	bool m_ServerShuttingDown = false;
+
 	void CustomMission()
 	{
 		WriteToLog("Entrou no construtor CustomMission");
@@ -115,14 +117,34 @@ class CustomMission: MissionServer
 			WriteToLog("Erro ao carregar dados da zona segura.");
 		}
 	}
+	void ~CustomMission()
+	{
+		WriteToLog("Destruindo CustomMission...");
+		FixedMessages = null;
+		safeZones = null;
+		wallZones = null;
+	}
+	
+	
 
+	override void OnMissionFinish()
+	{
+		super.OnMissionFinish();
+		m_ServerShuttingDown = true;
+		WriteToLog("Servidor em shutdown...");
+	}
 
-	// Classe global (não necessário se alterar o globals.xml)
-	//ref map<Object, float> m_DeadBodies = new map<Object, float>();
 
 	override void OnUpdate(float timeslice)
 	{
+		// Protege contra chamadas durante o shutdown
+		if (!GetGame())
+			return;
+		if (m_ServerShuttingDown) return;
+
 		super.OnUpdate(timeslice);
+
+		// --- Checagem a cada 10 segundos ---
 		m_AdminCheckTimer10 += timeslice;
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
@@ -130,66 +152,52 @@ class CustomMission: MissionServer
 			CheckAdminCommands();
 
 			array<string> msgs = CheckMessages();
-			
-			// Checar todos os jogadores
-			array<Man> players = new array<Man>;
-			GetGame().GetPlayers(players);
-			foreach (Man man : players)
+
+			// Validação básica
+			if (msgs && msgs.Count() > 0)
 			{
-				PlayerBase player = PlayerBase.Cast(man);
-				if (player)
+				array<Man> players = new array<Man>;
+				GetGame().GetPlayers(players);
+
+				foreach (Man man : players)
 				{
-					CheckPlayerArea(player);	
-
-					// Envia mensagens
-					foreach (string msg : msgs)
+					PlayerBase player = PlayerBase.Cast(man);
+					if (player && !player.IsDeleted())
 					{
-						player.MessageImportant(msg);
+						CheckPlayerArea(player);
+
+						foreach (string msg : msgs)
+						{
+							if (msg != string.Empty)
+								player.MessageImportant(msg);
+						}
 					}
-					//(não necessário se alterar o globals.xml)
-					// if (!player.IsAlive() && !m_DeadBodies.Contains(player))
-					// {
-					// 	float removalTime = GetGame().GetTime() + 30000; // 30 segundos no futuro
-					// 	m_DeadBodies.Insert(player, removalTime);
-					// }
 				}
-			}	
-
-			//(não necessário se alterar o globals.xml)	
-			// // Fora do loop, após processar jogadores
-			// array<Object> toDelete = new array<Object>();
-			// foreach (Object obj, float expireTime : m_DeadBodies)
-			// {
-			// 	if (GetGame().GetTime() >= expireTime)
-			// 	{
-			// 		toDelete.Insert(obj);
-			// 	}
-			// }
-
-			// foreach (Object objToDelete : toDelete)
-			// {
-			// 	GetGame().ObjectDelete(objToDelete);
-			// 	m_DeadBodies.Remove(objToDelete);
-			// }	
+			}
 		}
-		// Cada 1 min
+
+		// --- Checagem a cada 60 segundos ---
 		m_AdminCheckTimer60 += timeslice;
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
 		{
-			
-			if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
+			m_AdminCheckTimer60 = 0.0;
+
+			if (customMessage != string.Empty)
 			{
 				AppendMessage(customMessage);
+			}
+
+			if (FixedMessages)
+			{
 				foreach (string msgFixed : FixedMessages)
 				{
-					AppendMessage(msgFixed);
+					if (msgFixed != string.Empty)
+						AppendMessage(msgFixed);
 				}
-					
-			}			
-
-			m_AdminCheckTimer60 = 0.0;
+			}
 		}
 	}
+
 	
 
 	ref SafeZoneData LoadActiveRegionData(string path)
