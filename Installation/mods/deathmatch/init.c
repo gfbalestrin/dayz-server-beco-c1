@@ -1,24 +1,4 @@
 
-void WriteToLog(string content, string logfile = "init.log")
-{
-	string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
-	FileHandle file = OpenFile(fileName, FileMode.APPEND);
-
-	if (file != 0)
-	{
-		FPrintln(file, content); // Escreve a string com quebra de linha
-		CloseFile(file);
-	}
-	else
-	{
-		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
-	}
-}
-
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
-
 void main()
 {
 	//INIT ECONOMY--------------------------------------
@@ -50,6 +30,28 @@ void main()
 		}
 	}
 }
+
+void WriteToLog(string content, string logfile = "init.log")
+{
+	string fileName = "$profile:" + logfile; // Caminho dentro da pasta do servidor
+	FileHandle file = OpenFile(fileName, FileMode.APPEND);
+
+	if (file != 0)
+	{
+		FPrintln(file, content); // Escreve a string com quebra de linha
+		CloseFile(file);
+	}
+	else
+	{
+		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
+	}
+}
+
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
+
+
 
 class SafeZoneData {
 	string customMessage;
@@ -117,13 +119,13 @@ class CustomMission: MissionServer
 			WriteToLog("Erro ao carregar dados da zona segura.");
 		}
 	}
-	void ~CustomMission()
-	{
-		WriteToLog("Destruindo CustomMission...");
-		FixedMessages = null;
-		safeZones = null;
-		wallZones = null;
-	}
+	// void ~CustomMission()
+	// {
+	// 	WriteToLog("Destruindo CustomMission...");
+	// 	FixedMessages = null;
+	// 	safeZones = null;
+	// 	wallZones = null;
+	// }
 	
 	
 
