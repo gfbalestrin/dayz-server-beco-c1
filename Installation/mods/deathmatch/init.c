@@ -258,7 +258,7 @@ void CleanupCreatedWallObjects()
 
         foreach (Object obj : CreatedWallObjects)
         {
-            if (obj && !obj.IsBeingDeleted())
+            if (obj != null)
             {
                 toDelete.Insert(obj);
             }
@@ -272,6 +272,7 @@ void CleanupCreatedWallObjects()
         CreatedWallObjects.Clear();
     }
 }
+
 
 	
 
