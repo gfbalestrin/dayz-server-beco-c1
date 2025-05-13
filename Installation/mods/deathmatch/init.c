@@ -490,6 +490,7 @@ class CustomMission: MissionServer
 
 
 
+
 	vector GetRandomSafeSpawnPosition()
 	{
 		WriteToLog("Entrou em GetRandomSafeSpawnPosition");
