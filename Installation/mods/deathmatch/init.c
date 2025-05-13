@@ -321,11 +321,12 @@ class CustomMission: MissionServer
 	}
 
 	// Função auxiliar para extrair vetor string -> Vector
-	vector ExtractVectorFromString(string str)
+	vector ExtractVectorFromString(string vecStr)
 	{
-		str.Replace("\"", "");
+		vecStr.Replace("\"", "");
+		vecStr.Trim();
 		TStringArray parts = new TStringArray();
-		str.Split(",", parts);
+		vecStr.Split(",", parts);
 		if (parts.Count() == 3)
 		{
 			float x = parts[0].Trim().ToFloat();
@@ -471,21 +472,7 @@ class CustomMission: MissionServer
 		WriteToLog("Nenhum SafeZone ativo encontrado.");
 		return null;
 	}
-	vector ExtractVectorFromString(string vecStr)
-	{
-		vecStr.Replace("\"", "");
-		vecStr.Trim();
-		TStringArray parts = new TStringArray();
-		vecStr.Split(",", parts);
-		if (parts.Count() == 3)
-		{
-			float x = parts[0].Trim().ToFloat();
-			float y = parts[1].Trim().ToFloat();
-			float z = parts[2].Trim().ToFloat();
-			return Vector(x, y, z);
-		}
-		return "0 0 0";
-	}
+	
 
 
 
