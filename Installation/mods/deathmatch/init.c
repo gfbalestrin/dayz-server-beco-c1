@@ -122,9 +122,7 @@ class CustomMission: MissionServer
 	override void OnMissionFinish()
 	{
 		super.OnMissionFinish();
-		m_ServerShuttingDown = true;
 		WriteToLog("Servidor em shutdown...");
-
 	}
 
 
