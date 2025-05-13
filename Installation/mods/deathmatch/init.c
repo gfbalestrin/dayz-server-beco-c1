@@ -419,15 +419,17 @@ class CustomMission: MissionServer
 						int close = objStr.IndexOf("]");
 						if (open != -1 && close != -1 && close > open)
 						{
-							string block = objStr.Substring(open + 1, close - open - 1);
+							string safeBlock = objStr.Substring(open + 1, close - open - 1);
 							array<string> entries = new array<string>();
-							block.Split(",", entries);
+							safeBlock.Split(",", entries);
 
+							string safeVecStr;
+							vector safeVec;
 							for (int i = 0; i + 2 < entries.Count(); i += 3)
 							{
-								string vecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
-								vector v = ExtractVectorFromString(vecStr);
-								data.safeZones.Insert(v);
+								safeVecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
+								safeVec = ExtractVectorFromString(safeVecStr);
+								data.safeZones.Insert(safeVec);
 							}
 							WriteToLog("SafeZones carregadas: " + data.safeZones.Count().ToString());
 						}
@@ -437,23 +439,26 @@ class CustomMission: MissionServer
 					int idxWall = objStr.IndexOf("\"WallZones\":");
 					if (idxWall != -1)
 					{
-						int open2 = objStr.IndexOf("[");
-						int close2 = objStr.IndexOf("]");
-						if (open2 != -1 && close2 != -1 && close2 > open2)
+						int openW = objStr.IndexOf("[", idxWall);
+						int closeW = objStr.IndexOf("]", idxWall);
+						if (openW != -1 && closeW != -1 && closeW > openW)
 						{
-							string block = objStr.Substring(open2 + 1, close2 - open2 - 1);
-							array<string> entries2 = new array<string>();
-							block.Split(",", entries2);
+							string wallBlock = objStr.Substring(openW + 1, closeW - openW - 1);
+							array<string> entriesW = new array<string>();
+							wallBlock.Split(",", entriesW);
 
-							for (int j = 0; j + 2 < entries2.Count(); j += 3)
+							string wallVecStr;
+							vector wallVec;
+							for (int j = 0; j + 2 < entriesW.Count(); j += 3)
 							{
-								string vecStr = entries2[j] + "," + entries2[j + 1] + "," + entries2[j + 2];
-								vector v = ExtractVectorFromString(vecStr);
-								data.wallZones.Insert(v);
+								wallVecStr = entriesW[j] + "," + entriesW[j + 1] + "," + entriesW[j + 2];
+								wallVec = ExtractVectorFromString(wallVecStr);
+								data.wallZones.Insert(wallVec);
 							}
 							WriteToLog("WallZones carregadas: " + data.wallZones.Count().ToString());
 						}
 					}
+
 
 					return data;
 				}
