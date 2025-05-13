@@ -254,30 +254,24 @@ void CleanupCreatedWallObjects()
 
     if (CreatedWallObjects)
     {
-        array<Object> validObjects = new array<Object>();
+        array<Object> toDelete = new array<Object>();
 
         foreach (Object obj : CreatedWallObjects)
         {
-            if (obj && obj != null && !obj.IsInherited(BuildingBase)) // ou alguma verificação adicional
-            {
-                validObjects.Insert(obj);
-            }
+            if (obj)
+                toDelete.Insert(obj);
         }
 
-        WriteToLog("CleanupCreatedWallObjects() - Iniciando limpeza");
-
-		foreach (Object delObj : toDelete)
-		{
-			WriteToLog("Deletando objeto: " + delObj.ToString());
-			GetGame().ObjectDelete(delObj);
-		}
-
-		WriteToLog("CleanupCreatedWallObjects() - Limpeza finalizada");
-
+        // Agora deleta com segurança
+        foreach (Object obj : toDelete)
+        {
+            GetGame().ObjectDelete(obj);
+        }
 
         CreatedWallObjects.Clear();
     }
 }
+
 
 
 
