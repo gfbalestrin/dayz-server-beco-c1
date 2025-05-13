@@ -200,78 +200,108 @@ class CustomMission: MissionServer
 		}
 	}
 	// Cria objetos ao longo de uma linha entre dois pontos
-void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
-{
-    if (!GetGame()) return;
+	void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
+	{
+		if (!GetGame()) return;
 
-    vector direction = endPos - startPos;
-    float length = direction.Length();
-    int count = Math.Floor(length / spacing);
+		vector direction = endPos - startPos;
+		float length = direction.Length();
+		int count = Math.Floor(length / spacing);
 
-    int maxObjects = 1000; // Limite de segurança
-    if (count > maxObjects)
-    {
-        WriteToLog("CreateObjectsAlongLine: Tentativa de criar muitos objetos (" + count + "). Limitando para " + maxObjects);
-        count = maxObjects;
-    }
+		int maxObjects = 1000; // Limite de segurança
+		if (count > maxObjects)
+		{
+			WriteToLog("CreateObjectsAlongLine: Tentativa de criar muitos objetos (" + count + "). Limitando para " + maxObjects);
+			count = maxObjects;
+		}
+		else
+		{
+			WriteToLog("CreateObjectsAlongLine: Criando " + count + " objetos entre " + startPos.ToString() + " e " + endPos.ToString());
+		}
 
-    direction.Normalize();
-    float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
+		direction.Normalize();
+		float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
 
-    for (int i = 0; i <= count; i++)
-    {
-        vector pos = startPos + (direction * (i * spacing));
-        pos[1] = GetGame().SurfaceY(pos[0], pos[2]) + heightOffset;
+		for (int i = 0; i <= count; i++)
+		{
+			vector pos = startPos + (direction * (i * spacing));
+			pos[1] = GetGame().SurfaceY(pos[0], pos[2]) + heightOffset;
 
-        Object obj = GetGame().CreateObject(objectName, pos, false, true);
-        if (obj)
-        {
-            obj.SetPosition(pos);
-            obj.SetOrientation(Vector(angle, 0, 0));
-            CreatedWallObjects.Insert(obj);
-        }
-    }
-}
+			Object obj = GetGame().CreateObject(objectName, pos, false, true);
+			if (obj)
+			{
+				obj.SetPosition(pos);
+				obj.SetOrientation(Vector(angle, 0, 0));
+				CreatedWallObjects.Insert(obj);
+				WriteToLog("CreateObjectsAlongLine: Objeto criado em " + pos.ToString());
+			}
+			else
+			{
+				WriteToLog("CreateObjectsAlongLine: Falha ao criar objeto em " + pos.ToString());
+			}
+		}
+	}
 
-// Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
-void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
-{
-    if (!GetGame() || points.Count() < 2) return;
+	// Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
+	void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
+	{
+		if (!GetGame() || points.Count() < 2)
+		{
+			WriteToLog("CreateLinePathFromPoints: Número insuficiente de pontos ou GetGame() nulo.");
+			return;
+		}
 
-    for (int i = 0; i < points.Count() - 1; i++)
-    {
-        CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset);
-    }
+		WriteToLog("CreateLinePathFromPoints: Iniciando criação de caminho com " + points.Count() + " pontos.");
 
-    // Fecha o polígono ligando o último ao primeiro
-    CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
-}
+		for (int i = 0; i < points.Count() - 1; i++)
+		{
+			CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset);
+		}
 
-// Opcional: limpa todos os objetos criados
-void CleanupCreatedWallObjects()
-{
-    if (!GetGame()) return;
+		// Fecha o polígono ligando o último ao primeiro
+		CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
 
-    if (CreatedWallObjects)
-    {
-        array<Object> validObjects = new array<Object>();
+		WriteToLog("CreateLinePathFromPoints: Finalizada criação de caminho.");
+	}
 
-        foreach (Object obj : CreatedWallObjects)
-        {
-            if (obj && obj != null && !obj.IsInherited(BuildingBase)) // ou alguma verificação adicional
-            {
-                validObjects.Insert(obj);
-            }
-        }
+	// Limpa todos os objetos criados
+	void CleanupCreatedWallObjects()
+	{
+		if (!GetGame()) return;
 
-        foreach (Object obj2 : validObjects)
-        {
-            GetGame().ObjectDelete(obj2);
-        }
+		if (CreatedWallObjects && CreatedWallObjects.Count() > 0)
+		{
+			WriteToLog("CleanupCreatedWallObjects: Iniciando limpeza de " + CreatedWallObjects.Count() + " objetos.");
 
-        CreatedWallObjects.Clear();
-    }
-}
+			array<Object> validObjects = new array<Object>();
+
+			foreach (Object obj : CreatedWallObjects)
+			{
+				if (obj && obj != null /* && !obj.IsInherited(BuildingBase) */)
+				{
+					validObjects.Insert(obj);
+				}
+				else
+				{
+					WriteToLog("CleanupCreatedWallObjects: Objeto inválido ignorado.");
+				}
+			}
+
+			foreach (Object obj2 : validObjects)
+			{
+				GetGame().ObjectDelete(obj2);
+				WriteToLog("CleanupCreatedWallObjects: Objeto deletado.");
+			}
+
+			CreatedWallObjects.Clear();
+			WriteToLog("CleanupCreatedWallObjects: Limpeza concluída.");
+		}
+		else
+		{
+			WriteToLog("CleanupCreatedWallObjects: Nenhum objeto para limpar.");
+		}
+	}
+
 
 
 
@@ -279,9 +309,10 @@ void CleanupCreatedWallObjects()
 
 	ref SafeZoneData LoadActiveRegionData(string path)
 	{
+		WriteToLog("LoadActiveRegionData: Lendo arquivo " + path);
 		FileHandle file = OpenFile(path, FileMode.READ);
 		if (!file) {
-			WriteToLog("Arquivo não encontrado: " + path);
+			WriteToLog("LoadActiveRegionData: Arquivo não encontrado.");
 			return null;
 		}
 
@@ -294,161 +325,112 @@ void CleanupCreatedWallObjects()
 		int startObj = content.IndexOf("{");
 		while (startObj != -1)
 		{
-			// Procurar fechamento do objeto
-			string rest = content.Substring(startObj, content.Length() - startObj);
-			int relEnd = rest.IndexOf("}");
-			if (relEnd == -1) break;
-			int endObj = startObj + relEnd;
+			int endObj = content.IndexOf("}", startObj);
+			if (endObj == -1) break;
 
 			string objStr = content.Substring(startObj, endObj - startObj + 1);
+			WriteToLog("LoadActiveRegionData: Analisando bloco -> " + objStr);
 
-			int idxActive = objStr.IndexOf("\"Active\":");
-			if (idxActive != -1) {
-				string boolStr = objStr.Substring(idxActive + 9, 5);
-				boolStr.ToLower();
-				if (boolStr.Contains("true")) {
-					auto data = new SafeZoneData();
+			if (IsJsonValueTrue(objStr, "\"Active\":"))
+			{
+				SafeZoneData data = new SafeZoneData();
 
-					// Region
-					int idxRegion = objStr.IndexOf("\"Region\":");
-					if (idxRegion != -1) {
-						string subRegion = objStr.Substring(idxRegion + 9, objStr.Length() - idxRegion - 9);
-						int sRelRegion = subRegion.IndexOf("\"") + 1;
-						string subRegion2 = subRegion.Substring(sRelRegion, subRegion.Length() - sRelRegion);
-						int eRelRegion = subRegion2.IndexOf("\"");
-						int sRegion = idxRegion + 9 + sRelRegion;
-						int eRegion = sRegion + eRelRegion;
-						data.regionStr = objStr.Substring(sRegion, eRegion - sRegion);
-					}
+				data.regionStr = ExtractQuotedValue(objStr, "\"Region\":");
+				data.customMessage = ExtractQuotedValue(objStr, "\"CustomMessage\":");
 
-					// CustomMessage
-					int idxCustomMessage = objStr.IndexOf("\"CustomMessage\":");
-					if (idxCustomMessage != -1) {
-						string subCustomMessage = objStr.Substring(idxCustomMessage + 16, objStr.Length() - idxCustomMessage - 16);
-						int sRelCustomMessage = subCustomMessage.IndexOf("\"") + 1;
-						string subCustomMessage2 = subCustomMessage.Substring(sRelCustomMessage, subCustomMessage.Length() - sRelCustomMessage);
-						int eRelCustomMessage = subCustomMessage2.IndexOf("\"");
-						int sCustomMessage = idxCustomMessage + 16 + sRelCustomMessage;
-						int eCustomMessage = sCustomMessage + eRelCustomMessage;
-						data.customMessage = objStr.Substring(sCustomMessage, eCustomMessage - sCustomMessage);
-					}
+				string minStr = ExtractQuotedValue(objStr, "\"AreaMin\":");
+				if (minStr != "") data.areaMin = minStr.ToVector();
 
-					// AreaMin
-					int idxMin = objStr.IndexOf("\"AreaMin\":");
-					if (idxMin != -1) {
-						string subMin = objStr.Substring(idxMin + 10, objStr.Length() - idxMin - 10);
-						int sRel = subMin.IndexOf("\"") + 1;
-						string subMin2 = subMin.Substring(sRel, subMin.Length() - sRel);
-						int eRel = subMin2.IndexOf("\"");
-						int s = idxMin + 10 + sRel;
-						int e = s + eRel;
-						string minStr = objStr.Substring(s, e - s);
-						data.areaMin = minStr.ToVector();
-					}
+				string maxStr = ExtractQuotedValue(objStr, "\"AreaMax\":");
+				if (maxStr != "") data.areaMax = maxStr.ToVector();
 
-					// AreaMax
-					int idxMax = objStr.IndexOf("\"AreaMax\":");
-					if (idxMax != -1) {
-						string subMax = objStr.Substring(idxMax + 10, objStr.Length() - idxMax - 10);
-						int s2Rel = subMax.IndexOf("\"") + 1;
-						string subMax2 = subMax.Substring(s2Rel, subMax.Length() - s2Rel);
-						int e2Rel = subMax2.IndexOf("\"");
-						int s2 = idxMax + 10 + s2Rel;
-						int e2 = s2 + e2Rel;
-						string maxStr = objStr.Substring(s2, e2 - s2);
-						data.areaMax = maxStr.ToVector();
-					}
+				string safeBlock = ExtractArrayBlock(objStr, "\"SafeZones\":");
+				ParseVectorArray(safeBlock, data.safeZones);
 
-					// SafeZones
-					int idxSafe = objStr.IndexOf("\"SafeZones\":");
-					if (idxSafe != -1) {
-						string subSafe = objStr.Substring(idxSafe, objStr.Length() - idxSafe);
-						int s3Rel = subSafe.IndexOf("[");
-						int e3Rel = subSafe.IndexOf("]");
-						int s3 = idxSafe + s3Rel;
-						int e3 = idxSafe + e3Rel;
-						string safeBlock = objStr.Substring(s3 + 1, e3 - s3 - 1);
+				string wallBlock = ExtractArrayBlock(objStr, "\"WallZones\":");
+				ParseVectorArray(wallBlock, data.wallZones);
 
-						array<string> entries = new array<string>();
-						safeBlock.Split(",", entries);
-
-						for (int i = 0; i + 2 < entries.Count(); i += 3) {
-							string vecStr = entries[i] + "," + entries[i + 1] + "," + entries[i + 2];
-							vecStr.Replace("\"", "");
-							vecStr.Trim();
-							// Criar array para armazenar os valores separados
-							TStringArray parts = new TStringArray();
-							vecStr.Split(",", parts);
-
-							// Verificar se há exatamente 3 partes
-							if (parts.Count() == 3) {
-								float x = parts[0].Trim().ToFloat();
-								float y = parts[1].Trim().ToFloat();
-								float z = parts[2].Trim().ToFloat();
-								data.safeZones.Insert(Vector(x, y, z));
-							}
-							
-						}
-					}
-
-					// WallZones
-					int idxWall = objStr.IndexOf("\"WallZones\":");
-					if (idxWall != -1) {
-						string subWall = objStr.Substring(idxWall, objStr.Length() - idxWall);
-						int s4Rel = subWall.IndexOf("[");
-						int e4Rel = subWall.IndexOf("]");
-						int s4 = idxWall + s4Rel;
-						int e4 = idxWall + e4Rel;
-						string wallBlock = objStr.Substring(s4 + 1, e4 - s4 - 1);
-
-						array<string> entries2 = new array<string>();
-						wallBlock.Split(",", entries2);
-
-						for (int j = 0; j + 2 < entries2.Count(); j += 3) {
-							string vecStr2 = entries2[j] + "," + entries2[j + 1] + "," + entries2[j + 2];
-							vecStr2.Replace("\"", "");
-							vecStr2.Trim();
-							// Criar array para armazenar os valores separados
-							TStringArray parts2 = new TStringArray();
-							vecStr2.Split(",", parts2);
-
-							// Verificar se há exatamente 3 partes
-							if (parts2.Count() == 3) {
-								float x2 = parts2[0].Trim().ToFloat();
-								float y2 = parts2[1].Trim().ToFloat();
-								float z2 = parts2[2].Trim().ToFloat();
-								data.wallZones.Insert(Vector(x2, y2, z2));
-							}
-							
-						}
-					}
-
-					return data;
-				}
+				WriteToLog("LoadActiveRegionData: SafeZoneData carregado com sucesso.");
+				return data;
 			}
 
-			// Próximo objeto
-			string rem = content.Substring(endObj + 1, content.Length() - endObj - 1);
-			int relNext = rem.IndexOf("{");
-			if (relNext != -1) {
-				startObj = endObj + 1 + relNext;
-			} else {
-				startObj = -1;
-			}
+			startObj = content.IndexOf("{", endObj);
 		}
 
-
+		WriteToLog("LoadActiveRegionData: Nenhuma região ativa encontrada.");
 		return null;
 	}
 
+	// --- Funções auxiliares ---
+
+	bool IsJsonValueTrue(string source, string key)
+	{
+		int idx = source.IndexOf(key);
+		if (idx == -1) return false;
+
+		string rest = source.Substring(idx + key.Length(), 5);
+		rest.ToLower();
+		return rest.Contains("true");
+	}
+
+	string ExtractQuotedValue(string source, string key)
+	{
+		int idx = source.IndexOf(key);
+		if (idx == -1) return "";
+
+		string rest = source.Substring(idx + key.Length());
+		int startQuote = rest.IndexOf("\"") + 1;
+		if (startQuote <= 0 || startQuote >= rest.Length()) return "";
+
+		string rest2 = rest.Substring(startQuote);
+		int endQuote = rest2.IndexOf("\"");
+		if (endQuote == -1) return "";
+
+		return rest2.Substring(0, endQuote);
+	}
+
+	string ExtractArrayBlock(string source, string key)
+	{
+		int idx = source.IndexOf(key);
+		if (idx == -1) return "";
+
+		int start = source.IndexOf("[", idx);
+		int end = source.IndexOf("]", idx);
+		if (start == -1 || end == -1 || end <= start) return "";
+
+		return source.Substring(start + 1, end - start - 1);
+	}
+
+	void ParseVectorArray(string csvBlock, ref array<vector> outArray)
+	{
+		if (csvBlock == "") return;
+
+		array<string> entries = new array<string>();
+		csvBlock.Split(",", entries);
+
+		for (int i = 0; i + 2 < entries.Count(); i += 3) {
+			string xStr = entries[i].Trim().Replace("\"", "");
+			string yStr = entries[i + 1].Trim().Replace("\"", "");
+			string zStr = entries[i + 2].Trim().Replace("\"", "");
+
+			if (xStr != "" && yStr != "" && zStr != "") {
+				vector vec = Vector(xStr.ToFloat(), yStr.ToFloat(), zStr.ToFloat());
+				outArray.Insert(vec);
+			}
+		}
+	}
+
+
 	vector GetRandomSafeSpawnPosition()
 	{
+		WriteToLog("Entrou em GetRandomSafeSpawnPosition");
 		int index = Math.RandomInt(0, safeZones.Count());
 		return safeZones[index]; // Retorna a coordenada aleatória
 	}
 
 	void CheckPlayerArea(PlayerBase player)
 	{
+		WriteToLog("Entrou em CheckPlayerArea");
 		vector pos = player.GetPosition();
 		
 		// Checa se o jogador está fora da área permitida
@@ -464,6 +446,7 @@ void CleanupCreatedWallObjects()
 
 	array<string> CheckMessages()
 	{
+		WriteToLog("Entrou em CheckPlayerCheckMessagesArea");
 		array<string> msgs = new array<string>();
 
 		string path = "$mission:messages_to_send.txt";
@@ -524,6 +507,7 @@ void CleanupCreatedWallObjects()
 	}
 	void CheckAdminCommands()
 	{
+		WriteToLog("Entrou em CheckAdminCommands");
 		string path = "$mission:admin_cmds.txt";
         FileHandle file = OpenFile(path, FileMode.READ);
         if (file == 0) return;
@@ -737,6 +721,7 @@ void CleanupCreatedWallObjects()
 
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
+		WriteToLog("Entrou em CreateCharacter");
 		Entity playerEnt;
 		playerEnt = GetGame().CreatePlayer( identity, characterName, pos, 0, "NONE" );
 		Class.CastTo( m_player, playerEnt );
