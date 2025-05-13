@@ -132,7 +132,6 @@ class CustomMission: MissionServer
 		// Protege contra chamadas durante o shutdown
 		if (!GetGame())
 			return;
-		if (m_ServerShuttingDown) return;
 
 		super.OnUpdate(timeslice);
 
