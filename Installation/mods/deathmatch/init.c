@@ -46,12 +46,10 @@ void WriteToLog(string content, string logfile = "init.log")
 		WriteToLog("Erro ao abrir o arquivo para escrita.", logfile);
 	}
 }
-ref array<Object> m_CreatedObjects = new array<Object>;
 
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
-
 
 
 class SafeZoneData {
@@ -68,7 +66,7 @@ class SafeZoneData {
     }
 }
 
-ref array<string> FixedMessages;
+
 
 class CustomMission: MissionServer
 {
@@ -84,6 +82,8 @@ class CustomMission: MissionServer
     ref array<vector> safeZones;	
 	ref array<vector> wallZones;
 
+	ref array<string> FixedMessages;
+
 	void CustomMission()
 	{
 		WriteToLog("Entrou no construtor CustomMission");
@@ -97,8 +97,14 @@ class CustomMission: MissionServer
 			regionStr = szData.regionStr;
 			areaMin = szData.areaMin;
 			areaMax = szData.areaMax;
-			safeZones = szData.safeZones;
-			wallZones = szData.wallZones;
+			safeZones = new array<vector>;
+			wallZones = new array<vector>;
+
+			foreach (vector v : szData.safeZones)
+				safeZones.Insert(v);
+			foreach (vector w : szData.wallZones)
+				wallZones.Insert(w);
+
 			if (wallZones.Count() > 0)
 			{
 				WriteToLog("O mapa possui wallzones..." + wallZones.Count());
@@ -119,11 +125,13 @@ class CustomMission: MissionServer
 		}
 	}
 
-	// override void OnMissionFinish()
-	// {
-	// 	super.OnMissionFinish();
-	// 	WriteToLog("Servidor em shutdown...");
-	// }
+	override void OnMissionFinish()
+	{
+		super.OnMissionFinish();
+		WriteToLog("Servidor em shutdown...");
+		// Limpa containers/walls criados
+    	CleanupCreatedWallObjects();
+	}
 
 	override void OnUpdate(float timeslice)
 	{

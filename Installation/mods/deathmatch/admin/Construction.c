@@ -107,14 +107,26 @@ void CreateCustomObject(PlayerBase player, string buildName, float heightOffset 
     }
 }
 
+// Armazena objetos criados, útil para deletar depois
+ref array<Object> CreatedWallObjects = new array<Object>();
+
 // Cria objetos ao longo de uma linha entre dois pontos
 void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
 {
+    if (!GetGame()) return;
+
     vector direction = endPos - startPos;
     float length = direction.Length();
     int count = Math.Floor(length / spacing);
-    direction.Normalize();
 
+    int maxObjects = 1000; // Limite de segurança
+    if (count > maxObjects)
+    {
+        WriteToLog("CreateObjectsAlongLine: Tentativa de criar muitos objetos (" + count + "). Limitando para " + maxObjects);
+        count = maxObjects;
+    }
+
+    direction.Normalize();
     float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
 
     for (int i = 0; i <= count; i++)
@@ -127,6 +139,7 @@ void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, f
         {
             obj.SetPosition(pos);
             obj.SetOrientation(Vector(angle, 0, 0));
+            CreatedWallObjects.Insert(obj);
         }
     }
 }
@@ -134,7 +147,7 @@ void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, f
 // Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
 void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
 {
-    if (points.Count() < 2) return;
+    if (!GetGame() || points.Count() < 2) return;
 
     for (int i = 0; i < points.Count() - 1; i++)
     {
@@ -145,6 +158,21 @@ void CreateLinePathFromPoints(array<vector> points, string objectName, float spa
     CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
 }
 
+// Opcional: limpa todos os objetos criados
+void CleanupCreatedWallObjects()
+{
+    if (!GetGame()) return;
+
+    if (CreatedWallObjects)
+    {
+        foreach (Object obj : CreatedWallObjects)
+        {
+            if (obj)
+                GetGame().ObjectDelete(obj);
+        }
+        CreatedWallObjects.Clear();
+    }
+}
 
 
 
