@@ -64,7 +64,7 @@ class CustomMission: MissionServer
 		WriteToLog("CustomMission(): Inicializando CustomMission");
 
 		FixedMessages = new array<string>;
-		FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: /admin giveitem M67Grenade");
+		FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
 
 		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
 		if (szData)
@@ -120,6 +120,95 @@ class CustomMission: MissionServer
 			WriteToLog("CustomMission(): Erro ao carregar SafeZoneData");
 		}
 	}
+	
+	override void OnEvent(EventType eventTypeId, Param params)
+	{
+		super.OnEvent(eventTypeId, params);
+
+		if (eventTypeId == ChatMessageEventTypeID)
+		{
+			ChatMessageEventParams chatParams = ChatMessageEventParams.Cast(params);
+			if (!chatParams) {
+				WriteToLog("[DEBUG] chatParams cast falhou.");
+				return;
+			}
+
+			WriteToLog("[DEBUG] param1: " + chatParams.param1);
+			WriteToLog("[DEBUG] param2: " + chatParams.param2);
+			WriteToLog("[DEBUG] param3: " + chatParams.param3);
+
+			int channel = chatParams.param1;          // canal (ex: 0 = Global)
+			string playerName = chatParams.param2;    // nome do jogador
+			string text = chatParams.param3;          // mensagem digitada			
+
+			if (text == "")
+            	return;
+			
+			if (text.Length() == 0 || text.Get(0) != "!")
+				return;
+
+			PlayerBase player = GetPlayerByName(playerName);
+			if (!player) {
+				WriteToLog("[DEBUG] Player não identificado.");
+				return;
+			}
+
+			TStringArray tokensCommands = new TStringArray;
+			text.Split(" ", tokensCommands);
+			if (tokensCommands.Count() < 2)
+				return;
+			
+			tokensCommands[0] = tokensCommands[0].Substring(1, tokensCommands[0].Length() - 1);
+			string playerID = player.GetIdentity().GetId();
+			TStringArray tokens = new TStringArray;
+			tokens.Insert(playerID);
+			for (int i = 0; i < tokensCommands.Count(); i++)
+				tokens.Insert(tokensCommands.Get(i));
+			ExecuteCommand(tokens);
+		}
+	}
+
+	PlayerBase GetPlayerByName(string name)
+	{
+		array<Man> players = new array<Man>();
+		GetGame().GetPlayers(players);
+
+		foreach (Man man : players)
+		{
+			PlayerBase player = PlayerBase.Cast(man);
+			if (player && player.GetIdentity() && player.GetIdentity().GetName() == name)
+			{
+				return player;
+			}
+		}
+		return null;
+	}
+
+
+	PlayerBase GetPlayerByID(string id)
+	{
+		// Registra no log a busca
+		WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id);
+		array<Man> players = {};
+		GetGame().GetPlayers(players); // Pega todos os jogadores no servidor
+
+		// Itera sobre todos os jogadores para encontrar aquele com o ID fornecido
+		foreach (Man man : players)
+		{
+			PlayerBase player = PlayerBase.Cast(man); // Tenta converter o jogador
+			if (player && player.GetIdentity() && player.GetIdentity().GetId() == id)
+			{
+				// Se encontrar o jogador com o ID correto, registra e retorna o jogador
+				WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName());
+				return player;
+			}
+		}
+
+		// Se não encontrar, registra no log
+		WriteToLog("GetPlayerByID(): Jogador não encontrado");
+		return null;
+	}
+
 
 	override void OnUpdate(float timeslice)
 	{
@@ -173,24 +262,6 @@ class CustomMission: MissionServer
 		}
 	}
 
-	PlayerBase GetPlayerByID(string id)
-	{
-		WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id);
-		array<Man> players = {};
-		GetGame().GetPlayers(players);
-
-		foreach (Man man : players)
-		{
-			PlayerBase player = PlayerBase.Cast(man);
-			if (player && player.GetIdentity() && player.GetIdentity().GetId() == id)
-			{
-				WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName());
-				return player;
-			}
-		}
-		WriteToLog("GetPlayerByID(): Jogador não encontrado");
-		return null;
-	}
 
 	void SetRandomHealth(EntityAI itemEnt)
 	{
