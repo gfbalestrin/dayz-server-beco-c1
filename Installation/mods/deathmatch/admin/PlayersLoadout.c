@@ -1,29 +1,13 @@
 bool GiveCustomLoadout(PlayerBase player, string playerId)
 {
     string jsonPath = "$mission:custom_loadouts.json";
-    FileHandle fh = OpenFile(jsonPath, FileMode.READ);
-    if (!fh) {
-        WriteToLog("Erro ao abrir arquivo de loadouts.");
-        return false;
-    }
-
-    return false;
-
-    ref map<string, ref LoadoutData> loadoutMap = new map<string, ref LoadoutData>;
+    ref map<string, ref LoadoutData> loadoutMap;
 
     JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
-    if (!loadoutMap) {
-        WriteToLog("Erro ao carregar ou map nulo: " + jsonPath);
-        CloseFile(fh);
-        return false;
-    }
-    CloseFile(fh);
-    
-
     if (!loadoutMap || !loadoutMap.Contains(playerId)) {
         WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
         return false;
-    }
+    }    
 
     LoadoutData data = loadoutMap.Get(playerId);
     if (!data) {
@@ -92,12 +76,17 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
 
     if (weaponData.attachments) {
         foreach (WeaponAttachment att : weaponData.attachments) {
+            if (!att || att.name_type == "") continue;
+
             EntityAI attEntity = weaponEntity.GetInventory().CreateAttachment(att.name_type);
             if (attEntity) {
                 WriteToLog("Anexado: " + att.name_type);
                 if (att.battery) {
-                    attEntity.GetInventory().CreateAttachment("Battery9V");
-                    WriteToLog("Bateria adicionada a: " + att.name_type);
+                    EntityAI battery = attEntity.GetInventory().CreateAttachment("Battery9V");
+                    if (battery)
+                        WriteToLog("Bateria adicionada a: " + att.name_type);
+                    else
+                        WriteToLog("Falha ao adicionar bateria à: " + att.name_type);
                 }
             } else {
                 WriteToLog("Falha ao anexar: " + att.name_type);
@@ -105,35 +94,35 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         }
     }
 
+    Weapon_Base weapon_base = Weapon_Base.Cast(weaponEntity);
+    if (!weapon_base) {
+        WriteToLog("Falha no cast de Weapon_Base para: " + weaponData.name_type);
+        return;
+    }
+
     if (weaponData.magazine) {
-        Weapon_Base weapon_base = Weapon_Base.Cast(weaponEntity);
-        Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);	
+        Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);
         if (!mag) {
-            WriteToLog("Falha ao criar pente: " + weaponData.magazine.name_type);
+            WriteToLog("Falha ao anexar pente: " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type);
             return;
         }
-        int amountAmmo = mag.GetAmmoMax() - 1;
-        mag.LocalSetAmmoCount(amountAmmo);	
-        mag.ServerSetAmmoCount(amountAmmo);
 
-        //wpn_bs2.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER); // Só no chamber para internal
-        
-        // if (weaponData.ammunitions) {
-        //     for (int i = 0; i < weaponData.magazine.capacity; i++) {
-        //         mag.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
-        //     }
-        //     WriteToLog("Munição adicionada ao carregador: " + weaponData.magazine.name_type);
-        // } else if (weaponData.ammunitions) {
-        //     player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
-        // }
+        int amountAmmo = mag.GetAmmoMax() - 1;
+        if (amountAmmo > 0) {
+            mag.LocalSetAmmoCount(amountAmmo);	
+            mag.ServerSetAmmoCount(amountAmmo);
+            WriteToLog("Pente carregado com " + amountAmmo.ToString() + " munições.");
+        }
     }
 
     player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
 }
 
+
 EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBase player)
 {
     EntityAI item;
+
     if (parent) {
         WriteToLog("Criando item como attachment: " + itemData.name_type);
         item = parent.GetInventory().CreateAttachment(itemData.name_type);
@@ -149,12 +138,17 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
 
     if (itemData.subitems) {
         foreach (LoadoutItem sub : itemData.subitems) {
-            CreateItemWithSubitems(item, sub, player);
+            if (sub) {
+                CreateItemWithSubitems(item, sub, player);
+            } else {
+                WriteToLog("Subitem nulo detectado para: " + itemData.name_type);
+            }
         }
     }
 
     return item;
 }
+
 
 void GiveDefaultLoadout(PlayerBase player)
 {
