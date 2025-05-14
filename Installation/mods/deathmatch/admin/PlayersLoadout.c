@@ -1,10 +1,24 @@
 bool GiveCustomLoadout(PlayerBase player, string playerId)
 {
     string jsonPath = "$mission:custom_loadouts.json";
+    FileHandle fh = OpenFile(jsonPath, FileMode.READ);
+    if (!fh) {
+        WriteToLog("Erro ao abrir arquivo de loadouts.");
+        return false;
+    }
+
+    return false;
+
     ref map<string, ref LoadoutData> loadoutMap = new map<string, ref LoadoutData>;
 
-    // Carregar JSON
     JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
+    if (!loadoutMap) {
+        WriteToLog("Erro ao carregar ou map nulo: " + jsonPath);
+        CloseFile(fh);
+        return false;
+    }
+    CloseFile(fh);
+    
 
     if (!loadoutMap || !loadoutMap.Contains(playerId)) {
         WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
@@ -63,7 +77,11 @@ void HandleWeaponLoadout(Weapons weapons, PlayerBase player, string playerId)
 
 void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot, string label, string playerId)
 {
-    EntityAI weaponEntity = player.GetInventory().CreateInInventory(weaponData.name_type);
+    EntityAI weaponEntity; 
+    if (label == "primary")
+        weaponEntity = player.GetHumanInventory().CreateInHands(weaponData.name_type);
+    else
+        weaponEntity = player.GetInventory().CreateInInventory(weaponData.name_type);
 
     if (!weaponEntity) {
         WriteToLog("Falha ao criar arma: " + weaponData.name_type);
@@ -88,15 +106,26 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
     }
 
     if (weaponData.magazine) {
-        EntityAI mag = weaponEntity.GetInventory().CreateAttachment(weaponData.magazine.name_type);
-        if (mag && weaponData.ammunitions) {
-            for (int i = 0; i < weaponData.magazine.capacity; i++) {
-                mag.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
-            }
-            WriteToLog("Munição adicionada ao carregador: " + weaponData.magazine.name_type);
-        } else if (weaponData.ammunitions) {
-            player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
+        Weapon_Base weapon_base = Weapon_Base.Cast(weaponEntity);
+        Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);	
+        if (!mag) {
+            WriteToLog("Falha ao criar pente: " + weaponData.magazine.name_type);
+            return;
         }
+        int amountAmmo = mag.GetAmmoMax() - 1;
+        mag.LocalSetAmmoCount(amountAmmo);	
+        mag.ServerSetAmmoCount(amountAmmo);
+
+        //wpn_bs2.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER); // Só no chamber para internal
+        
+        // if (weaponData.ammunitions) {
+        //     for (int i = 0; i < weaponData.magazine.capacity; i++) {
+        //         mag.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
+        //     }
+        //     WriteToLog("Munição adicionada ao carregador: " + weaponData.magazine.name_type);
+        // } else if (weaponData.ammunitions) {
+        //     player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
+        // }
     }
 
     player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
@@ -129,128 +158,266 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
 
 void GiveDefaultLoadout(PlayerBase player)
 {
-    // Roupas e Proteção
-    player.GetInventory().CreateInInventory("TacticalShirt_Black");
-    player.GetInventory().CreateInInventory("CargoPants_Black");
-    player.GetInventory().CreateInInventory("CombatBoots_Black");
-    player.GetInventory().CreateInInventory("BalaclavaMask_Black");
-    player.GetInventory().CreateInInventory("TacticalGloves_Black");
-    player.GetInventory().CreateInInventory("TacticalGoggles");
-    
-     // Anexando os óculos de visão noturna ao capacete
-    EntityAI helmet = player.GetInventory().CreateInInventory("Mich2001Helmet");
-    EntityAI nvgoggles = helmet.GetInventory().CreateAttachment("NVGoggles");
+    WriteToLog("Iniciando entrega de loadout padrão para o jogador.");
 
-    // Colocando a bateria no NVGoggles
-    if (nvgoggles)
-    {
-        EntityAI battery = player.GetInventory().CreateInInventory("Battery9V");
-        nvgoggles.GetInventory().CreateAttachment("Battery9V");
+    // Vestimenta e proteção
+    ref array<string> roupas = {
+        "TacticalShirt_Black", "CargoPants_Black", "CombatBoots_Black",
+        "BalaclavaMask_Black", "TacticalGloves_Black", "TacticalGoggles"
+    };
+
+    foreach (string itemName : roupas) {
+        EntityAI item = player.GetInventory().CreateInInventory(itemName);
+        if (item)
+            WriteToLog("Equipado: " + itemName);
+        else
+            WriteToLog("Erro ao equipar: " + itemName);
+    }
+
+    // Capacete + NVG
+    EntityAI helmet = player.GetInventory().CreateInInventory("Mich2001Helmet");
+    EntityAI nvg = null;
+    if (helmet) {
+        nvg = helmet.GetInventory().CreateAttachment("NVGoggles");
+        if (nvg) {
+            nvg.GetInventory().CreateAttachment("Battery9V");
+            WriteToLog("NVG equipado com bateria.");
+        } else {
+            WriteToLog("Erro ao anexar NVG.");
+        }
     }
 
     // Equipamentos úteis
-    player.GetInventory().CreateInInventory("Battery9V");
-    player.GetInventory().CreateInInventory("Binoculars");
-    player.GetInventory().CreateInInventory("Canteen"); // água
+    ref array<string> utilitarios = {
+        "Battery9V", "Binoculars", "Canteen", "StarlightOptic", "Rangefinder"
+    };
 
-    // Mochila com espaço
+    foreach (string util : utilitarios) {
+        player.GetInventory().CreateInInventory(util);
+    }
+
+    // Medicamentos
+    ref array<string> medics = {
+        "BandageDressing", "Morphine", "TetracyclineAntibiotics", "Painkiller"
+    };
+
+    foreach (string med : medics) {
+        player.GetInventory().CreateInInventory(med);
+    }
+
+    // Mochila
     player.GetInventory().CreateInInventory("AliceBag_Camo");
-    player.GetInventory().CreateInInventory("StarlightOptic");
-    player.GetInventory().CreateInInventory("Rangefinder");    
 
-    // Itens medicos
-    player.GetInventory().CreateInInventory("BandageDressing");
-    player.GetInventory().CreateInInventory("Morphine");
-    player.GetInventory().CreateInInventory("TetracyclineAntibiotics");
-    player.GetInventory().CreateInInventory("Painkiller");
+    // Arma primária: M4A1
+    WriteToLog("########################## ARMA M4A1 ##########################");
+    EntityAI m4 = player.GetHumanInventory().CreateInHands("M4A1");
+    //EntityAI m4 = player.GetInventory().CreateInInventory("M4A1");
+    if (m4) {   
+        
+        ref array<string> m4Attachments = {
+            "ACOGOptic", "M4_RISHndgrd_Black", "M4_MPBttstck_Black"
+        };
 
-    // Arma principal + miras + munição
-    EntityAI m4 = player.GetInventory().CreateInInventory("M4A1");
-    m4.GetInventory().CreateAttachment("ACOGOptic");
-    //m4.GetInventory().CreateAttachment("M4_Suppressor");
-    m4.GetInventory().CreateAttachment("M4_RISHndgrd_Black");
-    m4.GetInventory().CreateAttachment("M4_MPBttstck_Black");
-    m4.GetInventory().CreateAttachment("Mag_STANAG_30Rnd");
-    player.SetQuickBarEntityShortcut(m4, 0, true);
-
-    // Munições e carregadores
-    for (int i = 0; i < 4; i++)
-    {
-        EntityAI mag = player.GetInventory().CreateInInventory("Mag_STANAG_30Rnd");
-        if (mag)
-        {
-            Magazine magazineM4 = Magazine.Cast(mag);
-            magazineM4.ServerSetAmmoCount(30);
-        }
-    }    
-
-    // Anexando o carregador à pistola
-    EntityAI vest = player.GetInventory().CreateInInventory("PlateCarrierVest");
-    vest.GetInventory().CreateAttachment("PlateCarrierHolster");  // Cria o holster no colete
-    vest.GetInventory().CreateAttachment("PlateCarrierPouches");  // Cria as bolsas no colete
-    vest.GetInventory().CreateAttachment("Glock19");
-
-    // Arma secundária (pistola Glock19)
-    EntityAI pistol = vest.GetInventory().CreateInInventory("Glock19");
-
-    EntityAI pistolMag = pistol.GetInventory().CreateAttachment("Mag_Glock_15Rnd");
-    if (pistolMag)
-    {
-        Magazine.Cast(pistolMag).ServerSetAmmoCount(15); // Definindo munição do carregador
-    }
-
-    pistol.GetInventory().CreateAttachment("PistolSuppressor");
-    pistol.GetInventory().CreateAttachment("UniversalLight");
-    player.SetQuickBarEntityShortcut(pistol, 3, true);
-
-    // Equipamento de munição adicional
-    player.GetInventory().CreateInInventory("Ammo_9x19");  // Reserva
-    player.GetInventory().CreateInInventory("Ammo_556x45"); // Reserva
-    player.GetInventory().CreateInInventory("Ammo_308WinTracer"); // Reserva
-    player.GetInventory().CreateInInventory("Ammo_762x39"); 
-
-    EntityAI tundra = player.GetInventory().CreateInInventory("Winchester70");
-    tundra.GetInventory().CreateAttachment("HuntingOptic");
-    tundra.GetInventory().CreateAttachment("ImprovisedSuppressor");
-    player.SetQuickBarEntityShortcut(tundra, 2, true);
-
-    EntityAI akm = player.GetInventory().CreateInInventory("AKM"); // ou: player.SpawnEntityOnGroundPos("AKM", akmPos);
-
-    if (akm) {
-        // Supressor
-        //akm.GetInventory().CreateAttachment("AK_Suppressor");
-
-        // Miras (coloque só uma das opções, ou troque conforme quiser)
-        akm.GetInventory().CreateAttachment("KobraOptic");
-        // akm.GetInventory().CreateAttachment("PUScopeOptic");
-
-        // Empunhadura (handguard)
-        akm.GetInventory().CreateAttachment("AK_WoodHandguard"); // ou: AK_RailHndgrd
-
-        // Coronha (buttstock)
-        akm.GetInventory().CreateAttachment("AK_WoodBttstck"); // ou: AK_FoldingBttstck, AK_PlasticBttstck
-
-        // Carregador tambor de 75 balas
-        Magazine drumMag = Magazine.Cast(akm.GetInventory().CreateAttachment("Mag_AKM_Drum75Rnd"));
-        if (drumMag) {
-            drumMag.ServerSetAmmoCount(75); // Enche o tambor
+        foreach (string att : m4Attachments) {
+            m4.GetInventory().CreateAttachment(att);
         }
 
-        // Munição extra no inventário do jogador (opcional)
-        player.GetInventory().CreateInInventory("Ammo_762x39"); // Caixa de munição extra
+        Weapon_Base weapon_base = Weapon_Base.Cast(m4);
+        Magazine magM4 = weapon_base.SpawnAttachedMagazine("Mag_STANAG_30Rnd");	// ja cria com o pente cheio
+        int amountAmmo = magM4.GetAmmoMax() - 1;
+        magM4.LocalSetAmmoCount(amountAmmo);	
+        magM4.ServerSetAmmoCount(amountAmmo);	
+        // magM4.LocalSetAmmoCount(0);	
+        // magM4.ServerSetAmmoCount(0);	
+        // for (int i = 0; i < 29; i++) {
+        //     magM4.GetInventory().CreateInInventory("Ammo_556x45Tracer");
+        // }
 
-        player.SetQuickBarEntityShortcut(akm, 1, true);
+        // string ammoTypeName = "Ammo_556x45Tracer";
+        // Weapon_Base magazine_base = Magazine_Base.Cast(magM4);
+        // for (int imuzzCount = 0; imuzzCount < 19; ++imuzzCount)
+        // {   
+        //     WriteToLog("Inserindo municao " + ammoTypeName + " no pente... " + imuzzCount);
+        //     magM4.PushCartridgeToChamber(imuzzCount, 0, ammoTypeName);
+        // }  
+        
+        // FUNCIONA MAS SEM BALA NO CHAMBER
+        // EntityAI mag = m4.GetInventory().CreateAttachment("Mag_STANAG_30Rnd");
+        // if (mag) {
+        //     Magazine castMag = Magazine.Cast(mag);
+        //     Weapon_Base weapon = Weapon_Base.Cast(m4);
+
+        //     if (castMag && weapon) {
+        //         castMag.ServerSetAmmoCount(20);
+                
+        //         // TENTATIVA FALHA DE BOTAR BALA NO CHAMBER
+        //         // string ammoTypeName = weapon.GetChamberAmmoTypeName(0); // obtém o nome da munição para esse slot, pode pegar do json
+        //         // if (ammoTypeName == "")
+        //         // {
+        //         //     WriteToLog("ammoTypeName não identificado. Usando Ammo_556x45");
+        //         //     ammoTypeName = "Ammo_556x45";
+        //         // }                 
+        //         // int muzzCount = weapon.GetMuzzleCount();
+        //         // WriteToLog("Quantidade suportada no chamber: " + muzzCount);
+        //         // for (int imuzzCount = 0; imuzzCount < muzzCount; ++imuzzCount)
+        //         // {   
+        //         //     WriteToLog("Inserindo municao " + ammoTypeName + " no chamber... " + imuzzCount);
+        //         //     weapon.PushCartridgeToChamber(imuzzCount, 0, ammoTypeName);
+        //         // }                
+
+        //         WriteToLog("M4A1 com carregador e munição na câmara pronta para disparo.");
+        //     } else {
+        //         WriteToLog("Erro ao converter carregador ou arma.");
+        //     }
+        // } else {
+        //     WriteToLog("Erro ao criar carregador na M4A1.");
+        // }
+
+
+        // // Carregador separado e seguro
+        // EntityAI mag = player.GetInventory().CreateInInventory("Mag_STANAG_30Rnd");
+        // Magazine castMag = Magazine.Cast(mag);
+        // if (castMag) {
+        //     castMag.ServerSetAmmoCount(20);
+        //     bool okToAdd = m4.GetInventory().CanAddAttachment(castMag);
+        //     if (okToAdd)
+        //         WriteToLog("Pode ser adicionado!");
+        //     else
+        //         WriteToLog("Não pode ser adicionado!");
+            
+        //     // Coloca a arma na mão antes de anexar o carregador, com delay
+        //     //GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(MoveWeaponToHandsAndAttachMag, 1000, false, player, m4, castMag);
+
+        //     // Tentativa 1 - Não funciona
+        //     // bool PredictiveTakeEntityAsAttachment = m4.PredictiveTakeEntityAsAttachment(castMag);
+        //     // if (PredictiveTakeEntityAsAttachment)
+        //     //     WriteToLog("M4A1 com carregador funcional carregado.");
+        //     // else
+        //     //     WriteToLog("Erro ao criar carregador M4A1.");
+
+        //     // // Tentativa 12 - Não funciona
+        //     // m4.LocalTakeEntityAsAttachment(mag);
+        //     // m4.ServerTakeEntityAsAttachment(mag);
+
+        //     //player.TakeEntityToHandsImpl(InventoryMode.LOCAL, mag);
+        //     // bool LocalTakeEntityToTargetAttachment = m4.LocalTakeEntityToTargetAttachment(mag);
+        //     // LocalTakeEntityToTargetAttachment (notnull EntityAI target, notnull EntityAI item)
+
+        //     // {
+        //     //         TakeEntityToHandsImpl(InventoryMode.LOCAL, item);
+        //     //     }
+                
+        //     //     void ServerTakeEntityToHands (EntityAI item)
+        //     //     {
+        //     //         TakeEntityToHandsImpl(InventoryMode.SERVER, item);
+        //     //     }
+            
+        // } else {
+        //     WriteToLog("Erro ao criar carregador M4A1.");
+        // }
+        WriteToLog("########################## ARMA M4A1 ##########################");
+
+        player.SetQuickBarEntityShortcut(m4, 0, true);
+
+        EntityAI AKM_Entity = player.GetInventory().CreateInInventory("AKM");
+        AKM_Entity.SetHealth(AKM_Entity.GetMaxHealth());		// Remove any damage from item
+        EntityAI Kobra = AKM_Entity.GetInventory().CreateAttachment("KobraOptic");	// set attachment
+        Kobra.GetInventory().CreateAttachment("Battery9V");							// add battary for attachment
+        AKM_Entity.GetInventory().CreateAttachment("AK_Bayonet");			// let's add some muzle attachment
+        AKM_Entity.GetInventory().CreateAttachment("AK_PlasticHndgrd");		// I hate to feel the smell of my hands, let's set handguard
+        AKM_Entity.GetInventory().CreateAttachment("AK_PlasticBttstck");	// I wish to kick zmbs a**es so I need the buttstock!
+        player.SetQuickBarEntityShortcut(AKM_Entity, 1, true);		// Set ours AKM to prime slot of quick bar.
+        Weapon wpn = Weapon.Cast(AKM_Entity);			// Now we cast or AKM to Weapon-instance class
+        Weapon_Base wpn_bs1 = Weapon_Base.Cast(wpn);	// For safe way recast to WeaponBase
+        Magazine magAKM = wpn_bs1.SpawnAttachedMagazine("Mag_AKM_Drum75Rnd");	// Attach mag to ours AKM = 75-1 (coz 1 cartrige placed ain camber
+        magAKM.LocalSetAmmoCount(magAKM.GetAmmoMax());		// Intent our Mag has full cap for local player instance
+        magAKM.ServerSetAmmoCount(magAKM.GetAmmoMax());		// Same fr Server instance
+        // On that stage we have a full AKM with mag and chambered!
+
+        // Munições adicionais
+        // for (int i = 0; i < 4; i++) {
+        //     EntityAI magExtra = player.GetInventory().CreateInInventory("Mag_STANAG_30Rnd");
+        //     Magazine magCasted = Magazine.Cast(magExtra);
+        //     if (magCasted)
+        //         magCasted.ServerSetAmmoCount(30);
+        // }
     }
 
-    // Cria o cinto
-    EntityAI belt = player.GetInventory().CreateInInventory("UtilityBelt");
+    // // Colete e pistola
+    // EntityAI vest = player.GetInventory().CreateInInventory("PlateCarrierVest");
+    // if (vest) {
+    //     vest.GetInventory().CreateAttachment("PlateCarrierHolster");
+    //     vest.GetInventory().CreateAttachment("PlateCarrierPouches");
 
-    // Cria a faca e anexa no slot do cinto
-    if (belt)
-    {
-        belt.GetInventory().CreateAttachment("CombatKnife");
-    }
+    //     EntityAI pistol = vest.GetInventory().CreateInInventory("Glock19");
+    //     if (pistol) {
+    //         EntityAI magPistol = player.GetInventory().CreateInInventory("Mag_Glock_15Rnd");
+    //         Magazine pistolMag = Magazine.Cast(magPistol);
+    //         if (pistolMag) {
+    //             pistolMag.ServerSetAmmoCount(15);
+    //             pistol.LocalTakeEntityAsAttachment(magPistol);
+    //         } else {
+    //             WriteToLog("Erro ao cast de Mag_Glock_15Rnd.");
+    //         }
+
+    //         pistol.GetInventory().CreateAttachment("PistolSuppressor");
+    //         pistol.GetInventory().CreateAttachment("UniversalLight");
+
+    //         player.SetQuickBarEntityShortcut(pistol, 3, true);
+    //     } else {
+    //         WriteToLog("Erro ao criar Glock19.");
+    //     }
+    // }
+
+    // // Munições soltas
+    // ref array<string> ammo = {
+    //     "Ammo_9x19", "Ammo_556x45", "Ammo_308WinTracer", "Ammo_762x39"
+    // };
+
+    // foreach (string a : ammo) {
+    //     player.GetInventory().CreateInInventory(a);
+    // }
+
+    // // Rifle Tundra
+    // EntityAI tundra = player.GetInventory().CreateInInventory("Winchester70");
+    // if (tundra) {
+    //     tundra.GetInventory().CreateAttachment("HuntingOptic");
+    //     tundra.GetInventory().CreateAttachment("ImprovisedSuppressor");
+    //     player.SetQuickBarEntityShortcut(tundra, 2, true);
+    // }
+
+    // // Rifle AKM
+    // EntityAI akm = player.GetInventory().CreateInInventory("AKM");
+    // if (akm) {
+    //     akm.GetInventory().CreateAttachment("KobraOptic");
+    //     akm.GetInventory().CreateAttachment("AK_WoodHandguard");
+    //     akm.GetInventory().CreateAttachment("AK_WoodBttstck");
+
+    //     EntityAI akmMag = player.GetInventory().CreateInInventory("Mag_AKM_Drum75Rnd");
+    //     Magazine akmMagCast = Magazine.Cast(akmMag);
+    //     if (akmMagCast) {
+    //         akmMagCast.ServerSetAmmoCount(75);
+    //         akm.LocalTakeEntityAsAttachment(akmMag);
+    //     } else {
+    //         WriteToLog("Erro ao cast de tambor AKM.");
+    //     }
+
+    //     player.GetInventory().CreateInInventory("Ammo_762x39");
+    //     player.SetQuickBarEntityShortcut(akm, 1, true);
+    // }
+
+    // // Cinto + faca
+    // EntityAI belt = player.GetInventory().CreateInInventory("UtilityBelt");
+    // if (belt)
+    //     belt.GetInventory().CreateAttachment("CombatKnife");
+
+    WriteToLog("Loadout padrão entregue com sucesso.");
 }
+
+
+
+
+
 
 
 void GiveAdminLoadout(PlayerBase player)
@@ -337,3 +504,61 @@ class LoadoutData {
     ref array<ref Explosive> explosives;
     ref array<ref LoadoutItem> items;
 }
+
+
+// Teste
+void TryAttachMagToWeapon(EntityAI weapon, Magazine mag)
+{
+    if (!weapon || !mag) {
+        WriteToLog("Erro: arma ou carregador nulo ao tentar anexar.");
+        return;
+    }
+
+    if (weapon.GetInventory().CanAddAttachment(mag)) {
+        // Usa LocalTakeEntityAsAttachment pois parece ser o método disponível
+        weapon.LocalTakeEntityAsAttachment(mag);
+        weapon.ServerTakeEntityAsAttachment(mag);
+        WriteToLog("Carregador anexado à M4A1 após delay.");
+    } else {
+        WriteToLog("Ainda não é possível anexar o carregador à M4A1.");
+    }
+}
+void MoveWeaponToHandsAndAttachMag(PlayerBase player, EntityAI weapon, Magazine mag)
+{
+    if (!player || !weapon || !mag) {
+        WriteToLog("Erro: jogador, arma ou carregador nulo.");
+        return;
+    }
+
+    // Garante que a arma está no inventário
+    //player.GetHumanInventory().TakeEntityToInventory(InventoryMode.LOCAL, weapon);
+
+    // Delay para garantir que a arma foi movida
+    GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(ForceWeaponToHands, 1000, false, player, weapon, mag);
+}
+
+void ForceWeaponToHands(PlayerBase player, EntityAI weapon, Magazine mag)
+{
+    WriteToLog("Tentando colocar arma nas mãos.");
+    player.LocalTakeEntityToHands(weapon);
+
+    // Outro delay para anexar o carregador
+    GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(TryAttachMagToWeapon, 1000, false, weapon, mag);
+}
+void ForceWeaponToHands(PlayerBase player, EntityAI item)
+{
+    WriteToLog("Tentando colocar item nas mãos.");
+    player.LocalTakeEntityToHands(item);
+}
+
+void ChaimberWeapon(Weapon_Base weapon)
+{
+    int muzzleIndex = weapon.GetCurrentMuzzle();
+    float ammoDamage;
+    string ammoTypeName;
+    Magazine magazine = weapon.GetMagazine(muzzleIndex);
+    magazine.LocalAcquireCartridge(ammoDamage, ammoTypeName);
+    
+    weapon.PushCartridgeToChamber(muzzleIndex, ammoDamage, ammoTypeName);		
+}
+

@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
 
 JSON_PATH = 'custom_loadouts.json'
+TMP_PATH = "custom_loadouts.tmp.json"
 
 def login_required(f):
     @wraps(f)
@@ -275,9 +276,12 @@ def export_loadouts_json():
         player_data["items"] = item_list
         full_data[player_id] = player_data
 
-    # Salvar em JSON
-    with open(JSON_PATH, "w", encoding="utf-8") as f:
+    # 1. Escreve num arquivo temporário
+    with open(TMP_PATH, "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2)
+
+    # 2. Substitui o original de forma atômica
+    os.replace(TMP_PATH, JSON_PATH)  # funciona como rename() com overwrite
 
     return True
 
