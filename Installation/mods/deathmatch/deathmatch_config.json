@@ -4,9 +4,7 @@
         "Active": false,
         "Region": "Ilha da prisão",
         "CustomMessage": "NÃO SAIA DA ILHA DA PRISÃO OU VOCÊ TOMARÁ DANO!",
-        "AreaMin": "2350 0 1000",
-        "AreaMax": "3000 0 1450",
-        "SafeZones": [
+        "SpawnZones": [
             "2672.192383, 3.129421, 1374.600342",
             "2651.712646, 1.712951, 1395.944336",
             "2608.701416, 2.664377, 1389.977295",
@@ -44,7 +42,7 @@
         "CustomMessage": "NÃO SAIA DA ILHA OU VOCÊ TOMARÁ DANO!",
         "AreaMin": "12896 0 2499",
         "AreaMax": "14310 0 3688",
-        "SafeZones": [
+        "SpawnZones": [
             "13265.220703, 3.239379, 3043.651367",
             "13102.581055, 12.738072, 3108.898193",
             "13034.583984, 17.983271, 3244.911621",
@@ -71,9 +69,7 @@
         "Active": false,
         "Region": "Ilha Urbana de Cherno",
         "CustomMessage": "NÃO SAIA DA ILHA DOS PRÉDIOS OU VOCÊ TOMARÁ DANO!",
-        "AreaMin": "6724.22 0 2416.88",
-        "AreaMax": "6860.63 0 2570.63",
-        "SafeZones": [
+        "SpawnZones": [
             "6771.701172, 3.011949, 2531.350342",
             "6758.121094, 3.011910, 2481.132812",
             "6770.675293, 3.197622, 2469.535156",
@@ -106,9 +102,7 @@
         "Active": false,
         "Region": "Airfiled full",
         "CustomMessage": "",
-        "AreaMin": "3465.00 0 9007.50",
-        "AreaMax": "5347.50 0 12285.00",
-        "SafeZones": [
+        "SpawnZones": [
             "4698.558594, 339.011963, 10267.247070",
             "4702.697754, 339.057953, 10354.048828",
             "4778.907715, 339.011841, 10355.979492",
@@ -207,9 +201,7 @@
         "Active": true,
         "Region": "Elektro",
         "CustomMessage": "",
-        "AreaMin": "9767.81 0 1481.25",
-        "AreaMax": "10446.5 0 2143.13",
-        "SafeZones": [
+        "SpawnZones": [
             "9844.203125, 6.011941, 1906.132324",
             "9865.412109, 6.021933, 1825.039062",
             "9862.911133, 6.355167, 1851.666504",
@@ -247,9 +239,7 @@
         "Active": false,
         "Region": "Novodmitrovsk",
         "CustomMessage": "",
-        "AreaMin": "11393 0 14511",
-        "AreaMax": "11774 0 14964",
-        "SafeZones": [
+        "SpawnZones": [
             "11685.089844, 57.528591, 14675.383789",
             "11677.737305, 61.245846, 14731.439453",
             "11621.760742, 60.292892, 14802.816406",

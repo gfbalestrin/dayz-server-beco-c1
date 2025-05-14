@@ -1,13 +1,28 @@
 class SafeZoneData {
-	string customMessage;
-	string regionStr;
-    vector areaMin;
-    vector areaMax;
-    ref array<vector> safeZones;
-	ref array<vector> wallZones;
+    int RegionId;
+	string Region;
+	string CustomMessage;
+	ref array<string> SpawnZones;
+	ref array<string> WallZones;
+	bool Active;
 
-    void SafeZoneData() {
-        safeZones = new array<vector>();
-		wallZones = new array<vector>();
+	ref array<vector> GetSpawnZoneVectors() {
+        ref array<vector> vecs = new array<vector>();
+        foreach (string s : SpawnZones) {
+            s.Replace(",", " "); 
+            vector v = s.ToVector();
+            vecs.Insert(v);
+        }
+        return vecs;
+    }
+
+    ref array<vector> GetWallZoneVectors() {
+        ref array<vector> vecs = new array<vector>();
+        foreach (string s : WallZones) {
+            s.Replace(",", " "); 
+            vector v = s.ToVector();
+            vecs.Insert(v);
+        }
+        return vecs;
     }
 }

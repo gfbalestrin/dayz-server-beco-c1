@@ -46,6 +46,7 @@ void main()
 
 class CustomMission: MissionServer
 {
+	string DeathMatchConfigJsonFile = "$mission:deathmatch_config.json";
 	ref array<string> FixedMessages;
 	float m_AdminCheckCooldown10 = 10.0;
 	float m_AdminCheckTimer10 = 0.0;
@@ -54,47 +55,47 @@ class CustomMission: MissionServer
 
 	string regionStr;
 	string customMessage;
-	vector areaMin;
-	vector areaMax;
-	ref array<vector> safeZones;	
+	ref array<vector> spawnZones;	
 	ref array<vector> wallZones;
 
 	void CustomMission()
 	{
+		ResetLog();
 		WriteToLog("CustomMission(): Inicializando CustomMission");
 
 		FixedMessages = new array<string>;
 		FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
 
-		ref SafeZoneData szData = LoadActiveRegionData("$mission:deathmatch_config.json");
+		ref SafeZoneData szData = LoadActiveRegionData(DeathMatchConfigJsonFile);
 		if (szData)
 		{
 			WriteToLog("CustomMission(): SafeZoneData carregado");
-			customMessage = szData.customMessage;
-			regionStr = szData.regionStr;
+			ToggleActiveRegion(DeathMatchConfigJsonFile);
 
-			if (szData.areaMin && szData.areaMax)
-			{
-				areaMin = szData.areaMin;
-				areaMax = szData.areaMax;
-				WriteToLog("CustomMission(): areaMin e areaMax atribuídos");
-			}
+			customMessage = szData.CustomMessage;
+			regionStr = szData.Region;
 
-			if (szData.safeZones)
+			if (szData.SpawnZones)
 			{
-				safeZones = szData.safeZones;
-				WriteToLog("CustomMission(): safeZones carregadas");
+				spawnZones = szData.GetSpawnZoneVectors();
+				WriteToLog("CustomMission(): spawnZones carregadas");
+				foreach (vector spawnZone : spawnZones) {
+					WriteToLog("spawnZone: " + spawnZone.ToString());
+				}
 			}
 			else
 			{
-				WriteToLog("CustomMission(): safeZones nulas, inicializando vazia");
-				safeZones = new array<vector>;
+				WriteToLog("CustomMission(): spawnZones nulas, inicializando vazia");
+				spawnZones = new array<vector>;
 			}
 
-			if (szData.wallZones)
+			if (szData.WallZones)
 			{
-				wallZones = szData.wallZones;
+				wallZones = szData.GetWallZoneVectors();
 				WriteToLog("CustomMission(): wallZones carregadas");
+				foreach (vector wallZone : wallZones) {
+					WriteToLog("wallZone: " + wallZone.ToString());
+				}
 			}
 			else
 			{
@@ -235,8 +236,8 @@ class CustomMission: MissionServer
 				{
 					WriteToLog("OnUpdate(): Verificando player: " + player.GetIdentity().GetName());
 
-					if (areaMin && areaMax)
-						CheckPlayerArea(player, areaMin, areaMax);
+					if (wallZones)
+						CheckPlayerAreaPolygonal(player, wallZones);
 
 					if (msgs)
 					{
@@ -342,7 +343,12 @@ class CustomMission: MissionServer
 			m_player.GetStatEnergy().Set(4000);
 			m_player.GetStatWater().Set(4000);
 
-			vector safePosition = GetRandomSafeSpawnPosition(safeZones);
+			for (int i = 0; i < spawnZones.Count(); i++)
+			{
+				WriteToLog("spawnZone: " + spawnZones[i].ToString());
+			}
+
+			vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
 			WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString());
 			m_player.SetPosition(safePosition);
 			m_player.SetAllowDamage(true);

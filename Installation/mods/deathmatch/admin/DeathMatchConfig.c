@@ -1,84 +1,77 @@
 ref SafeZoneData LoadActiveRegionData(string path)
 {
-    WriteToLog("Iniciando carregamento do arquivo: " + path);
+	WriteToLog("Carregando arquivo JSON: " + path);
 
-    FileHandle file = OpenFile(path, FileMode.READ);
-    if (!file) {
-        WriteToLog("Arquivo não encontrado: " + path);
-        return null;
-    }
+	ref array<ref SafeZoneData> list;
+	JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, list);
 
-    string content, line;
-    while (FGets(file, line) > 0) {
-        content += line;
-    }
-    CloseFile(file);
-    WriteToLog("Conteúdo do arquivo carregado.");
+	foreach (ref SafeZoneData data : list) {
+		if (data && data.Active) {
+			WriteToLog("Região ativa encontrada:");
+			WriteToLog("Region: " + data.Region);
+			WriteToLog("Mensagem personalizada: " + data.CustomMessage);
+			WriteToLog("SpawnZones: " + data.SpawnZones.Count().ToString());
+			WriteToLog("WallZones: " + data.WallZones.Count().ToString());            
 
-    int startObj = content.IndexOf("{");
-    while (startObj != -1) {
-        int relEnd = content.Substring(startObj).IndexOf("}");
-        if (relEnd == -1) break;
+			return data;
+		}
+	}
 
-        int endObj = startObj + relEnd;
-        string objStr = content.Substring(startObj, endObj - startObj + 1);
+	WriteToLog("Nenhuma região ativa encontrada.");
+	return null;
+}
 
-        if (objStr.IndexOf("\"Active\":") != -1 && objStr.Substring(objStr.IndexOf("\"Active\":") + 9, 5).ToLower().Contains("true")) {
-            auto data = new SafeZoneData();
-            WriteToLog("Região ativa encontrada. Processando dados...");
+void ToggleActiveRegion(string path)
+{
+    WriteToLog("Carregando JSON de regiões: " + path);
 
-            data.regionStr = ExtractJsonStringValue(objStr, "\"Region\":");
-            WriteToLog("Region: " + data.regionStr);
+    ref array<ref SafeZoneData> zones;
+    JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, zones);
 
-            data.customMessage = ExtractJsonStringValue(objStr, "\"CustomMessage\":");
-            WriteToLog("Mensagem personalizada: " + data.customMessage);
-
-            data.areaMin = ExtractVectorFromJson(objStr, "\"AreaMin\":");
-            WriteToLog("Área mínima: " + data.areaMin.ToString());
-
-            data.areaMax = ExtractVectorFromJson(objStr, "\"AreaMax\":");
-            WriteToLog("Área máxima: " + data.areaMax.ToString());
-
-            ExtractVectorArray(objStr, "\"SafeZones\":", data.safeZones);
-            WriteToLog("SafeZones carregadas: " + data.safeZones.Count().ToString());
-
-            ExtractVectorArray(objStr, "\"WallZones\":", data.wallZones);
-            WriteToLog("WallZones carregadas: " + data.wallZones.Count().ToString());
-
-            return data;
+    int activeIndex = -1;
+    for (int i = 0; i < zones.Count(); i++) {
+        if (zones[i].Active) {
+            zones[i].Active = false;
+            activeIndex = i;
+            break;
         }
+    }
 
-        startObj = content.Substring(endObj + 1).IndexOf("{");
-        if (startObj != -1) {
-            startObj = endObj + 1 + startObj;
+    int nextIndex = (activeIndex + 1) % zones.Count(); // loop circular
+    zones[nextIndex].Active = true;
+
+    JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(path, zones);
+
+    WriteToLog("Região ativa alterada para: " + zones[nextIndex].Region);
+}
+
+void SetActiveRegionById(string path, int regionId)
+{
+    WriteToLog("Carregando JSON de regiões: " + path);
+
+    ref array<ref SafeZoneData> zones;
+    JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, zones);
+
+    bool found = false;
+
+    for (int i = 0; i < zones.Count(); i++) {
+        if (zones[i].RegionId == regionId) {
+            zones[i].Active = true;
+            found = true;
         } else {
-            startObj = -1;
+            zones[i].Active = false;
         }
     }
 
-    WriteToLog("Nenhuma região ativa encontrada.");
-    return null;
+    if (found) {
+        JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(path, zones);
+        WriteToLog("Região com RegionId " + regionId.ToString() + " foi marcada como ativa.");
+    } else {
+        WriteToLog("RegionId " + regionId.ToString() + " não encontrado no arquivo.");
+    }
 }
 
-string ExtractJsonStringValue(string json, string key)
-{
-    int idx = json.IndexOf(key);
-    if (idx == -1) return "";
 
-    string sub = json.Substring(idx + key.Length(), json.Length() - idx - key.Length());
-    int sQuote = sub.IndexOf("\"") + 1;
-    int eQuote = sub.Substring(sQuote).IndexOf("\"");
-
-    if (sQuote == -1 || eQuote == -1) return "";
-
-    return sub.Substring(sQuote, eQuote);
-}
-
-vector ExtractVectorFromJson(string json, string key)
-{
-    string raw = ExtractJsonStringValue(json, key);
-    return raw.ToVector();
-}
 
 void ExtractVectorArray(string json, string key, out array<vector> output)
 {
@@ -87,7 +80,7 @@ void ExtractVectorArray(string json, string key, out array<vector> output)
     int idx = json.IndexOf(key);
     if (idx == -1) return;
 
-    string sub = json.Substring(idx);
+    string sub = json.Substring(idx, json.Length() - idx);
     int sBracket = sub.IndexOf("[");
     int eBracket = sub.IndexOf("]");
     if (sBracket == -1 || eBracket == -1 || eBracket <= sBracket) return;
@@ -114,26 +107,59 @@ void ExtractVectorArray(string json, string key, out array<vector> output)
     }
 }
 
-vector GetRandomSafeSpawnPosition(array<vector> safeZones)
+vector GetRandomSafeSpawnPosition(array<vector> spawnZones)
 {
-    if (safeZones.Count() == 0) {
+    if (spawnZones.Count() == 0) {
         WriteToLog("Nenhuma zona segura disponível para spawn.");
         return "0 0 0";
     }
 
-    int index = Math.RandomInt(0, safeZones.Count());
-    WriteToLog("Posição segura selecionada: " + safeZones[index].ToString());
-    return safeZones[index];
+    int index = Math.RandomInt(0, spawnZones.Count());
+    WriteToLog("Posição segura selecionada: " + spawnZones[index].ToString());
+    return spawnZones[index];
 }
 
-void CheckPlayerArea(PlayerBase player, vector areaMin, vector areaMax)
+bool IsInsidePolygon(vector point, array<vector> polygon)
 {
-    vector pos = player.GetPosition();
-    if (pos[0] < areaMin[0] || pos[0] > areaMax[0] || pos[2] < areaMin[2] || pos[2] > areaMax[2]) {
-        string ammoType = "MeleeSlash";
-        player.ProcessDirectDamage(DT_CUSTOM, player, "", ammoType, "0 0 0", 5.0);
-        player.MessageImportant("VOCÊ SAIU DA ZONA SEGURA, VOLTE IMEDIATAMENTE POIS SUA VIDA IRÁ REDUZIR!");
+	if (polygon.Count() < 3)
+		return false;
 
-        WriteToLog("Jogador " + player.GetIdentity().GetName() + " saiu da zona segura. Posição: " + pos.ToString());
-    }
+	bool inside = false;
+
+	for (int i = 0; i < polygon.Count(); i++)
+	{
+		int j;
+		if (i == 0)
+			j = polygon.Count() - 1;
+		else
+			j = i - 1;
+
+		vector pi = polygon[i];
+		vector pj = polygon[j];
+
+		if (((pi[2] > point[2]) != (pj[2] > point[2])) && (point[0] < (pj[0] - pi[0]) * (point[2] - pi[2]) / ((pj[2] - pi[2]) + 0.0001) + pi[0]))
+		{
+			inside = !inside;
+		}
+	}
+
+	return inside;
+}
+
+
+void CheckPlayerAreaPolygonal(PlayerBase player, array<vector> wallZones)
+{
+	if (!player || wallZones.Count() < 3)
+		return;
+
+	vector pos = player.GetPosition();
+
+	bool inside = IsInsidePolygon(pos, wallZones);
+
+	if (!inside)
+	{
+		float damage = 50.0;
+		player.DecreaseHealth("GlobalHealth", "Health", damage);
+		WriteToLog("[SAFEZONE] Jogador " + player.GetIdentity().GetName() + " saiu da zona segura.");
+	}
 }

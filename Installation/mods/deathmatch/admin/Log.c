@@ -21,3 +21,12 @@ void WriteToLog(string content, string logfile = "init.log", bool internalCall =
 		}
 	}
 }
+void ResetLog(string logfile = "init.log")
+{
+	string fileName = "$profile:" + logfile;	
+	FileHandle clearFile = OpenFile(fileName, FileMode.WRITE);
+    if (clearFile != 0)
+        CloseFile(clearFile);
+	
+	WriteToLog("Arquivo de log resetado... " + fileName);
+}
