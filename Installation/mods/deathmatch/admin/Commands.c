@@ -1,6 +1,3 @@
-// Forward declaration para evitar erro de função indefinida
-void CreateRectangleFromCoords(vector minArea, vector maxArea, string objectType, float spacing, float heightOffset);
-
 void CheckAdminCommands()
 {
     string path = "$mission:admin_cmds.txt";
@@ -195,37 +192,24 @@ bool ExecuteCommand(TStringArray tokens)
                 CreateCustomObject(target, buildName, heightOffset, containerCount, containerLength, rotationOffset);
                 WriteToLog("construct", buildName);
             }
+            break;        
+        case "votemap":
+            if (tokens.Count() < 3) {
+                SendPrivateMessage(playerID, "Uso: !votar <ID do mapa>");
+                return false;
+            }
+
+            if (!IsInteger(tokens[2])) {
+                SendPrivateMessage(playerID, "ID inválido.");
+                return false;
+            }
+
+            int regionId = tokens[2].ToInt();
+            g_VoteManager.HandleVote(playerID, regionId);
             break;
-
-        case "construct_retangle":
-            if (tokens.Count() >= 5)
-            {	
-                string minAreaStr = tokens[3];
-                string maxAreaStr = tokens[4];
-
-                minAreaStr.Replace(";", " ");
-                maxAreaStr.Replace(";", " ");
-
-                vector minArea = minAreaStr.ToVector();
-                vector maxArea = maxAreaStr.ToVector();
-
-                CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 1.0);
-                CreateRectangleFromCoords(minArea, maxArea, "Land_Container_1Bo", 6.0, 3.5);
-                WriteToLog("construct_retangle", minArea.ToString() + " -> " + maxArea.ToString());
-            }
-            else
-            {
-                // Fallback para retângulo fixo se não passar coordenadas
-                array<vector> points = new array<vector>;
-                points.Insert("4187.81 0 10610.63".ToVector());
-                points.Insert("4336.88 0 10631.25".ToVector());
-                points.Insert("4314.38 0 10800.94".ToVector());
-                points.Insert("4130.63 0 10757.81".ToVector());
-
-                CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
-                CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
-                WriteToLog("construct_retangle", "usou pontos fixos");
-            }
+        
+        case "vote":
+            g_VoteManager.CheckCurrentVoting(playerID);
             break;
     }
 
@@ -246,5 +230,3 @@ bool IsInteger(string s)
 
     return true;
 }
-
-

@@ -61,6 +61,10 @@ void HandleWeaponLoadout(Weapons weapons, PlayerBase player, string playerId)
 
 void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot, string label, string playerId)
 {
+    bool possuiAttachments = false;
+    bool possuiMagazine = false;
+    bool possuiAmmo = false;
+
     EntityAI weaponEntity; 
     if (label == "primary")
         weaponEntity = player.GetHumanInventory().CreateInHands(weaponData.name_type);
@@ -72,9 +76,23 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         return;
     }
 
-    WriteToLog("Criada arma " + label + ": " + weaponData.name_type);
+    player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
 
+    WriteToLog("Criada arma " + label + ": " + weaponData.name_type);
     if (weaponData.attachments) {
+        if (weaponData.attachments.Count() > 0)
+            possuiAttachments = true;
+    }
+    if (weaponData.magazine) {
+        if (weaponData.magazine.name_type != "")
+            possuiMagazine = true;
+    }
+    if (weaponData.ammunitions) {
+        if (weaponData.ammunitions.name_type != "")
+            possuiAmmo = true;
+    }
+
+    if (possuiAttachments) {
         foreach (WeaponAttachment att : weaponData.attachments) {
             if (!att || att.name_type == "") continue;
 
@@ -90,6 +108,20 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
                 }
             } else {
                 WriteToLog("Falha ao anexar: " + att.name_type);
+                WriteToLog("Tentando criar no inventário do jogador...");
+                EntityAI attEntity2 = player.GetInventory().CreateInInventory(att.name_type);
+                if (attEntity2) {
+                    WriteToLog("Criado no inventário: " + att.name_type);
+                    if (att.battery) {
+                        EntityAI battery2 = attEntity2.GetInventory().CreateAttachment("Battery9V");
+                        if (battery2)
+                            WriteToLog("Bateria adicionada a: " + att.name_type);
+                        else
+                            WriteToLog("Falha ao adicionar bateria à: " + att.name_type);
+                    }
+                } else {
+                    WriteToLog("Falha ao anexar: " + att.name_type);
+                }
             }
         }
     }
@@ -100,22 +132,104 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         return;
     }
 
-    if (weaponData.magazine) {
+    if (possuiMagazine) {
         Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);
         if (!mag) {
-            WriteToLog("Falha ao anexar pente: " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type);
+            WriteToLog("Falha ao anexar pente " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type);
             return;
         }
+        
+        // FillInnerMagazine	(	string 	ammoType = "",
+        // int 	flags = WeaponWithAmmoFlags.CHAMBER 
+        // )	
 
-        int amountAmmo = mag.GetAmmoMax() - 1;
-        if (amountAmmo > 0) {
-            mag.LocalSetAmmoCount(amountAmmo);	
-            mag.ServerSetAmmoCount(amountAmmo);
-            WriteToLog("Pente carregado com " + amountAmmo.ToString() + " munições.");
-        }
+        
+        // FillChamber	(	string 	ammoType = "",
+        // int 	flags = WeaponWithAmmoFlags.CHAMBER 
+        // )		
+
+        //ForceSyncSelectionState
+
+        if (possuiAmmo)
+        {
+            // Funciona mas munição aleatória
+            int amountAmmo = mag.GetAmmoMax() - 1;
+            if (amountAmmo > 0) {
+                mag.LocalSetAmmoCount(amountAmmo);	
+                mag.ServerSetAmmoCount(amountAmmo);
+                WriteToLog("Pente carregado com " + amountAmmo.ToString() + " munições.");
+            }
+
+            // // Não funcionou
+            // mag.LocalSetAmmoCount(0);	
+            // mag.ServerSetAmmoCount(0);            
+            // weapon_base.FillInnerMagazine(weaponData.ammunitions.name_type, WeaponWithAmmoFlags.MAX_CAPACITY_MAG);
+
+        }        
+    } else if (weaponData.feed_type == "manual" && possuiAmmo) {
+        // Shotguns, revolvers
+        WriteToLog("Arma sem suporte a pente. Tentando criar munição no chamber... ");
+        // Funciona mas munição aleatória
+        //weapon_base.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER);	
+
+        int muzzCount = weapon_base.GetMuzzleCount();
+        WriteToLog("Quantidade suportada no chamber: " + muzzCount);
+        for (int imuzzCount = 0; imuzzCount < muzzCount; ++imuzzCount)
+        {   
+            WriteToLog("Inserindo municao " + weaponData.ammunitions.name_type + " no chamber... " + imuzzCount);
+            weapon_base.FillChamber(weaponData.ammunitions.name_type);
+        }   
+
+    } else if (weaponData.feed_type == "internal" && possuiAmmo) {
+        WriteToLog("Arma sem suporte a pente. Tentando criar munição no pente interno... ");
+        // Funciona mas munição aleatória
+        //weapon_base.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER);	
+
+        weapon_base.FillInnerMagazine(weaponData.ammunitions.name_type);
+    } else if (possuiAmmo)
+    {
+        WriteToLog("O tipo de alimentação da arma não foi identificado. Tentando criar munição com o método SpawnAmmo... ");
+        weapon_base.SpawnAmmo(weaponData.ammunitions.name_type, WeaponWithAmmoFlags.CHAMBER);
     }
 
-    player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
+    // Extra cria no inventário enquanto não tem customização
+    if (possuiMagazine)
+    {        
+        int qtdMagazineExtra = 3;
+        if (weaponData.magazine.slots > 4)
+            qtdMagazineExtra = 1;
+
+        WriteToLog("Criando pentes extras...");
+        for (int magExtraI = 0; magExtraI < qtdMagazineExtra; magExtraI++) {
+            EntityAI magExtra = player.GetInventory().CreateInInventory(weaponData.magazine.name_type);
+            if (!magExtra)
+            {
+                WriteToLog("Erro ao criar pente extra!");
+                break;
+            }
+            Magazine magExtraCast = Magazine.Cast(magExtra);
+            if (!magExtraCast)
+            {
+                WriteToLog("Erro ao criar pente extra!");
+                break;
+            }
+            magExtraCast.ServerSetAmmoCount(weaponData.magazine.capacity);
+            WriteToLog("Pente extra criado e carregado!");
+        }
+    }
+    if (possuiAmmo)
+    {
+        for (int ammoExtraI = 0; ammoExtraI < 5; ammoExtraI++) {
+            EntityAI ammoExtra = player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
+            if (!ammoExtra)
+            {
+                WriteToLog("Erro ao criar munição extra!");
+                break;
+            }
+        }
+        
+    }
+
 }
 
 
@@ -409,11 +523,6 @@ void GiveDefaultLoadout(PlayerBase player)
 }
 
 
-
-
-
-
-
 void GiveAdminLoadout(PlayerBase player)
 {
     player.GetInventory().CreateInInventory("TacticalShirt_Black");
@@ -429,75 +538,34 @@ void GiveAdminLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("BalaclavaMask_Black");
 }
 
-// ==== Classes ====
 
-class Explosive {
-    string name_type;
-    int slots;
-    int width;
-    int height;
-    int quantity;
-}
+// Criou o pente com munição bugada
+// Magazine CreateMagazineWithAmmo(string magType, string ammoType, int count, EntityAI target = null)
+// {
+// 	// Cria o magazine no inventário do player ou diretamente no mundo
+// 	Magazine mag;
+// 	if (target)
+// 		mag = Magazine.Cast(target.GetInventory().CreateInInventory(magType));
+// 	else
+// 		mag = Magazine.Cast(GetGame().CreateObject(magType, Vector(0,0,0)));
 
-class WeaponAttachment {
-    string name_type;
-    string type;
-    int slots;
-    int width;
-    int height;
-    bool battery;
-}
+// 	if (!mag) {
+// 		Print("Falha ao criar magazine: " + magType);
+// 		return null;
+// 	}
 
-class WeaponMagazine {
-    string name_type;
-    int capacity;
-    int slots;
-    int width;
-    int height;
-}
+// 	// Garante que está vazio antes de carregar
+// 	mag.ServerSetAmmoCount(0);
 
-class WeaponAmmunition {
-    string name_type;
-    int slots;
-    int width;
-    int height;
-}
+// 	// Adiciona as munições do tipo especificado
+// 	for (int i = 0; i < count; i++) {
+// 		bool success = mag.ServerStoreCartridge(0, ammoType);
+// 		if (!success) {
+// 			Print("Falha ao inserir munição '" + ammoType + "' no pente '" + magType + "'");
+// 			break;
+// 		}
+// 	}
 
-class WeaponData {
-    string name_type;
-    string feed_type;
-    int slots;
-    int width;
-    int height;
-    ref WeaponAmmunition ammunitions;
-    ref WeaponMagazine magazine;
-    ref array<ref WeaponAttachment> attachments;
-}
-
-class Weapons {
-    ref WeaponData primary_weapon;
-    ref WeaponData secondary_weapon;
-    ref WeaponData small_weapon;
-}
-
-class LoadoutItem {
-    string name_type;
-    string type_name;
-    int slots;
-    int width;
-    int height;
-    int storage_slots;
-    int storage_width;
-    int storage_height;
-    string localization;
-    ref array<ref LoadoutItem> subitems;
-}
-
-class LoadoutData {
-    ref Weapons weapons;
-    ref array<ref Explosive> explosives;
-    ref array<ref LoadoutItem> items;
-}
-
-
-
+// 	Print("Magazine '" + magType + "' criado com " + count.ToString() + " munições do tipo '" + ammoType + "'");
+// 	return mag;
+// }

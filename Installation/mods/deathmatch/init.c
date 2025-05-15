@@ -1,9 +1,13 @@
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Globals.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/SafeZoneData.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/LoadoutData.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Log.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Functions.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteManager.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Commands.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Classes.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/DeathMatchConfig.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Messages.c"
 
@@ -27,6 +31,10 @@ void main()
 	GetGame().GetWorld().GetDate(year, month, day, hour, minute);
 	WriteToLog("main(): Data atual -> " + year + "/" + month + "/" + day);
 
+	// Força o horário para 12:00
+	hour = 12;
+	minute = 0;
+
 	if ((month == reset_month) && (day < reset_day))
 	{
 		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day);
@@ -42,11 +50,18 @@ void main()
 		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day);
 		GetGame().GetWorld().SetDate(year, reset_month, reset_day, hour, minute);
 	}
+	else
+	{
+		// Mesmo se não for necessário ajustar a data, ainda força o horário para meio-dia
+		GetGame().GetWorld().SetDate(year, month, day, hour, minute);
+		WriteToLog("main(): Data mantida, horário ajustado para 12:00.");
+	}
 }
+
 
 class CustomMission: MissionServer
 {
-	string DeathMatchConfigJsonFile = "$mission:deathmatch_config.json";
+	
 	ref array<string> FixedMessages;
 	float m_AdminCheckCooldown10 = 10.0;
 	float m_AdminCheckTimer10 = 0.0;
@@ -64,20 +79,24 @@ class CustomMission: MissionServer
 		WriteToLog("CustomMission(): Inicializando CustomMission");
 
 		FixedMessages = new array<string>;
-		FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
+		//FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
 
-		ref SafeZoneData szData = LoadActiveRegionData(DeathMatchConfigJsonFile);
-		if (szData)
+		currentMap = LoadActiveRegionData(DeathMatchConfigJsonFile);
+		if (currentMap)
 		{
 			WriteToLog("CustomMission(): SafeZoneData carregado");
+
+			// Configura para próximo mapa
 			ToggleActiveRegion(DeathMatchConfigJsonFile);
+			// Instancia classe de votação
+			g_VoteManager = new VoteManager();
 
-			customMessage = szData.CustomMessage;
-			regionStr = szData.Region;
+			customMessage = currentMap.CustomMessage;
+			regionStr = currentMap.Region;
 
-			if (szData.SpawnZones)
+			if (currentMap.SpawnZones)
 			{
-				spawnZones = szData.GetSpawnZoneVectors();
+				spawnZones = currentMap.GetSpawnZoneVectors();
 				WriteToLog("CustomMission(): spawnZones carregadas");
 				foreach (vector spawnZone : spawnZones) {
 					WriteToLog("spawnZone: " + spawnZone.ToString());
@@ -89,9 +108,9 @@ class CustomMission: MissionServer
 				spawnZones = new array<vector>;
 			}
 
-			if (szData.WallZones)
+			if (currentMap.WallZones)
 			{
-				wallZones = szData.GetWallZoneVectors();
+				wallZones = currentMap.GetWallZoneVectors();
 				WriteToLog("CustomMission(): wallZones carregadas");
 				foreach (vector wallZone : wallZones) {
 					WriteToLog("wallZone: " + wallZone.ToString());
@@ -145,6 +164,15 @@ class CustomMission: MissionServer
 			if (text == "")
             	return;
 			
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em"))
+				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.IMPORTANT);
+			
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos") && !isVotingActive)
+			{
+				g_VoteManager.IniciaVotacao();	
+				return;
+			}
+			
 			if (text.Length() == 0 || text.Get(0) != "!")
 				return;
 
@@ -155,10 +183,7 @@ class CustomMission: MissionServer
 			}
 
 			TStringArray tokensCommands = new TStringArray;
-			text.Split(" ", tokensCommands);
-			if (tokensCommands.Count() < 2)
-				return;
-			
+			text.Split(" ", tokensCommands);			
 			tokensCommands[0] = tokensCommands[0].Substring(1, tokensCommands[0].Length() - 1);
 			string playerID = player.GetIdentity().GetId();
 			TStringArray tokens = new TStringArray;
@@ -169,46 +194,7 @@ class CustomMission: MissionServer
 		}
 	}
 
-	PlayerBase GetPlayerByName(string name)
-	{
-		array<Man> players = new array<Man>();
-		GetGame().GetPlayers(players);
-
-		foreach (Man man : players)
-		{
-			PlayerBase player = PlayerBase.Cast(man);
-			if (player && player.GetIdentity() && player.GetIdentity().GetName() == name)
-			{
-				return player;
-			}
-		}
-		return null;
-	}
-
-
-	PlayerBase GetPlayerByID(string id)
-	{
-		// Registra no log a busca
-		WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id);
-		array<Man> players = {};
-		GetGame().GetPlayers(players); // Pega todos os jogadores no servidor
-
-		// Itera sobre todos os jogadores para encontrar aquele com o ID fornecido
-		foreach (Man man : players)
-		{
-			PlayerBase player = PlayerBase.Cast(man); // Tenta converter o jogador
-			if (player && player.GetIdentity() && player.GetIdentity().GetId() == id)
-			{
-				// Se encontrar o jogador com o ID correto, registra e retorna o jogador
-				WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName());
-				return player;
-			}
-		}
-
-		// Se não encontrar, registra no log
-		WriteToLog("GetPlayerByID(): Jogador não encontrado");
-		return null;
-	}
+	
 
 
 	override void OnUpdate(float timeslice)

@@ -25,8 +25,15 @@ void ResetLog(string logfile = "init.log")
 {
 	string fileName = "$profile:" + logfile;	
 	FileHandle clearFile = OpenFile(fileName, FileMode.WRITE);
-    if (clearFile != 0)
+    
+    if (clearFile != -1)  // -1 é o valor de erro
+    {
         CloseFile(clearFile);
-	
-	WriteToLog("Arquivo de log resetado... " + fileName);
+        WriteToLog("Arquivo de log resetado... " + fileName);
+    }
+    else
+    {
+        WriteToLog("⚠️ Falha ao resetar o arquivo de log: " + fileName);
+    }
 }
+

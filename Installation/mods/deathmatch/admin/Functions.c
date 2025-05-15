@@ -1,0 +1,124 @@
+PlayerBase GetPlayerByName(string name)
+{
+    array<Man> players = new array<Man>();
+    GetGame().GetPlayers(players);
+
+    foreach (Man man : players)
+    {
+        PlayerBase player = PlayerBase.Cast(man);
+        if (player && player.GetIdentity() && player.GetIdentity().GetName() == name)
+        {
+            return player;
+        }
+    }
+    return null;
+}
+
+PlayerBase GetPlayerById(string id)
+{
+    // Registra no log a busca
+    WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id);
+    array<Man> players = {};
+    GetGame().GetPlayers(players); // Pega todos os jogadores no servidor
+
+    // Itera sobre todos os jogadores para encontrar aquele com o ID fornecido
+    foreach (Man man : players)
+    {
+        PlayerBase player = PlayerBase.Cast(man); // Tenta converter o jogador
+        if (player && player.GetIdentity() && player.GetIdentity().GetId() == id)
+        {
+            // Se encontrar o jogador com o ID correto, registra e retorna o jogador
+            WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName());
+            return player;
+        }
+    }
+
+    // Se não encontrar, registra no log
+    WriteToLog("GetPlayerByID(): Jogador não encontrado");
+    return null;
+}
+
+void SendPrivateMessage(string playerId, string message, MessageColor color = MessageColor.STATUS)
+{
+    PlayerBase player = GetPlayerById(playerId);
+    if (!player)
+        return;
+
+    switch (color)
+    {
+        case MessageColor.IMPORTANT:
+            player.MessageImportant(message);
+            break;
+        case MessageColor.FRIENDLY:
+            player.MessageFriendly(message);
+            break;
+        case MessageColor.WARNING:
+            Param1<string> msgParam = new Param1<string>(message);
+            GetGame().RPCSingleParam(player, ERPCs.RPC_USER_ACTION_MESSAGE, msgParam, true, player.GetIdentity());
+            break;
+        default:
+            player.MessageStatus(message); // azul
+            break;
+    }
+}
+
+void BroadcastMessage(string message, MessageColor color = MessageColor.STATUS, string playerID = "")
+{
+    WriteToLog("[DEBUG] BroadcastMessage: " + message);
+    array<Man> players = new array<Man>();
+    GetGame().GetPlayers(players);
+
+    foreach (Man man : players)
+    {
+        PlayerBase player = PlayerBase.Cast(man);
+        if (!player)
+            continue;
+        if (playerID != "" && player.GetIdentity().GetId() == playerID)
+            continue;
+
+        SendPrivateMessage(player.GetIdentity().GetId(), message, color);
+    }
+}
+
+
+void SetActiveRegionById(int regionId)
+{
+    WriteToLog("Carregando JSON de regiões: " + DeathMatchConfigJsonFile);
+
+    ref array<ref SafeZoneData> zones;
+    JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(DeathMatchConfigJsonFile, zones);
+
+    bool found = false;
+
+    for (int i = 0; i < zones.Count(); i++) {
+        if (zones[i].RegionId == regionId) {
+            zones[i].Active = true;
+            found = true;
+        } else {
+            zones[i].Active = false;
+        }
+    }
+
+    if (found) {
+        JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(DeathMatchConfigJsonFile, zones);
+        WriteToLog("Região com RegionId " + regionId.ToString() + " foi marcada como ativa.");
+    } else {
+        WriteToLog("RegionId " + regionId.ToString() + " não encontrado no arquivo.");
+    }
+}
+string Pluralize(int valor, string singular, string plural)
+{
+    string result = plural;
+    if (valor == 1)
+        result = singular;
+    return result;
+}
+
+string FormatTempo(int segundos)
+{
+    int minutos = segundos / 60;
+    int resto = segundos % 60;
+
+    //return minutos.ToString() + " " + Pluralize(minutos, "minuto", "minutos") + " e " + resto.ToString() + " " + Pluralize(resto, "segundo", "segundos");
+    return minutos.ToString() + " " + Pluralize(minutos, "minuto", "minutos") ;
+}

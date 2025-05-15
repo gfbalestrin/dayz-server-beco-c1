@@ -2,10 +2,9 @@ ref SafeZoneData LoadActiveRegionData(string path)
 {
 	WriteToLog("Carregando arquivo JSON: " + path);
 
-	ref array<ref SafeZoneData> list;
-	JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, list);
+	JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, maps);
 
-	foreach (ref SafeZoneData data : list) {
+	foreach (ref SafeZoneData data : maps) {
 		if (data && data.Active) {
 			WriteToLog("Região ativa encontrada:");
 			WriteToLog("Region: " + data.Region);
@@ -41,37 +40,10 @@ void ToggleActiveRegion(string path)
     zones[nextIndex].Active = true;
 
     JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(path, zones);
+    nextMap = zones[nextIndex];
 
     WriteToLog("Região ativa alterada para: " + zones[nextIndex].Region);
 }
-
-void SetActiveRegionById(string path, int regionId)
-{
-    WriteToLog("Carregando JSON de regiões: " + path);
-
-    ref array<ref SafeZoneData> zones;
-    JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(path, zones);
-
-    bool found = false;
-
-    for (int i = 0; i < zones.Count(); i++) {
-        if (zones[i].RegionId == regionId) {
-            zones[i].Active = true;
-            found = true;
-        } else {
-            zones[i].Active = false;
-        }
-    }
-
-    if (found) {
-        JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(path, zones);
-        WriteToLog("Região com RegionId " + regionId.ToString() + " foi marcada como ativa.");
-    } else {
-        WriteToLog("RegionId " + regionId.ToString() + " não encontrado no arquivo.");
-    }
-}
-
-
 
 void ExtractVectorArray(string json, string key, out array<vector> output)
 {

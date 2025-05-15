@@ -1,7 +1,7 @@
 [
     {
-        "RegionId": 0,
-        "Active": false,
+        "RegionId": 1,
+        "Active": true,
         "Region": "Ilha da prisão",
         "CustomMessage": "NÃO SAIA DA ILHA DA PRISÃO OU VOCÊ TOMARÁ DANO!",
         "SpawnZones": [
@@ -36,7 +36,7 @@
         "WallZones": []
     },
     {
-        "RegionId": 1,
+        "RegionId": 2,
         "Active": false,
         "Region": "Ilha de Skalisty",
         "CustomMessage": "NÃO SAIA DA ILHA OU VOCÊ TOMARÁ DANO!",
@@ -65,7 +65,7 @@
         "WallZones": []
     },
     {
-        "RegionId": 2,
+        "RegionId": 3,
         "Active": false,
         "Region": "Ilha Urbana de Cherno",
         "CustomMessage": "NÃO SAIA DA ILHA DOS PRÉDIOS OU VOCÊ TOMARÁ DANO!",
@@ -98,7 +98,7 @@
         "WallZones": []
     },
     {
-        "RegionId": 3,
+        "RegionId": 4,
         "Active": false,
         "Region": "Airfiled full",
         "CustomMessage": "",
@@ -197,8 +197,8 @@
         ]
     },
     {
-        "RegionId": 4,
-        "Active": true,
+        "RegionId": 5,
+        "Active": false,
         "Region": "Elektro",
         "CustomMessage": "",
         "SpawnZones": [
@@ -235,7 +235,7 @@
         ]
     },
     {
-        "RegionId": 5,
+        "RegionId": 6,
         "Active": false,
         "Region": "Novodmitrovsk",
         "CustomMessage": "",
