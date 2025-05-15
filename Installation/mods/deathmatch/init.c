@@ -31,8 +31,8 @@ void main()
 	GetGame().GetWorld().GetDate(year, month, day, hour, minute);
 	WriteToLog("main(): Data atual -> " + year + "/" + month + "/" + day);
 
-	// Força o horário para 12:00
-	hour = 12;
+	// Força o horário para 06:00
+	hour = 6;
 	minute = 0;
 
 	if ((month == reset_month) && (day < reset_day))
