@@ -5,6 +5,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Functions.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteMapManager.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteKickManager.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Commands.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
@@ -88,8 +89,10 @@ class CustomMission: MissionServer
 
 			// Configura para próximo mapa
 			ToggleActiveRegion(DeathMatchConfigJsonFile);
-			// Instancia classe de votação
+			// Instancia classe de votação de mapa
 			g_VoteMapManager = new VoteMapManager();
+			// Instancia classe de votação de kick
+			g_VoteKickManager = new VoteKickManager();
 
 			customMessage = currentMap.CustomMessage;
 			regionStr = currentMap.Region;
@@ -243,7 +246,8 @@ class CustomMission: MissionServer
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
 			{
-				AppendMessage(msgFixed);
+				if (!isVotingMapActive)
+					AppendMessage(msgFixed);
 			}
 			m_AdminCheckTimer60 = 0.0;
 		}

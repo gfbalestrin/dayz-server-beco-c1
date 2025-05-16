@@ -196,7 +196,8 @@ bool ExecuteCommand(TStringArray tokens)
             break;        
         case "votemap":
             if (tokens.Count() < 3) {
-                SendPrivateMessage(playerID, "Uso: !vote <ID do mapa>", MessageColor.WARNING);
+                g_VoteMapManager.CheckCurrentVotingMap(playerID);
+                SendPrivateMessage(playerID, "Uso: !votemap <ID do mapa>", MessageColor.WARNING);
                 return false;
             }
 
@@ -207,12 +208,7 @@ bool ExecuteCommand(TStringArray tokens)
 
             int regionId = tokens[2].ToInt();
             g_VoteMapManager.HandleVote(playerID, regionId);
-            break;
-        
-        case "vote":
-            g_VoteMapManager.CheckCurrentVotingMap(playerID);
-            break;
-        
+            break;        
         case "nextmap":  
             SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
             break;
@@ -221,6 +217,31 @@ bool ExecuteCommand(TStringArray tokens)
                 string linha = mapL.RegionId.ToString() + " - " + mapL.Region;                
                 SendPrivateMessage(playerID, linha, MessageColor.FRIENDLY);
             }
+            break;
+        case "votekick":
+            if (tokens.Count() < 3) {
+                g_VoteKickManager.ListarJogadoresOnline(playerID);
+                SendPrivateMessage(playerID, "Uso: !votekick <ID do jogador>", MessageColor.WARNING);
+                return false;
+            }
+
+            if (!IsInteger(tokens[2])) {
+                SendPrivateMessage(playerID, "ID inválido.", MessageColor.WARNING);
+                return false;
+            }
+
+            string targetId = tokens[2];
+            PlayerBase targetKick = null;
+            foreach (Man manKick : players)
+            {
+                PlayerBase playerKick = PlayerBase.Cast(manKick);
+                if (playerKick && playerKick.GetIdentity() && playerKick.GetIdentity().GetId() == targetId)
+                {
+                    targetKick = playerKick;
+                    break;
+                }
+            }
+            g_VoteKickManager.StartKickVote(playerID, targetId, targetKick.GetIdentity().GetName());
             break;
     }
 
