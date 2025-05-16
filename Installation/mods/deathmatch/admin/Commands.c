@@ -56,7 +56,7 @@ bool ExecuteCommand(TStringArray tokens)
             params = params + " " + tokens[iC];
         }
         string commandFull = command + " " + params;
-        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando" + commandFull, LogFile.INIT, false, LogType.INFO);
+        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + commandFull, LogFile.INIT, false, LogType.INFO);
     } else {
         WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
     }

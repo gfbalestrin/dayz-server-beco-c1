@@ -7,7 +7,8 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
     Car vehicle = Car.Cast(GetGame().CreateObject(vehicleType, pos));
     if (!vehicle)
     {
-        player.MessageStatus("⚠️ Falha ao spawnar veículo: " + vehicleType);
+        player.MessageStatus("Falha ao spawnar veículo: " + vehicleType);
+        WriteToLog("Falha ao spawnar veículo: " + vehicleType, LogFile.INIT, false, LogType.ERROR);
         return;
     }
 
@@ -40,6 +41,7 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
                 "CivSedanHood",
                 "CivSedanTrunk",
                 "CarRadiator",
+                "HeadlightH7",
                 "HeadlightH7"
             };
             break;
@@ -56,6 +58,7 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
                 "Sedan_02_Hood",
                 "Sedan_02_Trunk",
                 "CarRadiator",
+                "HeadlightH7",
                 "HeadlightH7"
             };
             break;
@@ -72,6 +75,24 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
                 "Hatchback_02_Hood",
                 "Hatchback_02_Trunk",
                 "CarRadiator",
+                "HeadlightH7",
+                "HeadlightH7"
+            };
+            break;
+        
+        case "Offroad_02":
+            battery = "CarBattery";
+            plug = "GlowPlug";
+            wheel = "Offroad_02_Wheel";
+            wheels = 5;
+            parts = {
+                "Offroad_02_Door_1_1",
+                "Offroad_02_Door_1_2",
+                "Offroad_02_Door_2_1",
+                "Offroad_02_Door_2_2",
+                "Offroad_02_Hood",
+                "Offroad_02_Trunk",
+                "HeadlightH7",
                 "HeadlightH7"
             };
             break;
@@ -89,7 +110,9 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
                 "Truck_01_WheelDouble",
                 "Truck_01_WheelDouble",
                 "Truck_01_WheelDouble",
-                "Truck_01_WheelDouble"
+                "Truck_01_WheelDouble",
+                "HeadlightH7",
+                "HeadlightH7"
             };
             break;
 
@@ -108,7 +131,7 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
     foreach (string part : parts)
         vehicle.GetInventory().CreateAttachment(part);
 
-    player.MessageStatus("🚗 Veículo spawnado com sucesso: " + vehicleType);
+    player.MessageStatus("Veículo spawnado com sucesso: " + vehicleType);
 
     // Salvar veículo na persistência
     GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SaveVehicle, 1000, false, vehicle);
