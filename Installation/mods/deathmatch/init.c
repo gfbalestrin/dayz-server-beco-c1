@@ -4,7 +4,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Log.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Functions.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteManager.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteMapManager.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Commands.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/PlayersLoadout.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
@@ -89,7 +89,7 @@ class CustomMission: MissionServer
 			// Configura para próximo mapa
 			ToggleActiveRegion(DeathMatchConfigJsonFile);
 			// Instancia classe de votação
-			g_VoteManager = new VoteManager();
+			g_VoteMapManager = new VoteMapManager();
 
 			customMessage = currentMap.CustomMessage;
 			regionStr = currentMap.Region;
@@ -168,11 +168,11 @@ class CustomMission: MissionServer
             	return;
 			
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em"))
-				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.IMPORTANT);
+				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.FRIENDLY);
 			
-			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos") && !isVotingActive)
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos") && !isVotingMapActive)
 			{
-				g_VoteManager.IniciaVotacao();	
+				g_VoteMapManager.IniciaVotacaoProximoMapa();	
 				return;
 			}
 			

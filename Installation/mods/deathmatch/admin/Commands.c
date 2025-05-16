@@ -196,25 +196,25 @@ bool ExecuteCommand(TStringArray tokens)
             break;        
         case "votemap":
             if (tokens.Count() < 3) {
-                SendPrivateMessage(playerID, "Uso: !vote <ID do mapa>");
+                SendPrivateMessage(playerID, "Uso: !vote <ID do mapa>", MessageColor.WARNING);
                 return false;
             }
 
             if (!IsInteger(tokens[2])) {
-                SendPrivateMessage(playerID, "ID inválido.");
+                SendPrivateMessage(playerID, "ID inválido.", MessageColor.WARNING);
                 return false;
             }
 
             int regionId = tokens[2].ToInt();
-            g_VoteManager.HandleVote(playerID, regionId);
+            g_VoteMapManager.HandleVote(playerID, regionId);
             break;
         
         case "vote":
-            g_VoteManager.CheckCurrentVoting(playerID);
+            g_VoteMapManager.CheckCurrentVotingMap(playerID);
             break;
         
         case "nextmap":  
-            SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region);
+            SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
             break;
         case "listmaps":          
             foreach (ref SafeZoneData mapL : maps) {
