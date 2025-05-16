@@ -130,8 +130,9 @@ void CheckPlayerAreaPolygonal(PlayerBase player, array<vector> wallZones)
 
 	if (!inside)
 	{
-		float damage = 50.0;
-		player.DecreaseHealth("GlobalHealth", "Health", damage);
+        player.DecreaseHealth("GlobalHealth", "Health", 20.0);
+        player.GetBleedingManagerServer().AttemptAddBleedingSourceBySelection("LeftArm");
+        SendPrivateMessage(player.GetIdentity().GetId(), "VOCÊ SAIU DA ZONA SEGURA E RECEBERÁ PENALIDADES!", MessageColor.IMPORTANT);
 		WriteToLog("[SAFEZONE] Jogador " + player.GetIdentity().GetName() + " saiu da zona segura.");
 	}
 }

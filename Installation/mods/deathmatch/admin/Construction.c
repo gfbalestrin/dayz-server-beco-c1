@@ -108,14 +108,14 @@ void CreateCustomObject(PlayerBase player, string buildName, float heightOffset 
 }
 
 // Cria objetos ao longo de uma linha entre dois pontos
-void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset)
+void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, float spacing, float heightOffset, float rotationOffset)
 {
     vector direction = endPos - startPos;
     float length = direction.Length();
     int count = Math.Floor(length / spacing);
     direction.Normalize();
 
-    float angle = Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG;
+    float angle = (Math.Atan2(direction[0], direction[2]) * Math.RAD2DEG) + rotationOffset;
 
     for (int i = 0; i <= count; i++)
     {
@@ -132,22 +132,122 @@ void CreateObjectsAlongLine(vector startPos, vector endPos, string objectName, f
 }
 
 // Cria objetos entre vários pontos sequenciais e fecha o caminho automaticamente
-void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0)
+void CreateLinePathFromPoints(array<vector> points, string objectName, float spacing = 6.0, float heightOffset = 1.0, float rotationOffset = 0.0)
 {
     if (points.Count() < 2) return;
 
     for (int i = 0; i < points.Count() - 1; i++)
     {
-        CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset);
+        CreateObjectsAlongLine(points[i], points[i + 1], objectName, spacing, heightOffset, rotationOffset);
     }
 
     // Fecha o polígono ligando o último ao primeiro
-    CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset);
+    CreateObjectsAlongLine(points[points.Count() - 1], points[0], objectName, spacing, heightOffset, rotationOffset);
 }
 
+// Verifica se ponto está dentro do polígono (Ray-Casting)
+bool IsInsidePolygonToRemove(vector point, array<vector> polygon)
+{
+	int count = polygon.Count();
+	bool inside = false;
 
+	float px = point[0];
+	float pz = point[2];
 
+	for (int i = 0, j = count - 1; i < count; j = i++)
+	{
+		float xi = polygon[i][0], zi = polygon[i][2];
+		float xj = polygon[j][0], zj = polygon[j][2];
 
+		float denom = zj - zi;
+		if (Math.AbsFloat(denom) < 0.00001)
+			denom = 0.00001;
 
+		bool intersect = ((zi > pz) != (zj > pz)) && (px < (xj - xi) * (pz - zi) / denom + xi);
+		if (intersect)
+			inside = !inside;
+	}
 
+	return inside;
+}
+
+// Calcula o centro do polígono
+vector CalculateCentroid(array<vector> polygon)
+{
+	if (!polygon || polygon.Count() == 0)
+		return "0 0 0";
+
+	vector center = "0 0 0";
+	foreach (vector p : polygon)
+	{
+		center += p;
+	}
+
+	float count = polygon.Count() * 1.0;
+    center[0] = center[0] / count;
+    center[1] = center[1] / count;
+    center[2] = center[2] / count;
+    
+    return center;
+}
+
+// Calcula o raio até o ponto mais distante
+float CalculateMaxDistanceFromCenter(vector center, array<vector> polygon)
+{
+	float maxDist = 0;
+	foreach (vector p : polygon)
+	{
+		float dist = vector.Distance(p, center);
+		if (dist > maxDist)
+			maxDist = dist;
+	}
+	return maxDist + 100; // margem extra
+}
+
+// Remove objetos fora do polígono
+void RemoveObjectsOutsidePolygon(array<vector> polygon)
+{
+    vector center = CalculateCentroid(polygon);
+    float radius = CalculateMaxDistanceFromCenter(center, polygon);
+
+    array<Object> objects = new array<Object>();
+    GetGame().GetObjectsAtPosition(center, radius, objects, null);
+
+    int removed = 0;
+
+    // Lista opcional para preservar certos objetos
+    array<string> blacklist = {
+        "Land_Container_1Bo"
+    };
+
+    foreach (Object obj : objects)
+    {
+        if (!obj || obj.IsMan() || obj.IsInherited(PlayerBase) || obj.IsTransport())
+            continue;
+
+        string className = obj.GetType();
+        if (blacklist.Find(className) != -1)
+            continue;
+
+        vector pos = obj.GetPosition();
+
+        if (!IsInsidePolygonToRemove(pos, polygon))
+        {
+            if (obj.IsInherited(BuildingBase))
+            {
+                // Tenta destruir a construção "matando" sua saúde
+                obj.SetHealth("", "Health", 0);
+                removed++;
+            }
+            else
+            {
+                // Remove objetos móveis normalmente
+                GetGame().ObjectDelete(obj);
+                removed++;
+            }
+        }
+    }
+
+    WriteToLog("RemoveObjectsOutsidePolygon(): Objetos removidos: " + removed.ToString());
+}
 

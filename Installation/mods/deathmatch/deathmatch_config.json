@@ -1,9 +1,9 @@
 [
     {
         "RegionId": 1,
-        "Active": true,
+        "Active": false,
         "Region": "Ilha da prisão",
-        "CustomMessage": "NÃO SAIA DA ILHA DA PRISÃO OU VOCÊ TOMARÁ DANO!",
+        "CustomMessage": "NÃO SAIA DA ILHA DA PRISÃO OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [
             "2672.192383, 3.129421, 1374.600342",
             "2651.712646, 1.712951, 1395.944336",
@@ -33,13 +33,21 @@
             "2752.633301, 1.322555, 1342.637207",
             "2717.519775, 2.653562, 1344.919312"
         ],
-        "WallZones": []
+        "WallZones": [
+            "2385.00, 0, 1061.25",
+            "2843.44, 0, 1045.31",
+            "3108.75, 0, 1203.75",
+            "2930.63, 0, 1426.88",
+            "2728.13, 0, 1428.75",
+            "2458.13, 0, 1484.06",
+            "2331.56, 0, 1273.13"
+        ]
     },
     {
         "RegionId": 2,
         "Active": false,
         "Region": "Ilha de Skalisty",
-        "CustomMessage": "NÃO SAIA DA ILHA OU VOCÊ TOMARÁ DANO!",
+        "CustomMessage": "NÃO SAIA DA ILHA OU VOCÊ LEVARÁ PENALIDADES!",
         "AreaMin": "12896 0 2499",
         "AreaMax": "14310 0 3688",
         "SpawnZones": [
@@ -62,13 +70,19 @@
             "13588.008789, 4.929696, 2794.426514",
             "13315.817383, 2.185764, 2807.378418"
         ],
-        "WallZones": []
+        "WallZones": [
+            "12941.25, 0, 2538.75",
+            "14287.50, 0, 2535.00",
+            "14216.25, 0, 3645.00",
+            "13233.75, 0, 3631.88",
+            "12851.25, 0, 3198.75"
+        ]
     },
     {
         "RegionId": 3,
-        "Active": false,
+        "Active": true,
         "Region": "Ilha Urbana de Cherno",
-        "CustomMessage": "NÃO SAIA DA ILHA DOS PRÉDIOS OU VOCÊ TOMARÁ DANO!",
+        "CustomMessage": "NÃO SAIA DA ILHA DOS PRÉDIOS OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [
             "6771.701172, 3.011949, 2531.350342",
             "6758.121094, 3.011910, 2481.132812",
@@ -95,13 +109,20 @@
             "6790.454102, 3.010732, 2461.013672",
             "6740.562012, 2.998896, 2450.029297"
         ],
-        "WallZones": []
+        "WallZones": [
+            "6739.22, 0, 2417.11",
+            "6764.06, 0, 2425.55",
+            "6860.16, 0, 2502.66",
+            "6856.41, 0, 2565.94",
+            "6723.52, 0, 2567.34",
+            "6723.05, 0, 2470.78"
+        ]
     },
     {
         "RegionId": 4,
         "Active": false,
         "Region": "Airfiled full",
-        "CustomMessage": "",
+        "CustomMessage": "NÃO ULTRAPASSE A ÁREA DEMARCADA DO AIRFILED OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [
             "4698.558594, 339.011963, 10267.247070",
             "4702.697754, 339.057953, 10354.048828",
@@ -200,7 +221,7 @@
         "RegionId": 5,
         "Active": false,
         "Region": "Elektro",
-        "CustomMessage": "",
+        "CustomMessage": "NÃO ULTRAPASSE A ÁREA DEMARCADA OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [
             "9844.203125, 6.011941, 1906.132324",
             "9865.412109, 6.021933, 1825.039062",
@@ -238,7 +259,7 @@
         "RegionId": 6,
         "Active": false,
         "Region": "Novodmitrovsk",
-        "CustomMessage": "",
+        "CustomMessage": "NÃO ULTRAPASSE A ÁREA DEMARCADA OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [
             "11685.089844, 57.528591, 14675.383789",
             "11677.737305, 61.245846, 14731.439453",

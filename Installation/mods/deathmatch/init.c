@@ -130,9 +130,12 @@ class CustomMission: MissionServer
 				{
 					points.Insert(wallZones[i]);
 				}
-				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0);
-				CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5);
+				// CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0, 0.0);
+				// CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5, 0.0);
+				CreateLinePathFromPoints(points, "StaticObj_Roadblock_Wood_Long_DE", 3.0, 0.5, 90.0);
 				WriteToLog("CustomMission(): Wallzones construídas com sucesso");
+				// Remoção de objetos fora da área
+    			//RemoveObjectsOutsidePolygon(points);
 			}
 		}
 		else
@@ -193,9 +196,6 @@ class CustomMission: MissionServer
 			ExecuteCommand(tokens);
 		}
 	}
-
-	
-
 
 	override void OnUpdate(float timeslice)
 	{

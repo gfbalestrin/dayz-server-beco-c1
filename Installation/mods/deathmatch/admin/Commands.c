@@ -131,6 +131,7 @@ bool ExecuteCommand(TStringArray tokens)
 
         case "ghostmode":
             target.SetInvisible(true);
+            target.SetScale(0.0001);
             target.MessageStatus("🕵️ Você está invisível");
             WriteToLog("ghostmode");
             break;
@@ -195,7 +196,7 @@ bool ExecuteCommand(TStringArray tokens)
             break;        
         case "votemap":
             if (tokens.Count() < 3) {
-                SendPrivateMessage(playerID, "Uso: !votar <ID do mapa>");
+                SendPrivateMessage(playerID, "Uso: !vote <ID do mapa>");
                 return false;
             }
 
@@ -210,6 +211,16 @@ bool ExecuteCommand(TStringArray tokens)
         
         case "vote":
             g_VoteManager.CheckCurrentVoting(playerID);
+            break;
+        
+        case "nextmap":  
+            SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region);
+            break;
+        case "listmaps":          
+            foreach (ref SafeZoneData mapL : maps) {
+                string linha = mapL.RegionId.ToString() + " - " + mapL.Region;                
+                SendPrivateMessage(playerID, linha, MessageColor.FRIENDLY);
+            }
             break;
     }
 
