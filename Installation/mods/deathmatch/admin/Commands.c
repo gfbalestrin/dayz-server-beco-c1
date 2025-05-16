@@ -1,6 +1,6 @@
-void CheckAdminCommands()
+void CheckCommands()
 {
-    string path = "$mission:admin_cmds.txt";
+    string path = "$mission:admin/files/commands_to_execute.txt";
     FileHandle file = OpenFile(path, FileMode.READ);
     if (file == 0) return;
 

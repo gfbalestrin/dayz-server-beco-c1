@@ -1,7 +1,7 @@
 array<string> CheckMessages()
 {
     array<string> msgs = new array<string>();
-    string path = "$mission:messages_to_send.txt";
+    string path = "$mission:admin/files/messages_to_send.txt";
 
     //WriteToLog("Verificando mensagens em: " + path, LogFile.INIT, false, LogType.DEBUG);
 

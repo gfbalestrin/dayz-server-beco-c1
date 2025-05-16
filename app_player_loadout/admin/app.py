@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
 from collections import defaultdict
 from functools import wraps
+from collections import deque
 import os
 import json
 import sqlite3
@@ -14,11 +15,11 @@ import chardet
 import html
 
 app = Flask(__name__)
-app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
 
-JSON_PATH = 'custom_loadouts.json'
-TMP_PATH = "custom_loadouts.tmp.json"
-LOG_PATH = "init.log"
+app.secret_key = '88cxW5E1J9PLP4lMcH1DxJpu2Af9nbuUvIn2e7kx'
+JSON_PATH = '/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.json'
+TMP_PATH = "/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.tmp.json"
+LOG_PATH = "/home/dayzadmin/servers/dayz-server/profiles/init.log"
 
 def login_required(f):
     @wraps(f)
@@ -69,7 +70,7 @@ def query_db(query, args=(), one=False):
 
 def detect_encoding(file_path):
     with open(file_path, 'rb') as f:
-        raw_data = f.read(4096)  # Lê os primeiros 4KB
+        raw_data = f.read(4096)
         result = chardet.detect(raw_data)
         return result['encoding'] or 'utf-8'
 
@@ -444,48 +445,63 @@ def log_viewer():
 
 @app.route('/logs')
 @login_required
-@admin_required
 def logs():
     def tail():
         last_inode = None
         last_size = 0
+        encoding = detect_encoding(LOG_PATH)
+        f = None
 
         while True:
             try:
+                if not os.path.exists(LOG_PATH):
+                    yield f"data: [INFO] Arquivo de log ainda não existe.\n\n"
+                    time.sleep(1)
+                    continue
+
                 stat = os.stat(LOG_PATH)
                 current_inode = stat.st_ino
                 current_size = stat.st_size
 
-                # Detecta reinício ou rotação de log
-                if current_inode != last_inode or current_size < last_size:
-                    f = open(LOG_PATH, 'r', encoding=detect_encoding(LOG_PATH), errors='replace')
+                # Abre o arquivo se ele for novo ou tiver sido rotacionado
+                if f is None or current_inode != last_inode or current_size < last_size:
+                    if f:
+                        f.close()
+                    f = open(LOG_PATH, 'r', encoding=encoding, errors='replace')
                     last_inode = current_inode
                     last_size = current_size
-                    f.seek(0, os.SEEK_END)  # Vai para o final se for novo
+                    f.seek(0, os.SEEK_END)
 
                 line = f.readline()
                 if not line:
                     time.sleep(0.5)
                     continue
 
-                last_size += len(line.encode('utf-8', errors='replace'))  # Acompanha o crescimento
+                last_size += len(line.encode(encoding, errors='replace'))
                 sanitized_line = html.escape(line.strip())
                 yield f"data: {sanitized_line}\n\n"
+
             except Exception as e:
                 yield f"data: [ERROR] Falha ao ler log: {html.escape(str(e))}\n\n"
                 time.sleep(2)
+            finally:
+                # opcional: feche o arquivo ao sair (caso use break futuramente)
+                pass
 
     return Response(tail(), mimetype='text/event-stream')
 
 @app.route('/logs/latest')
 @login_required
-@admin_required
 def latest_logs():
     try:
+        if not os.path.exists(LOG_PATH):
+            return jsonify({"error": "Arquivo de log não encontrado."}), 404
+
         encoding = detect_encoding(LOG_PATH)
         with open(LOG_PATH, 'r', encoding=encoding, errors='replace') as f:
-            lines = [html.escape(line.strip()) for line in f.readlines()[-50:]]
-        return jsonify(lines)
+            lines = deque(f, maxlen=50)
+            sanitized = [html.escape(line.strip()) for line in lines]
+        return jsonify(sanitized)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -211,7 +211,7 @@ class CustomMission: MissionServer
 			//WriteToLog("OnUpdate(): Executando verificação a cada 10s", LogFile.INIT, false, LogType.DEBUG);
 			m_AdminCheckTimer10 = 0.0;
 
-			CheckAdminCommands();
+			CheckCommands();
 			array<string> msgs = CheckMessages();
 
 			array<Man> players = new array<Man>;
