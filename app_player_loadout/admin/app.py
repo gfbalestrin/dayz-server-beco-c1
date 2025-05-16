@@ -10,6 +10,8 @@ import json
 import sqlite3
 import traceback
 import time
+import chardet
+import html
 
 app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
@@ -65,6 +67,11 @@ def query_db(query, args=(), one=False):
     conn.close()
     return (rv[0] if rv else None) if one else rv
 
+def detect_encoding(file_path):
+    with open(file_path, 'rb') as f:
+        raw_data = f.read(4096)  # Lê os primeiros 4KB
+        result = chardet.detect(raw_data)
+        return result['encoding'] or 'utf-8'
 
 def get_weapon_data(weapon_id, magazine_id, ammo_id, attachments):
     if not weapon_id:
@@ -287,8 +294,6 @@ def export_loadouts_json():
 
     return True
 
-
-
 def start_scheduler():
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=export_loadouts_json, trigger="interval", seconds=60)
@@ -438,18 +443,34 @@ def log_viewer():
     return render_template('log_viewer.html')
 
 @app.route('/logs')
+@login_required
+@admin_required
 def logs():
     def tail():
-        with open(LOG_PATH, 'r') as f:
-            f.seek(0, 2)  # Vai para o final do arquivo
+        encoding = detect_encoding(LOG_PATH)
+        with open(LOG_PATH, 'r', encoding=encoding, errors='replace') as f:
+            f.seek(0, 2)
             while True:
                 line = f.readline()
                 if not line:
                     time.sleep(0.5)
                     continue
-                yield f"data: {line.strip()}\n\n"
+                sanitized_line = html.escape(line.strip())
+                yield f"data: {sanitized_line}\n\n"
 
     return Response(tail(), mimetype='text/event-stream')
+
+@app.route('/logs/latest')
+@login_required
+@admin_required
+def latest_logs():
+    try:
+        encoding = detect_encoding(LOG_PATH)
+        with open(LOG_PATH, 'r', encoding=encoding, errors='replace') as f:
+            lines = [html.escape(line.strip()) for line in f.readlines()[-50:]]
+        return jsonify(lines)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Arma
 @app.route("/api/weapons")

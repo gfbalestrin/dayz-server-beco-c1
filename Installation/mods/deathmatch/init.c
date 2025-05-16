@@ -208,7 +208,7 @@ class CustomMission: MissionServer
 
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
-			WriteToLog("OnUpdate(): Executando verificação a cada 10s", LogFile.INIT, false, LogType.DEBUG);
+			//WriteToLog("OnUpdate(): Executando verificação a cada 10s", LogFile.INIT, false, LogType.DEBUG);
 			m_AdminCheckTimer10 = 0.0;
 
 			CheckAdminCommands();
@@ -216,14 +216,15 @@ class CustomMission: MissionServer
 
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
-			WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
+			if (players.Count() > 0)
+				WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
 
 			foreach (Man man : players)
 			{
 				PlayerBase player = PlayerBase.Cast(man);
 				if (player && player.GetIdentity())
 				{
-					WriteToLog("OnUpdate(): Verificando player: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
+					//WriteToLog("OnUpdate(): Validando player: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
 
 					if (wallZones)
 						CheckPlayerAreaPolygonal(player, wallZones);
@@ -241,8 +242,12 @@ class CustomMission: MissionServer
 		}
 
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
-		{
-			WriteToLog("OnUpdate(): Executando mensagens fixas e customizadas (60s)", LogFile.INIT, false, LogType.DEBUG);
+		{			
+			int year, month, day, hour, minute;
+			GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+			string time = hour.ToString() + ":" + minute.ToString();
+			WriteToLog("OnUpdate(): Horário atual do servidor: " + time, LogFile.INIT, false, LogType.DEBUG);
+			
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
 			{

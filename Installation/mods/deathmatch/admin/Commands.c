@@ -29,8 +29,6 @@ bool ExecuteCommand(TStringArray tokens)
     string playerID = tokens[0];
     string command = tokens[1];
     
-    WriteToLog("PlayerID " + playerID + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
-
     PlayerBase target = null;
     array<Man> players = {};
     GetGame().GetPlayers(players);
@@ -47,6 +45,21 @@ bool ExecuteCommand(TStringArray tokens)
 
     if (!target || !target.IsAlive()) 
         return false;
+    
+    if (tokens.Count() >= 3)
+    {
+        string params = tokens[2];
+        for (int iC = 0; iC < tokens.Count(); iC++) {
+            if (iC < 4)
+                continue;
+
+            params = params + " " + tokens[iC];
+        }
+        string commandFull = command + " " + params;
+        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando" + commandFull, LogFile.INIT, false, LogType.INFO);
+    } else {
+        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
+    }
 
     switch (command)
     {

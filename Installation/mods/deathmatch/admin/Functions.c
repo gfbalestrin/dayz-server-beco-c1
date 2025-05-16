@@ -16,8 +16,6 @@ PlayerBase GetPlayerByName(string name)
 
 PlayerBase GetPlayerById(string id)
 {
-    // Registra no log a busca
-    WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id, LogFile.INIT, false, LogType.DEBUG);
     array<Man> players = {};
     GetGame().GetPlayers(players); // Pega todos os jogadores no servidor
 

@@ -3,7 +3,7 @@ array<string> CheckMessages()
     array<string> msgs = new array<string>();
     string path = "$mission:messages_to_send.txt";
 
-    WriteToLog("Verificando mensagens em: " + path, LogFile.INIT, false, LogType.DEBUG);
+    //WriteToLog("Verificando mensagens em: " + path, LogFile.INIT, false, LogType.DEBUG);
 
     FileHandle file = OpenFile(path, FileMode.READ);
     if (file == 0) {
@@ -23,13 +23,14 @@ array<string> CheckMessages()
     }
 
     CloseFile(file);
-    WriteToLog("Mensagens lidas: " + count.ToString(), LogFile.INIT, false, LogType.DEBUG);
+    if (count > 0)
+        WriteToLog("Mensagens lidas: " + count.ToString(), LogFile.INIT, false, LogType.DEBUG);
 
     // Limpa o conteúdo do arquivo após leitura
     FileHandle clearFile = OpenFile(path, FileMode.WRITE);
     if (clearFile != 0) {
         CloseFile(clearFile); // Modo WRITE limpa o arquivo
-        WriteToLog("Arquivo de mensagens limpo após leitura.", LogFile.INIT, false, LogType.DEBUG);
+        //WriteToLog("Arquivo de mensagens limpo após leitura.", LogFile.INIT, false, LogType.DEBUG);
     } else {
         WriteToLog("Falha ao limpar o arquivo de mensagens: " + path, LogFile.INIT, false, LogType.ERROR);
     }
@@ -51,7 +52,7 @@ void AppendMessage(string message)
     if (file != 0) {
         FPrintln(file, message);
         CloseFile(file);
-        WriteToLog("Mensagem adicionada: " + message, LogFile.INIT, false, LogType.DEBUG);
+        //WriteToLog("Mensagem adicionada: " + message, LogFile.INIT, false, LogType.DEBUG);
     } else {
         WriteToLog("Erro ao abrir o arquivo para append: " + path, LogFile.INIT, false, LogType.ERROR);
     }

@@ -57,29 +57,86 @@
     </div>
 <div class="container mt-5">
     <h3 class="mb-3">Logs em Tempo Real</h3>
+    <!-- Filtros -->
+    <div class="mb-3">
+        <label class="me-3"><input type="checkbox" class="form-check-input" id="filter-debug" checked> DEBUG</label>
+        <label class="me-3"><input type="checkbox" class="form-check-input" id="filter-info" checked> INFO</label>
+        <label class="me-3"><input type="checkbox" class="form-check-input" id="filter-error" checked> ERROR</label>
+    </div>
     <div id="log-box"></div>
 </div>
 
 <script>
     const logBox = document.getElementById('log-box');
-    const eventSource = new EventSource('/logs');
 
-    eventSource.onmessage = function(event) {
-        const line = event.data;
+    const filters = {
+        debug: document.getElementById('filter-debug'),
+        info: document.getElementById('filter-info'),
+        error: document.getElementById('filter-error')
+    };
+
+    function formatLine(line) {
         let span = document.createElement('div');
 
         if (line.includes('[DEBUG]')) {
             span.className = 'debug';
+            span.dataset.level = 'debug';
         } else if (line.includes('[INFO]')) {
             span.className = 'info';
+            span.dataset.level = 'info';
         } else if (line.includes('[ERROR]')) {
             span.className = 'error';
+            span.dataset.level = 'error';
         }
 
         span.textContent = line;
-        logBox.appendChild(span);
-        logBox.scrollTop = logBox.scrollHeight;
+        return span;
+    }
+
+    function isVisible(level) {
+        return filters[level]?.checked;
+    }
+
+    function applyVisibility() {
+        document.querySelectorAll('#log-box div').forEach(div => {
+            const level = div.dataset.level;
+            div.style.display = isVisible(level) ? 'block' : 'none';
+        });
+    }
+
+    Object.values(filters).forEach(cb => cb.addEventListener('change', applyVisibility));
+
+    // Autoscroll logic
+    let autoScrollEnabled = true;
+
+    logBox.addEventListener('scroll', () => {
+        const nearBottom = logBox.scrollHeight - logBox.scrollTop - logBox.clientHeight < 50;
+        autoScrollEnabled = nearBottom;
+    });
+
+    function appendLogLine(line) {
+        const lineDiv = formatLine(line);
+        if (!isVisible(lineDiv.dataset.level)) lineDiv.style.display = 'none';
+        logBox.appendChild(lineDiv);
+        if (autoScrollEnabled) {
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+    }
+
+    // Carrega últimas 50 linhas
+    fetch('/logs/latest')
+        .then(response => response.json())
+        .then(lines => {
+            lines.forEach(line => appendLogLine(line));
+        });
+
+    // Streaming em tempo real
+    const eventSource = new EventSource('/logs');
+    eventSource.onmessage = function(event) {
+        appendLogLine(event.data);
     };
 </script>
+
+
 </body>
 </html>
