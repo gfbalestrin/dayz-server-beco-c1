@@ -253,7 +253,6 @@ class CustomMission: MissionServer
 		}
 	}
 
-
 	void SetRandomHealth(EntityAI itemEnt)
 	{
 		if (itemEnt)

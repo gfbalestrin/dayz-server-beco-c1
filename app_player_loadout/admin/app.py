@@ -1,6 +1,6 @@
 import requests
 import xml.etree.ElementTree as ET
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
 from werkzeug.security import check_password_hash, generate_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
 from collections import defaultdict
@@ -9,12 +9,14 @@ import os
 import json
 import sqlite3
 import traceback
+import time
 
 app = Flask(__name__)
 app.secret_key = 'xxxxxxxxxxxxxx'  # Altere para uma chave forte na produção
 
 JSON_PATH = 'custom_loadouts.json'
 TMP_PATH = "custom_loadouts.tmp.json"
+LOG_PATH = "init.log"
 
 def login_required(f):
     @wraps(f)
@@ -430,6 +432,24 @@ def index():
 
     # Renderizar a página com os dados obtidos
     return render_template('index.html')
+
+@app.route('/log_viewer')
+def log_viewer():
+    return render_template('log_viewer.html')
+
+@app.route('/logs')
+def logs():
+    def tail():
+        with open(LOG_PATH, 'r') as f:
+            f.seek(0, 2)  # Vai para o final do arquivo
+            while True:
+                line = f.readline()
+                if not line:
+                    time.sleep(0.5)
+                    continue
+                yield f"data: {line.strip()}\n\n"
+
+    return Response(tail(), mimetype='text/event-stream')
 
 # Arma
 @app.route("/api/weapons")

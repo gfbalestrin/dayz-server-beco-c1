@@ -30,7 +30,7 @@
             "battery": false
           },
           {
-            "name_type": "M4_PlasticHndgrd",
+            "name_type": "M4_MPHndgrd",
             "type": "handguard",
             "slots": 2,
             "width": 2,
@@ -38,7 +38,7 @@
             "battery": false
           },
           {
-            "name_type": "M4_CQBBttstck",
+            "name_type": "M4_MPBttstck",
             "type": "buttstock",
             "slots": 2,
             "width": 2,
@@ -54,7 +54,7 @@
             "battery": false
           },
           {
-            "name_type": "M68Optic",
+            "name_type": "ReflexOptic",
             "type": "scope",
             "slots": 2,
             "width": 2,
@@ -75,6 +75,12 @@
           "slots": 2,
           "width": 1,
           "height": 2
+        },
+        "ammunitions": {
+          "name_type": "Ammo_308Win",
+          "slots": 1,
+          "width": 1,
+          "height": 1
         },
         "attachments": [
           {
@@ -104,20 +110,13 @@
         ]
       },
       "small_weapon": {
-        "name_type": "MKII",
-        "feed_type": "magazine",
+        "name_type": "Magnum",
+        "feed_type": "manual",
         "slots": 8,
-        "width": 4,
-        "height": 2,
-        "magazine": {
-          "name_type": "Mag_MKII_10Rnd",
-          "capacity": 10,
-          "slots": 2,
-          "width": 1,
-          "height": 2
-        },
+        "width": 2,
+        "height": 4,
         "ammunitions": {
-          "name_type": "Ammo_22",
+          "name_type": "Ammo_357",
           "slots": 1,
           "width": 1,
           "height": 1
@@ -127,30 +126,30 @@
     "explosives": [
       {
         "name_type": "LandMineTrap",
-        "slots": 2,
+        "slots": 4,
         "width": 2,
-        "height": 4,
+        "height": 2,
         "quantity": 1
       },
       {
         "name_type": "M67Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "RDG2SmokeGrenade_White",
         "slots": 2,
         "width": 2,
-        "height": 4,
+        "height": 1,
         "quantity": 1
       }
     ],
     "items": [
       {
         "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
+        "type_name": "Equipamentos",
         "slots": 9,
         "width": 3,
         "height": 3,
@@ -161,25 +160,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -232,7 +231,20 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "torso",
-        "subitems": []
+        "subitems": [
+          {
+            "name_type": "PlateCarrierPouches_Black",
+            "type_name": "Coletes",
+            "slots": 24,
+            "width": 6,
+            "height": 4,
+            "storage_slots": 15,
+            "storage_width": 5,
+            "storage_height": 3,
+            "localization": "torso",
+            "subitems": []
+          }
+        ]
       },
       {
         "name_type": "GhillieSuit_Mossy",
@@ -271,6 +283,56 @@
         "subitems": []
       },
       {
+        "name_type": "MilitaryBelt",
+        "type_name": "Roupas",
+        "slots": 3,
+        "width": 3,
+        "height": 1,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "waist",
+        "subitems": [
+          {
+            "name_type": "NylonKnifeSheath",
+            "type_name": "Suprimentos",
+            "slots": 3,
+            "width": 3,
+            "height": 1,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "waist",
+            "subitems": [
+              {
+                "name_type": "CombatKnife",
+                "type_name": "Armas Brancas",
+                "slots": 3,
+                "width": 1,
+                "height": 3,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": "",
+                "subitems": []
+              }
+            ]
+          },
+          {
+            "name_type": "Canteen",
+            "type_name": "Suprimentos",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
+      },
+      {
         "name_type": "BandageDressing",
         "type_name": "Suprimentos",
         "slots": 2,
@@ -283,19 +345,7 @@
         "subitems": []
       },
       {
-        "name_type": "TetracyclineAntibiotics",
-        "type_name": "Suprimentos",
-        "slots": 2,
-        "width": 2,
-        "height": 1,
-        "storage_slots": 0,
-        "storage_width": 0,
-        "storage_height": 0,
-        "localization": "",
-        "subitems": []
-      },
-      {
-        "name_type": "Epinephrine",
+        "name_type": "BandageDressing",
         "type_name": "Suprimentos",
         "slots": 2,
         "width": 1,
@@ -340,6 +390,18 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "hands",
+        "subitems": []
+      },
+      {
+        "name_type": "Heatpack",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
         "subitems": []
       }
     ]
@@ -450,9 +512,9 @@
       },
       {
         "name_type": "M67Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 2
       }
     ],
@@ -470,25 +532,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -504,7 +566,7 @@
         "storage_slots": 0,
         "storage_width": 0,
         "storage_height": 0,
-        "localization": "torso",
+        "localization": "head",
         "subitems": []
       },
       {
@@ -733,50 +795,50 @@
         "subitems": [
           {
             "name_type": "UniversalLight",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 2,
             "width": 1,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
           },
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -987,14 +1049,14 @@
         "name_type": "FlashGrenade",
         "slots": 2,
         "width": 2,
-        "height": 4,
+        "height": 1,
         "quantity": 2
       },
       {
         "name_type": "RGD5Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 2
       }
     ],
@@ -1012,25 +1074,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -1371,28 +1433,28 @@
         "name_type": "FlashGrenade",
         "slots": 2,
         "width": 2,
-        "height": 4,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "RDG2SmokeGrenade_Black",
         "slots": 2,
-        "width": 2,
-        "height": 4,
+        "width": 1,
+        "height": 2,
         "quantity": 1
       },
       {
         "name_type": "M67Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       }
     ],
     "items": [
       {
         "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
+        "type_name": "Equipamentos",
         "slots": 9,
         "width": 3,
         "height": 3,
@@ -1403,25 +1465,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -1625,6 +1687,12 @@
           "width": 1,
           "height": 2
         },
+        "ammunitions": {
+          "name_type": "Ammo_308Win",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
         "attachments": [
           {
             "name_type": "ImprovisedSuppressor",
@@ -1670,21 +1738,78 @@
           "slots": 1,
           "width": 1,
           "height": 1
-        }
+        },
+        "attachments": [
+          {
+            "name_type": "M4_RISHndgrd_Black",
+            "type": "handguard",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_OEBttstck",
+            "type": "buttstock",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "GhillieAtt_Mossy",
+            "type": "ghillie",
+            "slots": 12,
+            "width": 4,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "ACOGOptic_6x",
+            "type": "scope",
+            "slots": 6,
+            "width": 3,
+            "height": 2,
+            "battery": false
+          }
+        ]
       },
       "small_weapon": {
         "name_type": "CZ75",
         "feed_type": "magazine",
         "slots": 6,
         "width": 3,
-        "height": 2
+        "height": 2,
+        "magazine": {
+          "name_type": "Mag_CZ75_15Rnd",
+          "capacity": 15,
+          "slots": 2,
+          "width": 1,
+          "height": 2
+        },
+        "ammunitions": {
+          "name_type": "Ammo_9x19",
+          "slots": 1,
+          "width": 1,
+          "height": 1
+        },
+        "attachments": [
+          {
+            "name_type": "FNP45_MRDSOptic",
+            "type": "scope",
+            "slots": 1,
+            "width": 1,
+            "height": 1,
+            "battery": true
+          }
+        ]
       }
     },
     "explosives": null,
     "items": [
       {
         "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
+        "type_name": "Equipamentos",
         "slots": 9,
         "width": 3,
         "height": 3,
@@ -1692,7 +1817,33 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "head",
-        "subitems": []
+        "subitems": [
+          {
+            "name_type": "NVGoggles",
+            "type_name": "Equipamentos",
+            "slots": 4,
+            "width": 2,
+            "height": 2,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": [
+              {
+                "name_type": "Battery9V",
+                "type_name": "Acessorios Extra",
+                "slots": 1,
+                "width": 1,
+                "height": 1,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": "",
+                "subitems": []
+              }
+            ]
+          }
+        ]
       },
       {
         "name_type": "BallisticHelmet_Green",
@@ -1801,6 +1952,42 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "hands",
+        "subitems": []
+      },
+      {
+        "name_type": "BandageDressing",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "Epinephrine",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "GhillieSuit_Woodland",
+        "type_name": "Mochilas",
+        "slots": 30,
+        "width": 6,
+        "height": 5,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "back",
         "subitems": []
       }
     ]
@@ -1939,7 +2126,7 @@
         "name_type": "FlashGrenade",
         "slots": 2,
         "width": 2,
-        "height": 4,
+        "height": 1,
         "quantity": 3
       }
     ],
@@ -1957,25 +2144,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -2145,25 +2332,49 @@
   "nRhBiJjrMtYme0c5mKk5khnwKSH5SjD40C8SBl9L4S4=": {
     "weapons": {
       "primary_weapon": {
-        "name_type": "FAL",
+        "name_type": "M4A1",
         "feed_type": "magazine",
         "slots": 24,
         "width": 8,
         "height": 3,
         "magazine": {
-          "name_type": "Mag_FAL_20Rnd",
-          "capacity": 20,
-          "slots": 2,
+          "name_type": "Mag_STANAG_30Rnd",
+          "capacity": 30,
+          "slots": 3,
           "width": 1,
-          "height": 2
+          "height": 3
         },
         "ammunitions": {
-          "name_type": "Ammo_308Win",
+          "name_type": "Ammo_556x45Tracer",
           "slots": 1,
           "width": 1,
           "height": 1
         },
         "attachments": [
+          {
+            "name_type": "M9A1_Bayonet",
+            "type": "compensator",
+            "slots": 3,
+            "width": 1,
+            "height": 3,
+            "battery": false
+          },
+          {
+            "name_type": "M4_MPHndgrd",
+            "type": "handguard",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "M4_CQBBttstck",
+            "type": "buttstock",
+            "slots": 2,
+            "width": 2,
+            "height": 1,
+            "battery": false
+          },
           {
             "name_type": "ACOGOptic_6x",
             "type": "scope",
@@ -2171,44 +2382,36 @@
             "width": 3,
             "height": 2,
             "battery": false
-          },
-          {
-            "name_type": "Fal_OeBttstck",
-            "type": "buttstock",
-            "slots": 3,
-            "width": 3,
-            "height": 1,
-            "battery": false
           }
         ]
       },
       "secondary_weapon": {
-        "name_type": "CZ550",
+        "name_type": "SVD",
         "feed_type": "magazine",
         "slots": 30,
         "width": 10,
         "height": 3,
         "magazine": {
-          "name_type": "Mag_CZ550_10Rnd",
+          "name_type": "Mag_SVD_10Rnd",
           "capacity": 10,
           "slots": 2,
           "width": 1,
           "height": 2
         },
         "ammunitions": {
-          "name_type": "Ammo_308Win",
+          "name_type": "Ammo_762x54Tracer",
           "slots": 1,
           "width": 1,
           "height": 1
         },
         "attachments": [
           {
-            "name_type": "HuntingOptic",
+            "name_type": "KazuarOptic",
             "type": "scope",
-            "slots": 4,
+            "slots": 12,
             "width": 4,
-            "height": 1,
-            "battery": false
+            "height": 3,
+            "battery": true
           }
         ]
       },
@@ -2230,16 +2433,63 @@
           "slots": 1,
           "width": 1,
           "height": 1
-        }
+        },
+        "attachments": [
+          {
+            "name_type": "PistolSuppressor",
+            "type": "suppressor",
+            "slots": 3,
+            "width": 3,
+            "height": 1,
+            "battery": false
+          },
+          {
+            "name_type": "TLRLight",
+            "type": "flashlight",
+            "slots": 1,
+            "width": 1,
+            "height": 1,
+            "battery": true
+          },
+          {
+            "name_type": "FNP45_MRDSOptic",
+            "type": "scope",
+            "slots": 1,
+            "width": 1,
+            "height": 1,
+            "battery": true
+          }
+        ]
       }
     },
     "explosives": [
       {
-        "name_type": "LandMineTrap",
+        "name_type": "RemoteDetonator",
         "slots": 2,
         "width": 2,
+        "height": 1,
+        "quantity": 1
+      },
+      {
+        "name_type": "Plastic_Explosive",
+        "slots": 6,
+        "width": 2,
+        "height": 3,
+        "quantity": 2
+      },
+      {
+        "name_type": "ImprovisedExplosive",
+        "slots": 12,
+        "width": 3,
         "height": 4,
-        "quantity": 5
+        "quantity": 1
+      },
+      {
+        "name_type": "ClaymoreMine",
+        "slots": 12,
+        "width": 3,
+        "height": 4,
+        "quantity": 1
       }
     ],
     "items": [
@@ -2256,25 +2506,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -2315,7 +2565,32 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "torso",
-        "subitems": []
+        "subitems": [
+          {
+            "name_type": "PlateCarrierPouches",
+            "type_name": "Coletes",
+            "slots": 30,
+            "width": 6,
+            "height": 5,
+            "storage_slots": 20,
+            "storage_width": 5,
+            "storage_height": 4,
+            "localization": "torso",
+            "subitems": []
+          },
+          {
+            "name_type": "PlateCarrierHolster",
+            "type_name": "Coletes",
+            "slots": 6,
+            "width": 2,
+            "height": 3,
+            "storage_slots": 0,
+            "storage_width": 0,
+            "storage_height": 0,
+            "localization": "",
+            "subitems": []
+          }
+        ]
       },
       {
         "name_type": "WoolGlovesFingerless_Black",
@@ -2327,6 +2602,18 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "hands",
+        "subitems": []
+      },
+      {
+        "name_type": "AliceBag_Camo",
+        "type_name": "Mochilas",
+        "slots": 42,
+        "width": 6,
+        "height": 7,
+        "storage_slots": 64,
+        "storage_width": 8,
+        "storage_height": 8,
+        "localization": "back",
         "subitems": []
       },
       {
@@ -2355,6 +2642,54 @@
       },
       {
         "name_type": "BandageDressing",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "Epinephrine",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "Epinephrine",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "Epinephrine",
+        "type_name": "Suprimentos",
+        "slots": 2,
+        "width": 1,
+        "height": 2,
+        "storage_slots": 0,
+        "storage_width": 0,
+        "storage_height": 0,
+        "localization": "",
+        "subitems": []
+      },
+      {
+        "name_type": "Epinephrine",
         "type_name": "Suprimentos",
         "slots": 2,
         "width": 1,
@@ -2500,23 +2835,23 @@
     "explosives": [
       {
         "name_type": "LandMineTrap",
-        "slots": 2,
+        "slots": 4,
         "width": 2,
-        "height": 4,
+        "height": 2,
         "quantity": 3
       },
       {
         "name_type": "M18SmokeGrenade_Green",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "M67Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       }
     ],
@@ -2534,25 +2869,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -2628,7 +2963,20 @@
             "storage_width": 0,
             "storage_height": 0,
             "localization": "waist",
-            "subitems": []
+            "subitems": [
+              {
+                "name_type": "CombatKnife",
+                "type_name": "Armas Brancas",
+                "slots": 3,
+                "width": 1,
+                "height": 3,
+                "storage_slots": 0,
+                "storage_width": 0,
+                "storage_height": 0,
+                "localization": "",
+                "subitems": []
+              }
+            ]
           },
           {
             "name_type": "Canteen",
@@ -2666,20 +3014,7 @@
         "storage_width": 0,
         "storage_height": 0,
         "localization": "foot",
-        "subitems": [
-          {
-            "name_type": "CombatKnife",
-            "type_name": "Itens gerais",
-            "slots": 3,
-            "width": 1,
-            "height": 3,
-            "storage_slots": 0,
-            "storage_width": 0,
-            "storage_height": 0,
-            "localization": "",
-            "subitems": []
-          }
-        ]
+        "subitems": []
       },
       {
         "name_type": "BandageDressing",
@@ -3033,30 +3368,30 @@
       },
       {
         "name_type": "ClaymoreMine",
-        "slots": 4,
+        "slots": 12,
         "width": 3,
-        "height": 12,
+        "height": 4,
         "quantity": 1
       },
       {
         "name_type": "ImprovisedExplosive",
-        "slots": 4,
+        "slots": 12,
         "width": 3,
-        "height": 12,
+        "height": 4,
         "quantity": 1
       },
       {
         "name_type": "M18SmokeGrenade_Red",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "Plastic_Explosive",
-        "slots": 3,
+        "slots": 6,
         "width": 2,
-        "height": 6,
+        "height": 3,
         "quantity": 1
       }
     ],
@@ -3074,25 +3409,25 @@
         "subitems": [
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
@@ -3296,9 +3631,9 @@
     "explosives": [
       {
         "name_type": "RGD5Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 2
       },
       {
@@ -3312,7 +3647,7 @@
     "items": [
       {
         "name_type": "NVGHeadstrap",
-        "type_name": "Itens gerais",
+        "type_name": "Equipamentos",
         "slots": 9,
         "width": 3,
         "height": 3,
@@ -3431,7 +3766,7 @@
         "subitems": [
           {
             "name_type": "CombatKnife",
-            "type_name": "Itens gerais",
+            "type_name": "Armas Brancas",
             "slots": 3,
             "width": 1,
             "height": 3,
@@ -3575,30 +3910,30 @@
     "explosives": [
       {
         "name_type": "LandMineTrap",
-        "slots": 2,
+        "slots": 4,
         "width": 2,
-        "height": 4,
+        "height": 2,
         "quantity": 2
       },
       {
         "name_type": "M67Grenade",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "M18SmokeGrenade_Red",
-        "slots": 1,
+        "slots": 2,
         "width": 2,
-        "height": 2,
+        "height": 1,
         "quantity": 1
       },
       {
         "name_type": "FlashGrenade",
         "slots": 2,
         "width": 2,
-        "height": 4,
+        "height": 1,
         "quantity": 1
       }
     ],
@@ -3616,50 +3951,50 @@
         "subitems": [
           {
             "name_type": "UniversalLight",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 2,
             "width": 1,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
           },
           {
             "name_type": "NVGoggles",
-            "type_name": "Itens gerais",
+            "type_name": "Equipamentos",
             "slots": 4,
             "width": 2,
             "height": 2,
             "storage_slots": 0,
             "storage_width": 0,
             "storage_height": 0,
-            "localization": null,
+            "localization": "",
             "subitems": [
               {
                 "name_type": "Battery9V",
-                "type_name": "Itens gerais",
+                "type_name": "Acessorios Extra",
                 "slots": 1,
                 "width": 1,
                 "height": 1,
                 "storage_slots": 0,
                 "storage_width": 0,
                 "storage_height": 0,
-                "localization": null,
+                "localization": "",
                 "subitems": []
               }
             ]
