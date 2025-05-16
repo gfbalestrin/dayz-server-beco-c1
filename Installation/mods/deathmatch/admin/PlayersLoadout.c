@@ -5,17 +5,17 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
 
     JsonFileLoader<map<string, ref LoadoutData>>.JsonLoadFile(jsonPath, loadoutMap);
     if (!loadoutMap || !loadoutMap.Contains(playerId)) {
-        WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId);
+        WriteToLog("Nenhum loadout personalizado para o jogador com playerId: " + playerId, LogFile.INIT, false, LogType.INFO);
         return false;
     }    
 
     LoadoutData data = loadoutMap.Get(playerId);
     if (!data) {
-        WriteToLog("Erro ao obter dados de loadout para: " + playerId);
+        WriteToLog("Erro ao obter dados de loadout para: " + playerId, LogFile.INIT, false, LogType.ERROR);
         return false;
     }
 
-    WriteToLog("Iniciando custom loadout");
+    WriteToLog("Iniciando custom loadout para player " + playerId, LogFile.INIT, false, LogType.INFO);
 
     // Itens extras
     if (data.items) {
@@ -29,19 +29,19 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
 
     // Explosivos
     if (data.explosives) {
-        WriteToLog("Criando explosivos...");
+        WriteToLog("Criando explosivos...", LogFile.INIT, false, LogType.INFO);
         foreach (Explosive explosive : data.explosives) {
             for (int e = 0; e < explosive.quantity; e++) {
                 EntityAI ex = player.GetInventory().CreateInInventory(explosive.name_type);
                 if (ex)
-                    WriteToLog("Criado explosivo: " + explosive.name_type);
+                    WriteToLog("Criado explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
                 else
-                    WriteToLog("Erro ao criar explosivo: " + explosive.name_type);
+                    WriteToLog("Erro ao criar explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.ERROR);
             }
         }
     }
 
-    WriteToLog("Loadout aplicado com sucesso");
+    WriteToLog("Loadout aplicado com sucesso", LogFile.INIT, false, LogType.INFO);
     return true;
 }
 
@@ -72,13 +72,13 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         weaponEntity = player.GetInventory().CreateInInventory(weaponData.name_type);
 
     if (!weaponEntity) {
-        WriteToLog("Falha ao criar arma: " + weaponData.name_type);
+        WriteToLog("Falha ao criar arma: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
         return;
     }
 
     player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
 
-    WriteToLog("Criada arma " + label + ": " + weaponData.name_type);
+    WriteToLog("Criada arma " + label + ": " + weaponData.name_type, LogFile.INIT, false, LogType.INFO);
     if (weaponData.attachments) {
         if (weaponData.attachments.Count() > 0)
             possuiAttachments = true;
@@ -98,29 +98,29 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
 
             EntityAI attEntity = weaponEntity.GetInventory().CreateAttachment(att.name_type);
             if (attEntity) {
-                WriteToLog("Anexado: " + att.name_type);
+                WriteToLog("Anexado: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                 if (att.battery) {
                     EntityAI battery = attEntity.GetInventory().CreateAttachment("Battery9V");
                     if (battery)
-                        WriteToLog("Bateria adicionada a: " + att.name_type);
+                        WriteToLog("Bateria adicionada a: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                     else
-                        WriteToLog("Falha ao adicionar bateria à: " + att.name_type);
+                        WriteToLog("Falha ao adicionar bateria à: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                 }
             } else {
-                WriteToLog("Falha ao anexar: " + att.name_type);
-                WriteToLog("Tentando criar no inventário do jogador...");
+                WriteToLog("Falha ao anexar: " + att.name_type, LogFile.INIT, false, LogType.ERROR);
+                WriteToLog("Tentando criar no inventário do jogador...", LogFile.INIT, false, LogType.INFO);
                 EntityAI attEntity2 = player.GetInventory().CreateInInventory(att.name_type);
                 if (attEntity2) {
-                    WriteToLog("Criado no inventário: " + att.name_type);
+                    WriteToLog("Criado no inventário: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                     if (att.battery) {
                         EntityAI battery2 = attEntity2.GetInventory().CreateAttachment("Battery9V");
                         if (battery2)
-                            WriteToLog("Bateria adicionada a: " + att.name_type);
+                            WriteToLog("Bateria adicionada a: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                         else
-                            WriteToLog("Falha ao adicionar bateria à: " + att.name_type);
+                            WriteToLog("Falha ao adicionar bateria à: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                     }
                 } else {
-                    WriteToLog("Falha ao anexar: " + att.name_type);
+                    WriteToLog("Falha ao anexar: " + att.name_type, LogFile.INIT, false, LogType.ERROR);
                 }
             }
         }
@@ -128,14 +128,14 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
 
     Weapon_Base weapon_base = Weapon_Base.Cast(weaponEntity);
     if (!weapon_base) {
-        WriteToLog("Falha no cast de Weapon_Base para: " + weaponData.name_type);
+        WriteToLog("Falha no cast de Weapon_Base para: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
         return;
     }
 
     if (possuiMagazine) {
         Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);
         if (!mag) {
-            WriteToLog("Falha ao anexar pente " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type);
+            WriteToLog("Falha ao anexar pente " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
             return;
         }
         
@@ -157,7 +157,7 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
             if (amountAmmo > 0) {
                 mag.LocalSetAmmoCount(amountAmmo);	
                 mag.ServerSetAmmoCount(amountAmmo);
-                WriteToLog("Pente carregado com " + amountAmmo.ToString() + " munições.");
+                WriteToLog("Pente carregado com " + amountAmmo.ToString() + " munições.", LogFile.INIT, false, LogType.INFO);
             }
 
             // // Não funcionou
@@ -168,27 +168,27 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         }        
     } else if (weaponData.feed_type == "manual" && possuiAmmo) {
         // Shotguns, revolvers
-        WriteToLog("Arma sem suporte a pente. Tentando criar munição no chamber... ");
+        WriteToLog("Arma sem suporte a pente. Tentando criar munição no chamber... ", LogFile.INIT, false, LogType.INFO);
         // Funciona mas munição aleatória
         //weapon_base.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER);	
 
         int muzzCount = weapon_base.GetMuzzleCount();
-        WriteToLog("Quantidade suportada no chamber: " + muzzCount);
+        WriteToLog("Quantidade suportada no chamber: " + muzzCount, LogFile.INIT, false, LogType.INFO);
         for (int imuzzCount = 0; imuzzCount < muzzCount; ++imuzzCount)
         {   
-            WriteToLog("Inserindo municao " + weaponData.ammunitions.name_type + " no chamber... " + imuzzCount);
+            WriteToLog("Inserindo municao " + weaponData.ammunitions.name_type + " no chamber... " + imuzzCount, LogFile.INIT, false, LogType.INFO);
             weapon_base.FillChamber(weaponData.ammunitions.name_type);
         }   
 
     } else if (weaponData.feed_type == "internal" && possuiAmmo) {
-        WriteToLog("Arma sem suporte a pente. Tentando criar munição no pente interno... ");
+        WriteToLog("Arma sem suporte a pente. Tentando criar munição no pente interno... ", LogFile.INIT, false, LogType.INFO);
         // Funciona mas munição aleatória
         //weapon_base.SpawnAmmo("", WeaponWithAmmoFlags.CHAMBER);	
 
         weapon_base.FillInnerMagazine(weaponData.ammunitions.name_type);
     } else if (possuiAmmo)
     {
-        WriteToLog("O tipo de alimentação da arma não foi identificado. Tentando criar munição com o método SpawnAmmo... ");
+        WriteToLog("O tipo de alimentação da arma não foi identificado. Tentando criar munição com o método SpawnAmmo... ", LogFile.INIT, false, LogType.INFO);
         weapon_base.SpawnAmmo(weaponData.ammunitions.name_type, WeaponWithAmmoFlags.CHAMBER);
     }
 
@@ -199,22 +199,22 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         if (weaponData.magazine.slots > 4)
             qtdMagazineExtra = 1;
 
-        WriteToLog("Criando pentes extras...");
+        WriteToLog("Criando pentes extras...", LogFile.INIT, false, LogType.INFO);
         for (int magExtraI = 0; magExtraI < qtdMagazineExtra; magExtraI++) {
             EntityAI magExtra = player.GetInventory().CreateInInventory(weaponData.magazine.name_type);
             if (!magExtra)
             {
-                WriteToLog("Erro ao criar pente extra!");
+                WriteToLog("Erro ao criar pente extra!", LogFile.INIT, false, LogType.ERROR);
                 break;
             }
             Magazine magExtraCast = Magazine.Cast(magExtra);
             if (!magExtraCast)
             {
-                WriteToLog("Erro ao criar pente extra!");
+                WriteToLog("Erro ao criar pente extra!", LogFile.INIT, false, LogType.ERROR);
                 break;
             }
             magExtraCast.ServerSetAmmoCount(weaponData.magazine.capacity);
-            WriteToLog("Pente extra criado e carregado!");
+            WriteToLog("Pente extra criado e carregado!", LogFile.INIT, false, LogType.INFO);
         }
     }
     if (possuiAmmo)
@@ -223,7 +223,7 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
             EntityAI ammoExtra = player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
             if (!ammoExtra)
             {
-                WriteToLog("Erro ao criar munição extra!");
+                WriteToLog("Erro ao criar munição extra!", LogFile.INIT, false, LogType.ERROR);
                 break;
             }
         }
@@ -238,15 +238,15 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
     EntityAI item;
 
     if (parent) {
-        WriteToLog("Criando item como attachment: " + itemData.name_type);
+        WriteToLog("Criando item como attachment: " + itemData.name_type, LogFile.INIT, false, LogType.INFO);
         item = parent.GetInventory().CreateAttachment(itemData.name_type);
     } else {
-        WriteToLog("Criando item no inventário: " + itemData.name_type);
+        WriteToLog("Criando item no inventário: " + itemData.name_type, LogFile.INIT, false, LogType.INFO);
         item = player.GetInventory().CreateInInventory(itemData.name_type);
     }
 
     if (!item) {
-        WriteToLog("Erro ao criar item: " + itemData.name_type);
+        WriteToLog("Erro ao criar item: " + itemData.name_type, LogFile.INIT, false, LogType.ERROR);
         return null;
     }
 
@@ -255,7 +255,7 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
             if (sub) {
                 CreateItemWithSubitems(item, sub, player);
             } else {
-                WriteToLog("Subitem nulo detectado para: " + itemData.name_type);
+                WriteToLog("Subitem nulo detectado para: " + itemData.name_type, LogFile.INIT, false, LogType.ERROR);
             }
         }
     }
@@ -266,7 +266,7 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
 
 void GiveDefaultLoadout(PlayerBase player)
 {
-    WriteToLog("Iniciando entrega de loadout padrão para o jogador.");
+    WriteToLog("Iniciando entrega de loadout padrão para o jogador.", LogFile.INIT, false, LogType.INFO);
 
     // Vestimenta e proteção
     ref array<string> roupas = {
@@ -277,9 +277,9 @@ void GiveDefaultLoadout(PlayerBase player)
     foreach (string itemName : roupas) {
         EntityAI item = player.GetInventory().CreateInInventory(itemName);
         if (item)
-            WriteToLog("Equipado: " + itemName);
+            WriteToLog("Equipado: " + itemName, LogFile.INIT, false, LogType.INFO);
         else
-            WriteToLog("Erro ao equipar: " + itemName);
+            WriteToLog("Erro ao equipar: " + itemName, LogFile.INIT, false, LogType.ERROR);
     }
 
     // Capacete + NVG
@@ -289,9 +289,9 @@ void GiveDefaultLoadout(PlayerBase player)
         nvg = helmet.GetInventory().CreateAttachment("NVGoggles");
         if (nvg) {
             nvg.GetInventory().CreateAttachment("Battery9V");
-            WriteToLog("NVG equipado com bateria.");
+            WriteToLog("NVG equipado com bateria.", LogFile.INIT, false, LogType.INFO);
         } else {
-            WriteToLog("Erro ao anexar NVG.");
+            WriteToLog("Erro ao anexar NVG.", LogFile.INIT, false, LogType.ERROR);
         }
     }
 
@@ -317,7 +317,6 @@ void GiveDefaultLoadout(PlayerBase player)
     player.GetInventory().CreateInInventory("AliceBag_Camo");
 
     // Arma primária: M4A1
-    WriteToLog("########################## ARMA M4A1 ##########################");
     EntityAI m4 = player.GetHumanInventory().CreateInHands("M4A1");
     //EntityAI m4 = player.GetInventory().CreateInInventory("M4A1");
     if (m4) {   
@@ -423,7 +422,6 @@ void GiveDefaultLoadout(PlayerBase player)
         // } else {
         //     WriteToLog("Erro ao criar carregador M4A1.");
         // }
-        WriteToLog("########################## ARMA M4A1 ##########################");
 
         player.SetQuickBarEntityShortcut(m4, 0, true);
 
@@ -519,7 +517,7 @@ void GiveDefaultLoadout(PlayerBase player)
     // if (belt)
     //     belt.GetInventory().CreateAttachment("CombatKnife");
 
-    WriteToLog("Loadout padrão entregue com sucesso.");
+    WriteToLog("Loadout padrão entregue com sucesso.", LogFile.INIT, false, LogType.INFO);
 }
 
 

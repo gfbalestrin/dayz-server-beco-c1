@@ -6,6 +6,17 @@ enum MessageColor
     FRIENDLY,   // verde
     WARNING      // amarelo (via RPC)
 }
+enum LogType
+{
+    DEBUG,
+    ERROR,
+    INFO
+}
+enum LogFile
+{
+    INIT,
+    POSITION
+}
 ref array<ref SafeZoneData> maps;
 ref SafeZoneData currentMap;
 ref SafeZoneData nextMap;

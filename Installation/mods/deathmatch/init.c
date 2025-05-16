@@ -14,23 +14,23 @@
 
 void main()
 {
-	WriteToLog("main(): Inicializando servidor...");
+	WriteToLog("main(): Inicializando servidor...", LogFile.INIT, false, LogType.INFO);
 
 	Hive ce = CreateHive();
 	if ( ce )
 	{
-		WriteToLog("main(): Hive criado com sucesso. Iniciando offline...");
+		WriteToLog("main(): Hive criado com sucesso. Iniciando offline...", LogFile.INIT, false, LogType.INFO);
 		ce.InitOffline();
 	}
 	else
 	{
-		WriteToLog("main(): Falha ao criar Hive.");
+		WriteToLog("main(): Falha ao criar Hive.", LogFile.INIT, false, LogType.ERROR);
 	}
 
 	int year, month, day, hour, minute;
 	int reset_month = 9, reset_day = 20;
 	GetGame().GetWorld().GetDate(year, month, day, hour, minute);
-	WriteToLog("main(): Data atual -> " + year + "/" + month + "/" + day);
+	WriteToLog("main(): Data atual -> " + year + "/" + month + "/" + day, LogFile.INIT, false, LogType.INFO);
 
 	// Força o horário para 06:00
 	hour = 6;
@@ -38,24 +38,24 @@ void main()
 
 	if ((month == reset_month) && (day < reset_day))
 	{
-		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day);
+		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day, LogFile.INIT, false, LogType.INFO);
 		GetGame().GetWorld().SetDate(year, reset_month, reset_day, hour, minute);
 	}
 	else if ((month == reset_month + 1) && (day > reset_day))
 	{
-		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day);
+		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day, LogFile.INIT, false, LogType.INFO);
 		GetGame().GetWorld().SetDate(year, reset_month, reset_day, hour, minute);
 	}
 	else if ((month < reset_month) || (month > reset_month + 1))
 	{
-		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day);
+		WriteToLog("main(): Ajustando data para " + reset_month + "/" + reset_day, LogFile.INIT, false, LogType.INFO);
 		GetGame().GetWorld().SetDate(year, reset_month, reset_day, hour, minute);
 	}
 	else
 	{
-		// Mesmo se não for necessário ajustar a data, ainda força o horário para meio-dia
+		// Mesmo se não for necessário ajustar a data, ainda força o horário para 06
 		GetGame().GetWorld().SetDate(year, month, day, hour, minute);
-		WriteToLog("main(): Data mantida, horário ajustado para 12:00.");
+		WriteToLog("main(): Data mantida, horário ajustado para 06:00.", LogFile.INIT, false, LogType.INFO);
 	}
 }
 
@@ -77,7 +77,7 @@ class CustomMission: MissionServer
 	void CustomMission()
 	{
 		ResetLog();
-		WriteToLog("CustomMission(): Inicializando CustomMission");
+		WriteToLog("CustomMission(): Inicializando CustomMission", LogFile.INIT, false, LogType.INFO);
 
 		FixedMessages = new array<string>;
 		//FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
@@ -85,7 +85,7 @@ class CustomMission: MissionServer
 		currentMap = LoadActiveRegionData(DeathMatchConfigJsonFile);
 		if (currentMap)
 		{
-			WriteToLog("CustomMission(): SafeZoneData carregado");
+			WriteToLog("CustomMission(): SafeZoneData carregado", LogFile.INIT, false, LogType.INFO);
 
 			// Configura para próximo mapa
 			ToggleActiveRegion(DeathMatchConfigJsonFile);
@@ -100,34 +100,34 @@ class CustomMission: MissionServer
 			if (currentMap.SpawnZones)
 			{
 				spawnZones = currentMap.GetSpawnZoneVectors();
-				WriteToLog("CustomMission(): spawnZones carregadas");
+				WriteToLog("CustomMission(): spawnZones carregadas", LogFile.INIT, false, LogType.INFO);
 				foreach (vector spawnZone : spawnZones) {
-					WriteToLog("spawnZone: " + spawnZone.ToString());
+					WriteToLog("spawnZone: " + spawnZone.ToString(), LogFile.INIT, false, LogType.DEBUG);
 				}
 			}
 			else
 			{
-				WriteToLog("CustomMission(): spawnZones nulas, inicializando vazia");
+				WriteToLog("CustomMission(): spawnZones nulas, inicializando vazia", LogFile.INIT, false, LogType.ERROR);
 				spawnZones = new array<vector>;
 			}
 
 			if (currentMap.WallZones)
 			{
 				wallZones = currentMap.GetWallZoneVectors();
-				WriteToLog("CustomMission(): wallZones carregadas");
+				WriteToLog("CustomMission(): wallZones carregadas", LogFile.INIT, false, LogType.INFO);
 				foreach (vector wallZone : wallZones) {
-					WriteToLog("wallZone: " + wallZone.ToString());
+					WriteToLog("wallZone: " + wallZone.ToString(), LogFile.INIT, false, LogType.DEBUG);
 				}
 			}
 			else
 			{
-				WriteToLog("CustomMission(): wallZones nulas, inicializando vazia");
+				WriteToLog("CustomMission(): wallZones nulas, inicializando vazia", LogFile.INIT, false, LogType.ERROR);
 				wallZones = new array<vector>;
 			}
 
 			if (wallZones.Count() > 0)
 			{
-				WriteToLog("CustomMission(): Construindo wallzones (" + wallZones.Count() + ")");
+				WriteToLog("CustomMission(): Construindo wallzones (" + wallZones.Count() + ")", LogFile.INIT, false, LogType.INFO);
 				array<vector> points = new array<vector>;
 				for (int i = 0; i < wallZones.Count(); i++)
 				{
@@ -136,14 +136,14 @@ class CustomMission: MissionServer
 				// CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 1.0, 0.0);
 				// CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5, 0.0);
 				CreateLinePathFromPoints(points, "StaticObj_Roadblock_Wood_Long_DE", 3.0, 0.5, 90.0);
-				WriteToLog("CustomMission(): Wallzones construídas com sucesso");
+				WriteToLog("CustomMission(): Wallzones construídas com sucesso", LogFile.INIT, false, LogType.INFO);
 				// Remoção de objetos fora da área
     			//RemoveObjectsOutsidePolygon(points);
 			}
 		}
 		else
 		{
-			WriteToLog("CustomMission(): Erro ao carregar SafeZoneData");
+			WriteToLog("CustomMission(): Erro ao carregar SafeZoneData", LogFile.INIT, false, LogType.ERROR);
 		}
 	}
 	
@@ -155,13 +155,13 @@ class CustomMission: MissionServer
 		{
 			ChatMessageEventParams chatParams = ChatMessageEventParams.Cast(params);
 			if (!chatParams) {
-				WriteToLog("[DEBUG] chatParams cast falhou.");
+				WriteToLog("chatParams cast falhou.", LogFile.INIT, false, LogType.ERROR);
 				return;
 			}
 
-			WriteToLog("[DEBUG] param1: " + chatParams.param1);
-			WriteToLog("[DEBUG] param2: " + chatParams.param2);
-			WriteToLog("[DEBUG] param3: " + chatParams.param3);
+			WriteToLog("param1: " + chatParams.param1, LogFile.INIT, false, LogType.DEBUG);
+			WriteToLog("param2: " + chatParams.param2, LogFile.INIT, false, LogType.DEBUG);
+			WriteToLog("param3: " + chatParams.param3, LogFile.INIT, false, LogType.DEBUG);
 
 			int channel = chatParams.param1;          // canal (ex: 0 = Global)
 			string playerName = chatParams.param2;    // nome do jogador
@@ -184,7 +184,7 @@ class CustomMission: MissionServer
 
 			PlayerBase player = GetPlayerByName(playerName);
 			if (!player) {
-				WriteToLog("[DEBUG] Player não identificado.");
+				WriteToLog("Player não identificado.", LogFile.INIT, false, LogType.ERROR);
 				return;
 			}
 
@@ -208,7 +208,7 @@ class CustomMission: MissionServer
 
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
-			WriteToLog("OnUpdate(): Executando verificação a cada 10s");
+			WriteToLog("OnUpdate(): Executando verificação a cada 10s", LogFile.INIT, false, LogType.DEBUG);
 			m_AdminCheckTimer10 = 0.0;
 
 			CheckAdminCommands();
@@ -216,14 +216,14 @@ class CustomMission: MissionServer
 
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
-			WriteToLog("OnUpdate(): Jogadores online: " + players.Count());
+			WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
 
 			foreach (Man man : players)
 			{
 				PlayerBase player = PlayerBase.Cast(man);
 				if (player && player.GetIdentity())
 				{
-					WriteToLog("OnUpdate(): Verificando player: " + player.GetIdentity().GetName());
+					WriteToLog("OnUpdate(): Verificando player: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
 
 					if (wallZones)
 						CheckPlayerAreaPolygonal(player, wallZones);
@@ -242,7 +242,7 @@ class CustomMission: MissionServer
 
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
 		{
-			WriteToLog("OnUpdate(): Executando mensagens fixas e customizadas (60s)");
+			WriteToLog("OnUpdate(): Executando mensagens fixas e customizadas (60s)", LogFile.INIT, false, LogType.DEBUG);
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
 			{
@@ -260,13 +260,13 @@ class CustomMission: MissionServer
 		{
 			float rndHlt = Math.RandomFloat(0.45, 0.65);
 			itemEnt.SetHealth01("", "", rndHlt);
-			WriteToLog("SetRandomHealth(): Item " + itemEnt.GetType() + " com vida aleatória: " + rndHlt);
+			WriteToLog("SetRandomHealth(): Item " + itemEnt.GetType() + " com vida aleatória: " + rndHlt, LogFile.INIT, false, LogType.DEBUG);
 		}
 	}
 
 	array<string> LoadAdminIDs(string filePath)
 	{
-		WriteToLog("LoadAdminIDs(): Carregando IDs do arquivo: " + filePath);
+		WriteToLog("LoadAdminIDs(): Carregando IDs do arquivo: " + filePath, LogFile.INIT, false, LogType.DEBUG);
 		array<string> ids = new array<string>;
 		FileHandle file = OpenFile(filePath, FileMode.READ);
 
@@ -280,30 +280,30 @@ class CustomMission: MissionServer
 					ids.Insert(line);
 			}
 			CloseFile(file);
-			WriteToLog("LoadAdminIDs(): IDs carregados: " + ids.Count());
+			WriteToLog("LoadAdminIDs(): IDs carregados: " + ids.Count(), LogFile.INIT, false, LogType.DEBUG);
 		}
 		else
 		{
-			WriteToLog("LoadAdminIDs(): Erro ao abrir o arquivo.");
+			WriteToLog("LoadAdminIDs(): Erro ao abrir o arquivo.", LogFile.INIT, false, LogType.ERROR);
 		}
 		return ids;
 	}
 
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
-		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName());
+		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);
 
 		Entity playerEnt = GetGame().CreatePlayer(identity, characterName, pos, 0, "NONE");
 		if (!playerEnt)
 		{
-			WriteToLog("CreateCharacter(): Erro ao criar player!");
+			WriteToLog("CreateCharacter(): Erro ao criar player!", LogFile.INIT, false, LogType.ERROR);
 			return null;
 		}
 
 		Class.CastTo(m_player, playerEnt);
 		if (!m_player)
 		{
-			WriteToLog("CreateCharacter(): Erro ao fazer cast para PlayerBase");
+			WriteToLog("CreateCharacter(): Erro ao fazer cast para PlayerBase", LogFile.INIT, false, LogType.ERROR);
 			return null;
 		}
 
@@ -312,18 +312,18 @@ class CustomMission: MissionServer
 		array<string> adminIDs = LoadAdminIDs("$mission:admin_ids.txt");
 		if (adminIDs.Find(identity.GetId()) != -1)
 		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " é admin.");
+			WriteToLog("CreateCharacter(): " + identity.GetName() + " é admin.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
 			GiveAdminLoadout(m_player);
 		}
 		else
 		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " é jogador comum.");
+			WriteToLog("CreateCharacter(): " + identity.GetName() + " é jogador comum.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
 
 			if (!GiveCustomLoadout(m_player, identity.GetId()))
 			{
-				WriteToLog("CreateCharacter(): Loadout customizado não encontrado. Aplicando padrão.");
+				WriteToLog("CreateCharacter(): Loadout customizado não encontrado. Aplicando padrão.", LogFile.INIT, false, LogType.DEBUG);
 				GiveDefaultLoadout(m_player);
 			}
 
@@ -333,13 +333,8 @@ class CustomMission: MissionServer
 			m_player.GetStatEnergy().Set(4000);
 			m_player.GetStatWater().Set(4000);
 
-			for (int i = 0; i < spawnZones.Count(); i++)
-			{
-				WriteToLog("spawnZone: " + spawnZones[i].ToString());
-			}
-
 			vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
-			WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString());
+			WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetPosition(safePosition);
 			m_player.SetAllowDamage(true);
 		}
@@ -350,6 +345,6 @@ class CustomMission: MissionServer
 
 Mission CreateCustomMission(string path)
 {
-	WriteToLog("CreateCustomMission(): Criando instância de CustomMission");
+	WriteToLog("CreateCustomMission(): Criando instância de CustomMission", LogFile.INIT, false, LogType.INFO);
 	return new CustomMission();
 }

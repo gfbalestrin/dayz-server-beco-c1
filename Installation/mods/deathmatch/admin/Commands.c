@@ -28,9 +28,8 @@ bool ExecuteCommand(TStringArray tokens)
 {
     string playerID = tokens[0];
     string command = tokens[1];
-
-    WriteToLog("playerID: " + playerID);
-    WriteToLog("Comando recebido: " + command);
+    
+    WriteToLog("PlayerID " + playerID + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
 
     PlayerBase target = null;
     array<Man> players = {};
@@ -56,8 +55,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 vector posT = Vector(tokens[2].ToFloat(), tokens[3].ToFloat(), tokens[4].ToFloat());
                 target.SetPosition(posT);
-                target.MessageStatus("🚀 Você foi teleportado");
-                WriteToLog("teleport " + posT.ToString());
+                target.MessageStatus("Você foi teleportado");
             }
             break;
 
@@ -67,26 +65,22 @@ bool ExecuteCommand(TStringArray tokens)
             target.SetHealth("GlobalHealth", "Shock", 0);
             target.GetStatEnergy().Set(4000);
             target.GetStatWater().Set(4000);
-            target.MessageStatus("❤️ Você foi curado");
-            WriteToLog("heal");
+            target.MessageStatus("Você foi curado");
             break;
 
         case "kill":
             target.SetHealth("", "", 0);
-            target.MessageStatus("💀 Você foi eliminado");
-            WriteToLog("kill");
+            target.MessageStatus("Você foi eliminado");
             break;
 
         case "godmode":
             target.SetAllowDamage(false);
-            target.MessageStatus("⚡ God Mode ativado");
-            WriteToLog("godmode");
+            target.MessageStatus("God Mode ativado");
             break;
 
         case "ungodmode":
             target.SetAllowDamage(true);
-            target.MessageStatus("🔓 God Mode desativado");
-            WriteToLog("ungodmode");
+            target.MessageStatus("God Mode desativado");
             break;
 
         case "giveitem":
@@ -107,13 +101,12 @@ bool ExecuteCommand(TStringArray tokens)
 
                     if (item)
                     {
-                        target.MessageStatus("🎁 Item recebido: " + itemName);
-                        WriteToLog("giveitem " + itemName);
+                        target.MessageStatus("Item recebido: " + itemName);
                     }
                     else
                     {
-                        target.MessageStatus("⚠️ Erro ao criar item: " + itemName);
-                        WriteToLog("giveitem_failed");
+                        target.MessageStatus("Erro ao criar item: " + itemName);
+                        WriteToLog("Erro ao criar item: " + itemName, LogFile.INIT, false, LogType.ERROR);
                     }
                 }
             }
@@ -125,28 +118,24 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 string vehicleType = tokens[2];
                 SpawnVehicleWithParts(target, vehicleType);
-                WriteToLog("spawnvehicle");
             }
             break;
 
         case "ghostmode":
             target.SetInvisible(true);
             target.SetScale(0.0001);
-            target.MessageStatus("🕵️ Você está invisível");
-            WriteToLog("ghostmode");
+            target.MessageStatus("Você está invisível");
             break;
 
         case "unghostmode":
             target.SetInvisible(false);
-            target.MessageStatus("👁️ Você está visível");
-            WriteToLog("unghostmode");
+            target.MessageStatus("Você está visível");
             break;
 
         case "kick":
             PlayerIdentity identity = target.GetIdentity();
             target.MessageStatus("Seu jogador está bugado. Realizando ajuste...");
             GetGame().DisconnectPlayer(identity);
-            WriteToLog("kick");
             break;
 
         case "desbug":
@@ -159,14 +148,13 @@ bool ExecuteCommand(TStringArray tokens)
             target.SetOrientation(target.GetOrientation());
             target.Update();
             target.MessageStatus("Posição ajustada: " + newPos.ToString());
-            WriteToLog("desbug", newPos.ToString());
             break;
 
         case "getposition":
             vector posP = target.GetPosition();
             target.MessageStatus("Posição atual: " + posP.ToString());
-            WriteToLog(posP.ToString(), "position.log");
-            WriteToLog("getposition", posP.ToString());
+            WriteToLog(posP.ToString(), LogFile.POSITION, false);
+            WriteToLog("Posição capturada: " + posP.ToString(), LogFile.INIT, false, LogType.DEBUG);
             break;
 
         case "construct":
@@ -191,7 +179,6 @@ bool ExecuteCommand(TStringArray tokens)
 
                 string buildName = tokens[2];
                 CreateCustomObject(target, buildName, heightOffset, containerCount, containerLength, rotationOffset);
-                WriteToLog("construct", buildName);
             }
             break;        
         case "votemap":
@@ -212,7 +199,7 @@ bool ExecuteCommand(TStringArray tokens)
         case "nextmap":  
             SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
             break;
-        case "listmaps":          
+        case "maps":          
             foreach (ref SafeZoneData mapL : maps) {
                 string linha = mapL.RegionId.ToString() + " - " + mapL.Region;                
                 SendPrivateMessage(playerID, linha, MessageColor.FRIENDLY);
@@ -242,6 +229,9 @@ bool ExecuteCommand(TStringArray tokens)
                 }
             }
             g_VoteKickManager.StartKickVote(playerID, targetId, targetKick.GetIdentity().GetName());
+            break;
+        case "players":          
+            g_VoteKickManager.ListarJogadoresOnline(playerID);
             break;
     }
 

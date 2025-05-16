@@ -18,54 +18,15 @@ void CreateConstruction(PlayerBase player, string objectName)
 
     if (!wall)
     {
-        WriteToLog("ERRO: Objeto não foi criado!");
+        WriteToLog("Objeto não foi criado!", LogFile.INIT, false, LogType.ERROR);
         player.MessageStatus("ERRO: Objeto não foi criado!");
     }        
     else{
-        WriteToLog("SUCESSO: Objeto criado na posição: " + spawnPos);
+        WriteToLog("Objeto criado na posição: " + spawnPos, LogFile.INIT, false, LogType.INFO);
         player.MessageStatus("SUCESSO: Objeto criado na posição: " + spawnPos);
     }
         
 }
-void CreatePrisonWall(PlayerBase player)
-{
-    if (!player) return;
-
-    vector basePos = player.GetPosition();
-    float playerAngle = player.GetOrientation()[0];      // Direção que o jogador olha
-    float wallLength = 12.0;
-    int wallCount = 4;
-
-    float rad = playerAngle * Math.DEG2RAD;
-    vector forward = Vector(Math.Sin(rad), 0, Math.Cos(rad)); // Direção para frente
-
-    float wallAngle = playerAngle + 90; // Gira cada muro de lado
-
-    for (int i = 0; i < wallCount; i++)
-    {
-        vector offset = forward * (i * wallLength);
-        vector spawnPos = basePos + offset;
-
-        // Corrige altura para alinhar com o terreno
-        float groundY = GetGame().SurfaceY(spawnPos[0], spawnPos[2]);
-        spawnPos[1] = groundY;
-
-        Object wall = GetGame().CreateObject("Land_Prison_Wall_Large", spawnPos, false, true);
-        if (wall)
-        {
-            wall.SetPosition(spawnPos);
-            wall.SetOrientation(Vector(wallAngle, 0, 0)); // Gira o muro 90°
-            WriteToLog("SUCESSO: Objeto criado na posição: " + spawnPos);
-            player.MessageStatus("SUCESSO: Objeto criado na posição: " + spawnPos);
-        }
-        else
-        {
-            WriteToLog("ERRO: Falha ao criar muro na posição " + spawnPos);
-            player.MessageStatus("ERRO: Falha ao criar muro na posição " + spawnPos);
-        }
-    }
-}
-
 
 void CreateCustomObject(PlayerBase player, string buildName, float heightOffset = 1.0, int containerCount = 4, float containerLength = 6.0, float rotationOffset = 0.0)
 {
@@ -96,12 +57,11 @@ void CreateCustomObject(PlayerBase player, string buildName, float heightOffset 
         {
             obj.SetPosition(spawnPos);
             obj.SetOrientation(Vector(finalAngle, 0, 0)); // Aplica rotação parametrizada
-            WriteToLog("SUCESSO: Objeto " + buildName + " criado em " + spawnPos);
             player.MessageStatus("SUCESSO: Objeto " + buildName + " criado na posição: " + spawnPos);
         }
         else
         {
-            WriteToLog("ERRO: Falha ao criar " + buildName + " em " + spawnPos);
+            WriteToLog("ERRO: Falha ao criar " + buildName + " em " + spawnPos, LogFile.INIT, false, LogType.ERROR);
             player.MessageStatus("ERRO: Falha ao criar " + buildName + " em " + spawnPos);
         }
     }
@@ -248,6 +208,6 @@ void RemoveObjectsOutsidePolygon(array<vector> polygon)
         }
     }
 
-    WriteToLog("RemoveObjectsOutsidePolygon(): Objetos removidos: " + removed.ToString());
+    WriteToLog("RemoveObjectsOutsidePolygon(): Objetos removidos: " + removed.ToString(), LogFile.INIT, false, LogType.DEBUG);
 }
 

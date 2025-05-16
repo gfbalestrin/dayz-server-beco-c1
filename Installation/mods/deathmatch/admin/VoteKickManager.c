@@ -19,6 +19,12 @@ class VoteKickManager
 		array<Man> players = new array<Man>();
 		GetGame().GetPlayers(players);
 
+        if (players.Count() < 3)
+        {
+            BroadcastMessage("É necessário pelo menos 3 jogadores online para iniciar uma votação de kick.", MessageColor.WARNING);
+            return;
+        }
+
 		bool found = false;
 		foreach (Man man : players) {
 			PlayerBase player = PlayerBase.Cast(man);
@@ -41,7 +47,7 @@ class VoteKickManager
 		votingKickTimer.Run(votingKickDuration, this, "FinalizarKickVote");
 
 		BroadcastMessage("Votação para kickar " + targetPlayerName + " iniciada! Digite 1 para SIM ou 2 para NÃO.", MessageColor.WARNING);
-		WriteToLog("Votação de kick iniciada por " + callerId + " contra " + targetPlayerId);
+		WriteToLog("Votação de kick iniciada por " + callerId + " contra " + targetPlayerId, LogFile.INIT, false, LogType.INFO);
 	}
 
 	void HandleVote(string playerId, int vote)
@@ -76,7 +82,7 @@ class VoteKickManager
 	void CheckIfAllVoted()
 	{
 		array<Man> players = new array<Man>();
-		GetGame().GetPlayers(players);
+		GetGame().GetPlayers(players);        
 
 		int totalVoters = 0;
 		foreach (Man man : players) {
@@ -105,6 +111,13 @@ class VoteKickManager
 		array<Man> players = new array<Man>();
 		GetGame().GetPlayers(players);
 
+        if (players.Count() < 3)
+        {
+            BroadcastMessage("É necessário pelo menos 3 jogadores online para finalizar uma votação de kick. A votação será anulada.", MessageColor.WARNING);
+            ResetKickVote();
+            return;
+        }
+
 		int totalVoters = 0;
 		foreach (Man man : players) {
 			PlayerBase player = PlayerBase.Cast(man);
@@ -114,10 +127,10 @@ class VoteKickManager
 			if (id != targetPlayerId) totalVoters++;
 		}
 
-		if (simVotes == totalVoters) {
-			BroadcastMessage("Jogador " + targetPlayerName + " foi kickado por votação unânime!", MessageColor.IMPORTANT);
+		if (simVotes == totalVoters) {			
 			KickPlayerById(targetPlayerId);
-			WriteToLog("Jogador " + targetPlayerId + " kickado após votação.");
+            BroadcastMessage("Jogador " + targetPlayerName + " foi kickado por votação unânime!", MessageColor.IMPORTANT);
+			WriteToLog("Jogador " + targetPlayerId + " kickado após votação.", LogFile.INIT, false, LogType.INFO);
 		} else {
 			BroadcastMessage("Votação para kickar " + targetPlayerName + " falhou. Votos SIM: " + simVotes + "/" + totalVoters, MessageColor.WARNING);
 		}
@@ -133,19 +146,6 @@ class VoteKickManager
 		targetPlayerName = "";
 	}
 
-	void KickPlayerById(string playerId)
-	{
-		array<Man> players = new array<Man>();
-		GetGame().GetPlayers(players);
-
-		foreach (Man man : players) {
-			PlayerBase player = PlayerBase.Cast(man);
-			if (player && player.GetIdentity() && player.GetIdentity().GetPlainId() == playerId) {
-				GetGame().DisconnectPlayer(player.GetIdentity(), "Você foi kickado por votação.");
-				return;
-			}
-		}
-	}
 
     void ListarJogadoresOnline(string solicitanteId)
     {

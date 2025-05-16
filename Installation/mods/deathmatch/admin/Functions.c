@@ -17,7 +17,7 @@ PlayerBase GetPlayerByName(string name)
 PlayerBase GetPlayerById(string id)
 {
     // Registra no log a busca
-    WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id);
+    WriteToLog("GetPlayerByID(): Procurando jogador com ID: " + id, LogFile.INIT, false, LogType.DEBUG);
     array<Man> players = {};
     GetGame().GetPlayers(players); // Pega todos os jogadores no servidor
 
@@ -28,13 +28,13 @@ PlayerBase GetPlayerById(string id)
         if (player && player.GetIdentity() && player.GetIdentity().GetId() == id)
         {
             // Se encontrar o jogador com o ID correto, registra e retorna o jogador
-            WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName());
+            WriteToLog("GetPlayerByID(): Jogador encontrado: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
             return player;
         }
     }
 
     // Se não encontrar, registra no log
-    WriteToLog("GetPlayerByID(): Jogador não encontrado");
+    WriteToLog("GetPlayerByID(): Jogador não encontrado", LogFile.INIT, false, LogType.ERROR);
     return null;
 }
 
@@ -64,7 +64,7 @@ void SendPrivateMessage(string playerId, string message, MessageColor color = Me
 
 void BroadcastMessage(string message, MessageColor color = MessageColor.STATUS, string playerID = "")
 {
-    WriteToLog("[DEBUG] BroadcastMessage: " + message);
+    WriteToLog("BroadcastMessage: " + message, LogFile.INIT, false, LogType.DEBUG);
     array<Man> players = new array<Man>();
     GetGame().GetPlayers(players);
 
@@ -83,7 +83,7 @@ void BroadcastMessage(string message, MessageColor color = MessageColor.STATUS, 
 
 void SetActiveRegionById(int regionId)
 {
-    WriteToLog("Carregando JSON de regiões: " + DeathMatchConfigJsonFile);
+    WriteToLog("Carregando JSON de regiões: " + DeathMatchConfigJsonFile, LogFile.INIT, false, LogType.DEBUG);
 
     ref array<ref SafeZoneData> zones;
     JsonFileLoader<array<ref SafeZoneData>>.JsonLoadFile(DeathMatchConfigJsonFile, zones);
@@ -101,9 +101,9 @@ void SetActiveRegionById(int regionId)
 
     if (found) {
         JsonFileLoader<array<ref SafeZoneData>>.JsonSaveFile(DeathMatchConfigJsonFile, zones);
-        WriteToLog("Região com RegionId " + regionId.ToString() + " foi marcada como ativa.");
+        WriteToLog("Região com RegionId " + regionId.ToString() + " foi marcada como ativa.", LogFile.INIT, false, LogType.INFO);
     } else {
-        WriteToLog("RegionId " + regionId.ToString() + " não encontrado no arquivo.");
+        WriteToLog("RegionId " + regionId.ToString() + " não encontrado no arquivo.", LogFile.INIT, false, LogType.ERROR);
     }
 }
 string Pluralize(int valor, string singular, string plural)
@@ -121,4 +121,18 @@ string FormatTempo(int segundos)
 
     //return minutos.ToString() + " " + Pluralize(minutos, "minuto", "minutos") + " e " + resto.ToString() + " " + Pluralize(resto, "segundo", "segundos");
     return minutos.ToString() + " " + Pluralize(minutos, "minuto", "minutos") ;
+}
+
+void KickPlayerById(string playerId)
+{
+    array<Man> players = new array<Man>();
+    GetGame().GetPlayers(players);
+
+    foreach (Man man : players) {
+        PlayerBase player = PlayerBase.Cast(man);
+        if (player && player.GetIdentity() && player.GetIdentity().GetPlainId() == playerId) {
+            GetGame().DisconnectPlayer(player.GetIdentity(), "Você foi kickado por votação.");
+            return;
+        }
+    }
 }

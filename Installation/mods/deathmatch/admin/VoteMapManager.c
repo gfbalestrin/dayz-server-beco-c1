@@ -30,14 +30,14 @@ class VoteMapManager
 		voteCountsMap.Set(regionId, currentVotes + 1);
         string mapName;
         foreach (ref SafeZoneData mapI : maps) {
-            WriteToLog("Mapa: " + mapI.Region);
+            WriteToLog("Mapa: " + mapI.Region, LogFile.INIT, false, LogType.INFO);
             if (mapI && mapI.RegionId == regionId) {                
                 mapName = mapI.Region;
             }
         }
 
 		SendPrivateMessage(playerID, "Voto registrado para o mapa (" + regionId + ") " + mapName, MessageColor.FRIENDLY);
-		WriteToLog("VOTO: " + playerID + " votou em (" + regionId + ") " + mapName);
+		WriteToLog("VOTO: " + playerID + " votou em (" + regionId + ") " + mapName, LogFile.INIT, false, LogType.INFO);
 
         // Verifica se todos os jogadores online já votaram
         array<Man> playersOnline = new array<Man>();
@@ -76,7 +76,7 @@ class VoteMapManager
         string tempo = FormatTempo(votingMapDuration);
 
         BroadcastMessage("Votação iniciada! Você tem " + tempo + " para votar.", MessageColor.FRIENDLY);
-        WriteToLog("Votação iniciada! Os jogadores tem " + tempo + " para votar. Mapas disponíveis: ");
+        WriteToLog("Votação iniciada! Os jogadores tem " + tempo + " para votar", LogFile.INIT, false, LogType.INFO);
 
         foreach (ref SafeZoneData mapV : maps) {
             BroadcastMessage(mapV.RegionId.ToString() + " - " + mapV.Region + " - digite no chat: !votemap " + mapV.RegionId.ToString(), MessageColor.FRIENDLY);
@@ -100,14 +100,13 @@ class VoteMapManager
 		if (winner != -1) {     
             string mapName;    
             foreach (ref SafeZoneData mapW : maps) {
-                WriteToLog("Mapa: " + mapW.Region);
                 if (mapW && mapW.RegionId == regionId) {
                     mapName = mapW.Region;
                     nextMap = mapW;
                 }
             }
 
-            WriteToLog("Mapa vencedor: (" + regionId + ") " + mapName + " com " + highest.ToString() + " votos.");
+            WriteToLog("Mapa vencedor: (" + regionId + ") " + mapName + " com " + highest.ToString() + " votos.", LogFile.INIT, false, LogType.INFO);
 			BroadcastMessage("Mapa vencedor: " + regionId + " - " + mapName + " com " + highest.ToString() + " votos.", MessageColor.FRIENDLY);
 			SetActiveRegionById(regionId);
             
