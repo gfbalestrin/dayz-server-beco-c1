@@ -1,4 +1,4 @@
-string DeathMatchConfigJsonFile = "$mission:deathmatch_config.json";
+string DeathMatchConfigJsonFile = "$mission:admin/files/deathmatch_config.json";
 enum MessageColor
 {
     STATUS,     // azul

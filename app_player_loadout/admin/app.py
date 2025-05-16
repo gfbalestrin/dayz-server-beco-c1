@@ -16,10 +16,11 @@ import html
 
 app = Flask(__name__)
 
-app.secret_key = '88cxW5E1J9PLP4lMcH1DxJpu2Af9nbuUvIn2e7kx'
+app.secret_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 JSON_PATH = '/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.json'
 TMP_PATH = "/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.tmp.json"
 LOG_PATH = "/home/dayzadmin/servers/dayz-server/profiles/init.log"
+ADMIN_IDS_FILE = '/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/files/admin_ids.txt'
 
 def login_required(f):
     @wraps(f)
@@ -73,6 +74,20 @@ def detect_encoding(file_path):
         raw_data = f.read(4096)
         result = chardet.detect(raw_data)
         return result['encoding'] or 'utf-8'
+
+def load_ids():
+    if not os.path.exists(ADMIN_IDS_FILE):
+        return []
+    with open(ADMIN_IDS_FILE, 'r') as f:
+        return [line.strip() for line in f if line.strip()]
+
+def save_ids(ids):
+    with open(ADMIN_IDS_FILE, 'w') as f:
+        for id in ids:
+            f.write(f"{id}\n")
+
+def is_valid_id(player_id):
+    return isinstance(player_id, str) and len(player_id.strip()) == 44
 
 def get_weapon_data(weapon_id, magazine_id, ammo_id, attachments):
     if not weapon_id:
@@ -504,6 +519,48 @@ def latest_logs():
         return jsonify(sanitized)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/admin_ids', methods=['GET'])
+@login_required
+@admin_required
+def list_admin_ids():
+    ids = load_ids()
+    return jsonify(ids)
+
+@app.route('/admin_ids', methods=['POST'])
+def insert_admin_id():
+    data = request.json
+    player_id = data.get('id', '').strip()
+
+    if not is_valid_id(player_id):
+        return jsonify({'error': 'ID inválido. Deve conter exatamente 44 caracteres.'}), 400
+
+    ids = load_ids()
+    if player_id in ids:
+        return jsonify({'error': 'ID já existente.'}), 409
+
+    ids.append(player_id)
+    save_ids(ids)
+
+    return jsonify({'message': 'ID inserido com sucesso.'}), 201
+
+@app.route('/admin_ids', methods=['DELETE'])
+def delete_admin_id():
+    data = request.json
+    player_id = data.get('id', '').strip()
+
+    if not is_valid_id(player_id):
+        return jsonify({'error': 'ID inválido. Deve conter exatamente 44 caracteres.'}), 400
+
+    ids = load_ids()
+    if player_id not in ids:
+        return jsonify({'error': 'ID não encontrado.'}), 404
+
+    ids.remove(player_id)
+    save_ids(ids)
+
+    return jsonify({'message': 'ID removido com sucesso.'}), 200
+
 
 # Arma
 @app.route("/api/weapons")

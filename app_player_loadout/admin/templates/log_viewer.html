@@ -66,6 +66,34 @@
     <div id="log-box"></div>
 </div>
 
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">IDs de Administradores</h2>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-primary text-white">Adicionar Novo ID</div>
+      <div class="card-body">
+        <form id="add-form" class="row g-2">
+          <div class="col-10">
+            <input type="text" id="new-id" class="form-control" placeholder="Cole aqui o ID de 44 caracteres" required>
+          </div>
+          <div class="col-2">
+            <button type="submit" class="btn btn-success w-100">Adicionar</button>
+          </div>
+        </form>
+        <div id="add-msg" class="mt-2"></div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">Lista de IDs</div>
+      <div class="card-body">
+        <ul class="list-group" id="id-list">
+          <!-- IDs serão carregados aqui -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
 <script>
     const logBox = document.getElementById('log-box');
 
@@ -137,6 +165,56 @@
     };
 </script>
 
+<script>
+    async function carregarIds() {
+      const list = document.getElementById('id-list');
+      list.innerHTML = '';
+      const res = await fetch('/admin_ids');
+      const data = await res.json();
+      data.forEach(id => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.textContent = id;
 
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-danger btn-sm';
+        btn.textContent = 'Remover';
+        btn.onclick = async () => {
+          const resp = await fetch('/admin_ids', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          const result = await resp.json();
+          carregarIds();
+        };
+
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('add-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const input = document.getElementById('new-id');
+      const msg = document.getElementById('add-msg');
+      const id = input.value.trim();
+
+      const res = await fetch('/admin_ids', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+
+      const data = await res.json();
+      msg.textContent = data.message || data.error;
+      msg.className = `mt-2 alert ${data.message ? 'alert-success' : 'alert-danger'}`;
+      if (data.message) input.value = '';
+      carregarIds();
+    });
+
+    window.onload = carregarIds;
+  </script>
+  
 </body>
 </html>

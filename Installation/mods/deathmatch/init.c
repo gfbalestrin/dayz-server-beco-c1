@@ -290,31 +290,6 @@ class CustomMission: MissionServer
 		}
 	}
 
-	array<string> LoadAdminIDs(string filePath)
-	{
-		WriteToLog("LoadAdminIDs(): Carregando IDs do arquivo: " + filePath, LogFile.INIT, false, LogType.DEBUG);
-		array<string> ids = new array<string>;
-		FileHandle file = OpenFile(filePath, FileMode.READ);
-
-		if (file != 0)
-		{
-			string line;
-			while (FGets(file, line) > 0)
-			{
-				line = line.Trim();
-				if (line != "")
-					ids.Insert(line);
-			}
-			CloseFile(file);
-			WriteToLog("LoadAdminIDs(): IDs carregados: " + ids.Count(), LogFile.INIT, false, LogType.DEBUG);
-		}
-		else
-		{
-			WriteToLog("LoadAdminIDs(): Erro ao abrir o arquivo.", LogFile.INIT, false, LogType.ERROR);
-		}
-		return ids;
-	}
-
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
 		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);
@@ -336,9 +311,7 @@ class CustomMission: MissionServer
 		}
 
 		GetGame().SelectPlayer(identity, m_player);
-
-		array<string> adminIDs = LoadAdminIDs("$mission:admin_ids.txt");
-		if (adminIDs.Find(identity.GetId()) != -1)
+		if (CheckIfIsAdmin(identity.GetId()))
 		{
 			WriteToLog("CreateCharacter(): " + identity.GetName() + " é admin.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);

@@ -134,3 +134,37 @@ void KickPlayerById(string playerId)
         }
     }
 }
+
+array<string> LoadAdminIDs(string filePath)
+{
+    WriteToLog("LoadAdminIDs(): Carregando IDs do arquivo: " + filePath, LogFile.INIT, false, LogType.DEBUG);
+    array<string> ids = new array<string>;
+    FileHandle file = OpenFile(filePath, FileMode.READ);
+
+    if (file != 0)
+    {
+        string line;
+        while (FGets(file, line) > 0)
+        {
+            line = line.Trim();
+            if (line != "")
+                ids.Insert(line);
+        }
+        CloseFile(file);
+        WriteToLog("LoadAdminIDs(): IDs carregados: " + ids.Count(), LogFile.INIT, false, LogType.DEBUG);
+    }
+    else
+    {
+        WriteToLog("LoadAdminIDs(): Erro ao abrir o arquivo.", LogFile.INIT, false, LogType.ERROR);
+    }
+    return ids;
+}
+
+bool CheckIfIsAdmin(string playerId)
+{
+    array<string> adminIDs = LoadAdminIDs("$mission:admin/files/admin_ids.txt");
+    if (adminIDs.Find(playerId) != -1)
+        return true;
+
+    return false;
+}

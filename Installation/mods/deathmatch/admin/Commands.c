@@ -60,10 +60,16 @@ bool ExecuteCommand(TStringArray tokens)
     } else {
         WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
     }
+    bool isAdmin = CheckIfIsAdmin(playerID);
 
     switch (command)
     {
         case "teleport":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             if (tokens.Count() == 5)
             {
                 vector posT = Vector(tokens[2].ToFloat(), tokens[3].ToFloat(), tokens[4].ToFloat());
@@ -73,6 +79,11 @@ bool ExecuteCommand(TStringArray tokens)
             break;
 
         case "heal":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             target.SetHealth("", "", 100);
             target.SetHealth("GlobalHealth", "Blood", 5000);
             target.SetHealth("GlobalHealth", "Shock", 0);
@@ -87,16 +98,26 @@ bool ExecuteCommand(TStringArray tokens)
             break;
 
         case "godmode":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             target.SetAllowDamage(false);
             target.MessageStatus("God Mode ativado");
             break;
 
         case "ungodmode":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             target.SetAllowDamage(true);
             target.MessageStatus("God Mode desativado");
             break;
 
-        case "giveitem":
+        case "giveitem":            
             if (tokens.Count() >= 3)
             {
                 string itemName = tokens[2];
@@ -135,17 +156,27 @@ bool ExecuteCommand(TStringArray tokens)
             break;
 
         case "ghostmode":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             target.SetInvisible(true);
             target.SetScale(0.0001);
             target.MessageStatus("Você está invisível");
             break;
 
         case "unghostmode":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             target.SetInvisible(false);
             target.MessageStatus("Você está visível");
             break;
 
-        case "kick":
+        case "kick":            
             PlayerIdentity identity = target.GetIdentity();
             target.MessageStatus("Seu jogador está bugado. Realizando ajuste...");
             GetGame().DisconnectPlayer(identity);
@@ -171,6 +202,11 @@ bool ExecuteCommand(TStringArray tokens)
             break;
 
         case "construct":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             if (tokens.Count() >= 3)
             {
                 float heightOffset = 1.0;
