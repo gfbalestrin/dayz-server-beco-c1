@@ -11,8 +11,13 @@ ref SafeZoneData LoadActiveRegionData(string path)
 			WriteToLog("Mensagem personalizada: " + data.CustomMessage, LogFile.INIT, false, LogType.DEBUG);
 			WriteToLog("SpawnZones: " + data.SpawnZones.Count().ToString(), LogFile.INIT, false, LogType.DEBUG);
 			WriteToLog("WallZones: " + data.WallZones.Count().ToString(), LogFile.INIT, false, LogType.DEBUG);            
+            if (!data.Spawns)
+                return data;
 
-			return data;
+            if (data.Spawns.Vehicles)
+                WriteToLog("Spawns.Vehicles: " + data.Spawns.Vehicles.Count().ToString(), LogFile.INIT, false, LogType.DEBUG);
+            
+            return data;
 		}
 	}
 

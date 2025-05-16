@@ -130,7 +130,7 @@ bool ExecuteCommand(TStringArray tokens)
             if (tokens.Count() == 3)
             {
                 string vehicleType = tokens[2];
-                SpawnVehicleWithParts(target, vehicleType);
+                SpawnVehicleWithPartsToPlayer(target, vehicleType);
             }
             break;
 

@@ -1,20 +1,27 @@
-void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
+void SpawnVehicleWithPartsToPlayer(PlayerBase player, string vehicleType)
 {
     vector spawnOffset = "2 0 2";
     vector pos = player.GetPosition() + spawnOffset;
     pos[1] = GetGame().SurfaceY(pos[0], pos[2]);
-
-    Car vehicle = Car.Cast(GetGame().CreateObject(vehicleType, pos));
-    if (!vehicle)
+    bool success = SpawnVehicleWithParts(pos, vehicleType);
+    if (!success)
     {
         player.MessageStatus("Falha ao spawnar veículo: " + vehicleType);
         WriteToLog("Falha ao spawnar veículo: " + vehicleType, LogFile.INIT, false, LogType.ERROR);
         return;
     }
+    player.MessageStatus("Veículo spawnado com sucesso: " + vehicleType);
+}
+
+bool SpawnVehicleWithParts(vector pos, string vehicleType)
+{
+    pos[1] = GetGame().SurfaceY(pos[0], pos[2]);
+    Car vehicle = Car.Cast(GetGame().CreateObject(vehicleType, pos));
+    if (!vehicle)        
+        return false;
 
     vehicle.SetOrientation("0 0 0");
-    vehicle.SetDirection(player.GetDirection());
-
+    //vehicle.SetDirection(player.GetDirection());
     vehicle.Fill(CarFluid.FUEL, 1000.0);
     vehicle.Fill(CarFluid.OIL, 1000.0);
     vehicle.Fill(CarFluid.BRAKE, 1000.0);
@@ -131,11 +138,10 @@ void SpawnVehicleWithParts(PlayerBase player, string vehicleType)
     foreach (string part : parts)
         vehicle.GetInventory().CreateAttachment(part);
 
-    player.MessageStatus("Veículo spawnado com sucesso: " + vehicleType);
-
     // Salvar veículo na persistência
     GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SaveVehicle, 1000, false, vehicle);
 
+    return true;
 }
 
 void SaveVehicle(Car vehicle)

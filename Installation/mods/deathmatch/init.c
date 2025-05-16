@@ -73,6 +73,7 @@ class CustomMission: MissionServer
 	string customMessage;
 	ref array<vector> spawnZones;	
 	ref array<vector> wallZones;
+	SafeZoneDataSpawns spawns;
 
 	void CustomMission()
 	{
@@ -140,6 +141,27 @@ class CustomMission: MissionServer
 				// Remoção de objetos fora da área
     			//RemoveObjectsOutsidePolygon(points);
 			}
+
+			if (currentMap.Spawns)
+			{
+				spawns = currentMap.Spawns;
+				WriteToLog("CustomMission(): Spawns carregados", LogFile.INIT, false, LogType.INFO);
+				if (spawns.Vehicles)
+				{
+					foreach (SafeZoneDataVehicle vehicle : spawns.Vehicles) {
+						bool successSpawnVehicle = SpawnVehicleWithParts(vehicle.GetCoord(), vehicle.name);
+						if (successSpawnVehicle)
+							WriteToLog("Veículo " + vehicle.name + " criado com sucesso na posição " + vehicle.coord, LogFile.INIT, false, LogType.DEBUG);
+						else
+							WriteToLog("Falha ao criar veículo " + vehicle.name + " criado com sucesso na posição " + vehicle.coord, LogFile.INIT, false, LogType.ERROR);
+					}
+				}				
+			}
+			else
+			{
+				WriteToLog("CustomMission(): nenhum Spawns configurado", LogFile.INIT, false, LogType.ERROR);
+			}
+			
 		}
 		else
 		{
