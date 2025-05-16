@@ -447,16 +447,33 @@ def log_viewer():
 @admin_required
 def logs():
     def tail():
-        encoding = detect_encoding(LOG_PATH)
-        with open(LOG_PATH, 'r', encoding=encoding, errors='replace') as f:
-            f.seek(0, 2)
-            while True:
+        last_inode = None
+        last_size = 0
+
+        while True:
+            try:
+                stat = os.stat(LOG_PATH)
+                current_inode = stat.st_ino
+                current_size = stat.st_size
+
+                # Detecta reinício ou rotação de log
+                if current_inode != last_inode or current_size < last_size:
+                    f = open(LOG_PATH, 'r', encoding=detect_encoding(LOG_PATH), errors='replace')
+                    last_inode = current_inode
+                    last_size = current_size
+                    f.seek(0, os.SEEK_END)  # Vai para o final se for novo
+
                 line = f.readline()
                 if not line:
                     time.sleep(0.5)
                     continue
+
+                last_size += len(line.encode('utf-8', errors='replace'))  # Acompanha o crescimento
                 sanitized_line = html.escape(line.strip())
                 yield f"data: {sanitized_line}\n\n"
+            except Exception as e:
+                yield f"data: [ERROR] Falha ao ler log: {html.escape(str(e))}\n\n"
+                time.sleep(2)
 
     return Response(tail(), mimetype='text/event-stream')
 
