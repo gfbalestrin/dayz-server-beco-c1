@@ -296,8 +296,10 @@ class CustomMission: MissionServer
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
 		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);
+		vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
+		WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
 
-		Entity playerEnt = GetGame().CreatePlayer(identity, characterName, pos, 0, "NONE");
+		Entity playerEnt = GetGame().CreatePlayer(identity, characterName, safePosition, 0, "NONE");
 		if (!playerEnt)
 		{
 			WriteToLog("CreateCharacter(): Erro ao criar player!", LogFile.INIT, false, LogType.ERROR);
@@ -336,10 +338,8 @@ class CustomMission: MissionServer
 			m_player.SetHealth("GlobalHealth", "Shock", 0);
 			m_player.GetStatEnergy().Set(4000);
 			m_player.GetStatWater().Set(4000);
-
-			vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
-			WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
-			m_player.SetPosition(safePosition);
+			
+			//m_player.SetPosition(safePosition);
 			m_player.SetAllowDamage(true);
 		}
 
