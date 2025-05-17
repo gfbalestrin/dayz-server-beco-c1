@@ -281,14 +281,18 @@ class CustomMission: MissionServer
 
 							if (privMsgArr[0] != player.GetIdentity().GetId())
 								continue;
+							
+							string messageText = privMsgArr[1];
+							bool isError = messageText.Contains("[ERROR]");
 
-							if (privMsgArr[1].Contains("[ERROR]"))
+							if (isError)
 							{
-								SendPrivateMessage(player.GetIdentity().GetId(), privMsgArr[1], MessageColor.IMPORTANT);
-							}								
+								messageText.Replace("[ERROR]", "");
+								SendPrivateMessage(player.GetIdentity().GetId(), messageText, MessageColor.IMPORTANT);
+							}
 							else
 							{
-								SendPrivateMessage(player.GetIdentity().GetId(), privMsgArr[1], MessageColor.FRIENDLY);
+								SendPrivateMessage(player.GetIdentity().GetId(), messageText, MessageColor.FRIENDLY);
 							}
 								
 						}
