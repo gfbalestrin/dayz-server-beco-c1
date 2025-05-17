@@ -1,6 +1,6 @@
 void CheckCommands()
 {
-    string path = "$mission:admin/files/commands_to_execute.txt";
+    string path = ExternalCommandsFile;
     FileHandle file = OpenFile(path, FileMode.READ);
     if (file == 0) return;
 
@@ -56,9 +56,9 @@ bool ExecuteCommand(TStringArray tokens)
             params = params + " " + tokens[iC];
         }
         string commandFull = command + " " + params;
-        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + commandFull, LogFile.INIT, false, LogType.INFO);
+        WriteToLog("PlayerID " + target.GetIdentity().GetName() + " (" + playerID + ")" + " digitou comando " + commandFull, LogFile.INIT, false, LogType.INFO);
     } else {
-        WriteToLog("PlayerID " + target.GetIdentity().GetName() + "(" + playerID + ")" + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
+        WriteToLog("PlayerID " + target.GetIdentity().GetName() + " (" + playerID + ")" + " digitou comando " + command, LogFile.INIT, false, LogType.INFO);
     }
     bool isAdmin = CheckIfIsAdmin(playerID);
 
@@ -292,8 +292,9 @@ bool ExecuteCommand(TStringArray tokens)
             }
             if (tokens[2] == "reset")
             {
-                SendPrivateMessage(playerID, "Você solicitou a geração de uma nova de senha de acesso!" , MessageColor.WARNING);
-                SendPrivateMessage(playerID, "Acesse: " + UrlAppPython + " Senha: ASD23XCZ" , MessageColor.WARNING);
+                WriteToLog("PlayerID " + target.GetIdentity().GetName() + " (" + playerID + ")" + " solicitou reset de senha", LogFile.INIT, false, LogType.INFO);
+                SendPrivateMessage(playerID, "Você solicitou a geração de uma nova de senha de acesso! Aguarde um momento..." , MessageColor.WARNING);
+                AppendExternalAction("{\"action\":\"reset_password\",\"player_id\":\"" + playerID + "\"}");
                 return true;
             }
 
@@ -305,7 +306,10 @@ bool ExecuteCommand(TStringArray tokens)
                 return false;
             }
 
-             SendPrivateMessage(playerID, "Loadout ativado com sucesso para o próximo respawn!" , MessageColor.FRIENDLY);
+            WriteToLog("PlayerID " + target.GetIdentity().GetName() + " (" + playerID + ")" + " solicitou ativacao do loadout " + loadoutName, LogFile.INIT, false, LogType.INFO);
+            SendPrivateMessage(playerID, "Você solicitou a ativação de um lodout! Aguarde um momento..." , MessageColor.WARNING);
+            ActiveLoadoutByName(playerID, loadoutName);
+            AppendExternalAction("{\"action\":\"active_loadout\",\"player_id\":\"" + playerID + "\",\"loadout_name\":\"" + loadoutName + "\"}");
 
             break;
     }

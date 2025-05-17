@@ -290,7 +290,7 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
 
 bool GiveDefaultLoadout(PlayerBase player, string playerId)
 {
-    string jsonPlayerId = "$mission:admin/loadouts/default.json";
+    string jsonPlayerId = LoadoutDefaultJsonFile;
     FileHandle handle2 = OpenFile(jsonPlayerId, FileMode.READ);
     if (!handle2)
     {
@@ -359,7 +359,7 @@ bool GiveDefaultLoadout(PlayerBase player, string playerId)
 
 bool GiveAdminLoadout(PlayerBase player, string playerId)
 {
-    string jsonPlayerId = "$mission:admin/loadouts/admin.json";
+    string jsonPlayerId = LoadoutAdminJsonFile;
     FileHandle handle2 = OpenFile(jsonPlayerId, FileMode.READ);
     if (!handle2)
     {
@@ -436,7 +436,7 @@ ref array<ref LoadoutPlayer> GetAllLoudoutsFromPlayer(string playerId)
 {
     ref array<ref LoadoutPlayer> loadoutsPlayer;
 
-    string jsonPlayersIds = "$mission:admin/loadouts/players_ids.json";
+    string jsonPlayersIds = LoadoutPlayersIdsJsonFile;
     FileHandle handle = OpenFile(jsonPlayersIds, FileMode.READ);
     if (!handle)
     {
@@ -474,7 +474,7 @@ ref array<ref LoadoutPlayer> GetAllLoudoutsFromPlayer(string playerId)
         return loadoutsPlayer;
     }
     
-    string jsonPlayerId = "$mission:admin/loadouts/players/" + playerJson.PlayerIdBase64 + ".json";
+    string jsonPlayerId = LoadoutPlayersFolder + playerJson.PlayerIdBase64 + ".json";
     FileHandle handle2 = OpenFile(jsonPlayerId, FileMode.READ);
     if (!handle2)
     {
@@ -558,3 +558,75 @@ EntityAI TryCreateItemInInventoryOrOnGround(PlayerBase player, string itemType)
 
     return item;
 }
+
+void ActiveLoadoutByName(string playerId, string loadoutName)
+{
+    ref array<ref LoadoutPlayer> loadoutsPlayer;
+
+    string jsonPlayersIds = LoadoutPlayersIdsJsonFile;
+    FileHandle handle = OpenFile(jsonPlayersIds, FileMode.READ);
+    if (!handle)
+    {
+        WriteToLog("Arquivo não encontrado: " + jsonPlayersIds, LogFile.INIT, false, LogType.ERROR);
+        return;
+    }
+    CloseFile(handle);
+
+    ref array<ref LoadoutPlayerId> loadoutPlayersIds;
+    JsonFileLoader<ref array<ref LoadoutPlayerId>>.JsonLoadFile(jsonPlayersIds, loadoutPlayersIds);
+
+    if (!loadoutPlayersIds || loadoutPlayersIds.Count() == 0)
+    {
+        WriteToLog("JSON carregado, mas lista vazia ou nula.", LogFile.INIT, false, LogType.ERROR);
+        return;
+    }
+
+    LoadoutPlayerId playerJson = null;
+    foreach (ref LoadoutPlayerId entry : loadoutPlayersIds)
+    {
+        WriteToLog("PlayerID capturado do players_ids.json: " + entry.PlayerId, LogFile.INIT, false, LogType.DEBUG);
+        if (!entry)
+            continue;
+
+        if (entry.PlayerId == playerId)
+        {
+            playerJson = entry;
+            break;
+        }
+    }
+
+    if (!playerJson)
+    {
+        WriteToLog("ID não encontrado no JSON.", LogFile.INIT, false, LogType.INFO);
+        return;
+    }
+
+    string path = LoadoutPlayersFolder + playerJson.PlayerIdBase64 + ".json";
+    ref array<ref LoadoutPlayer> loadouts = new array<ref LoadoutPlayer>();
+
+    // Carrega os dados do JSON
+    JsonFileLoader<array<ref LoadoutPlayer>>.JsonLoadFile(path, loadouts);
+
+    if (loadouts && loadouts.Count() > 0)
+    {
+        foreach (ref LoadoutPlayer lp : loadouts)
+        {
+            if (!lp) continue;
+
+            // Ativa apenas o loadout com nome correspondente
+            if (lp.Name == loadoutName)
+                lp.IsActive = true;
+            else
+                lp.IsActive = false;
+        }
+
+        // Salva o arquivo atualizado
+        JsonFileLoader<array<ref LoadoutPlayer>>.JsonSaveFile(path, loadouts);
+        WriteToLog("Loadout '" + loadoutName + "' ativado com sucesso.", LogFile.INIT, false, LogType.INFO);
+    }
+    else
+    {
+        WriteToLog("Falha ao carregar os loadouts do jogador: " + path, LogFile.INIT, false, LogType.ERROR);
+    }
+}
+

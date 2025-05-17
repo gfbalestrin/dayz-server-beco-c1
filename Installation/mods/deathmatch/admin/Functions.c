@@ -1,3 +1,34 @@
+void EnsureAllFilesExist()
+{
+    EnsureFileExists("$mission:admin/files/commands_to_execute.txt");
+    EnsureFileExists("$mission:admin/files/external_actions.txt");
+    EnsureFileExists("$mission:admin/files/messages_to_send.txt");
+    EnsureFileExists("$mission:admin/files/messages_private_to_send.txt");
+    EnsureFileExists("$mission:admin/files/admin_ids.txt");
+}
+void EnsureFileExists(string path)
+{
+    // Tenta abrir para leitura
+    FileHandle handle = OpenFile(path, FileMode.READ);
+    if (handle)
+    {
+        CloseFile(handle);  // Já existe
+        return;
+    }
+
+    // Se não existir, cria vazio
+    FileHandle createHandle = OpenFile(path, FileMode.WRITE);
+    if (createHandle)
+    {
+        CloseFile(createHandle);
+        Print("Arquivo criado: " + path);
+    }
+    else
+    {
+        Print("Falha ao criar arquivo: " + path);
+    }
+}
+
 PlayerBase GetPlayerByName(string name)
 {
     array<Man> players = new array<Man>();
@@ -41,6 +72,8 @@ void SendPrivateMessage(string playerId, string message, MessageColor color = Me
     PlayerBase player = GetPlayerById(playerId);
     if (!player)
         return;
+    
+    WriteToLog("SendPrivateMessage() Enviando mensagem privada: " + message, LogFile.INIT, false, LogType.INFO);
 
     switch (color)
     {

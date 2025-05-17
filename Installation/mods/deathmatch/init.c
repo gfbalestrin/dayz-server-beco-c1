@@ -12,6 +12,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/DeathMatchConfig.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Messages.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/ExternalActions.c"
 
 void main()
 {
@@ -79,6 +80,7 @@ class CustomMission: MissionServer
 	void CustomMission()
 	{
 		ResetLog();
+		EnsureAllFilesExist();
 		WriteToLog("CustomMission(): Inicializando CustomMission", LogFile.INIT, false, LogType.INFO);
 
 		FixedMessages = new array<string>;
@@ -236,6 +238,7 @@ class CustomMission: MissionServer
 
 			CheckCommands();
 			array<string> msgs = CheckMessages();
+			array<string> privMsgs = CheckPrivateMessages();
 
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
@@ -258,6 +261,35 @@ class CustomMission: MissionServer
 						{
 							if (msg != "")
 								player.MessageImportant(msg);
+						}
+					}
+					if (privMsgs)
+					{						
+						foreach (string privMsg : privMsgs)
+						{
+							if (privMsg == "")
+								continue;
+							
+							TStringArray privMsgArr = new TStringArray;
+							privMsg.Split(";", privMsgArr);
+							if (privMsgArr.Count() != 2)
+							{
+								WriteToLog("Mensagem privada fora do padrão: " + privMsg, LogFile.INIT, false, LogType.ERROR);
+								continue;
+							}
+
+							if (privMsgArr[0] != player.GetIdentity().GetId())
+								continue;
+
+							if (privMsgArr[1].Contains("[ERROR]"))
+							{
+								SendPrivateMessage(player.GetIdentity().GetId(), privMsgArr[1], MessageColor.IMPORTANT);
+							}								
+							else
+							{
+								SendPrivateMessage(player.GetIdentity().GetId(), privMsgArr[1], MessageColor.FRIENDLY);
+							}
+								
 						}
 					}
 				}

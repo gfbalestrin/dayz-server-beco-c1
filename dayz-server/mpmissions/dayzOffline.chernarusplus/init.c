@@ -47,7 +47,7 @@ class CustomMission: MissionServer
 		if (m_AdminCheckTimer >= m_AdminCheckCooldown)
 		{
 			m_AdminCheckTimer = 0.0;
-			CheckAdminCommands();
+			CheckExternalCommandsToExecute();
 		}
 	}
 
@@ -64,9 +64,9 @@ class CustomMission: MissionServer
 		}
 		return null;
 	}
-	void CheckAdminCommands()
+	void CheckExternalCommandsToExecute()
 	{
-		string path = "$mission:admin_cmds.txt";
+		string path = ExternalCommandsFile;
         FileHandle file = OpenFile(path, FileMode.READ);
         if (file == 0) return;
 

@@ -19,6 +19,8 @@ export DayzPlayerDbFile=$(jq -r '.Dayz.PlayerDbFile' "$CONFIG_FILE")
 export DayzAdminIdsFile=$(jq -r '.Dayz.AdminIdsFile' "$CONFIG_FILE")
 export DayzAdminCmdsFile=$(jq -r '.Dayz.AdminCmdsFile' "$CONFIG_FILE")
 export DayzMessagesToSendoFile=$(jq -r '.Dayz.MessagesToSendoFile' "$CONFIG_FILE")
+export DayzMessagesPrivateToSendoFile=$(jq -r '.Dayz.MessagesPrivateToSendoFile' "$CONFIG_FILE")
+export DayzActionsToExecuteFile=$(jq -r '.Dayz.ActionsToExecuteFile' "$CONFIG_FILE")
 export DayzDeathmatchCoords=$(jq -r '.Dayz.DeathmatchCoords' "$CONFIG_FILE")
 export DayzMessagesXmlFile=$(jq -r '.Dayz.MessagesXmlFile' "$CONFIG_FILE")
 export DayzDeathmatch=$(jq -r '.Dayz.Deathmatch' "$CONFIG_FILE")
@@ -33,8 +35,9 @@ export AppScriptUpdatePlayersOnlineFile=$(jq -r '.App.ScriptUpdatePlayersOnlineF
 export AppScriptExtractPlayersStatsFile=$(jq -r '.App.ScriptExtractPlayersStatsFile' "$CONFIG_FILE")
 export AppScriptUpdateGeneralKillfeed=$(jq -r '.App.ScriptUpdateGeneralKillfeed' "$CONFIG_FILE")
 export AppScriptGetPlayerDamageFile=$(jq -r '.App.ScriptGetPlayerDamageFile' "$CONFIG_FILE")
+export AppScriptPlayerLoadoutManagerFile=$(jq -r '.App.ScriptPlayerLoadoutManagerFile' "$CONFIG_FILE")
 export AppScriptWipeFile=$(jq -r '.App.ScriptWipeFile' "$CONFIG_FILE")
-
+export AppUrlAppLoadout=$(jq -r '.App.UrlAppLoadout' "$CONFIG_FILE")
 
 # Print all variables
 # echo "DayzServerFolder: $DayzServerFolder"

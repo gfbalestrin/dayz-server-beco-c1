@@ -1,0 +1,10 @@
+[Unit]
+Description=DayZ Supervisor (command + log monitor)
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/dayz_supervisor.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
