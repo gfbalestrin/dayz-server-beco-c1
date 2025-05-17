@@ -60,8 +60,6 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             echo "$player_id;Nova senha: $senha" >> "$DayzServerFolder/$DayzMessagesPrivateToSendoFile"
             ;;
 
-
-
         active_loadout)
             player_id=$(echo "$line" | jq -r '.player_id')
             loadout_name=$(echo "$line" | jq -r '.loadout_name')
@@ -81,12 +79,22 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             echo "$player_id;$msg" >> "$DayzServerFolder/$DayzMessagesPrivateToSendoFile"
             ;;
 
-        restart_server)
-            minutes=$(echo "$line" | jq -r '.minutes')
-            message=$(echo "$line" | jq -r '.message')
-            echo ">> Reinício do servidor em $minutes minuto(s): $message"
-            # comando real aqui
-            ;;
+            restart_server)
+                minutes=$(echo "$line" | jq -r '.minutes')
+                message=$(echo "$line" | jq -r '.message')
+                echo ">> Reinício do servidor em $minutes minuto(s): $message"
+
+                # Validação mínima
+                if ! [[ "$minutes" =~ ^[0-9]+$ ]] || [[ "$minutes" -le 0 ]]; then
+                    echo ">> Valor inválido para minutos: $minutes"
+                    continue
+                fi
+
+                echo "[ERROR] Atenção: o servidor será reiniciado em $minutes minuto(s)!" >> "$DayzServerFolder/$DayzMessagesToSendoFile"
+                sleep 60
+                systemctl restart dayz-server
+                ;;
+
 
         *)
             echo ">> Ação desconhecida: $action"

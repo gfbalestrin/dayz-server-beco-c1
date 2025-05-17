@@ -200,6 +200,7 @@ class CustomMission: MissionServer
 			
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos") && !isVotingMapActive)
 			{
+				serverWillRestartSoon = true;
 				g_VoteMapManager.IniciaVotacaoProximoMapa();	
 				return;
 			}

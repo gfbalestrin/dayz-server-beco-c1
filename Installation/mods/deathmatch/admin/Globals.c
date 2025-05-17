@@ -39,6 +39,7 @@ ref map<int, int> voteCountsMap = new map<int, int>();         // RegionId -> co
 bool isVotingMapActive = false;
 float votingMapDuration = 300.0; // 300 segundos = 5 minutos
 ref Timer votingMapTimer;
+bool changeMapNow = false;
 
 // Votação de kick
 ref VoteKickManager g_VoteKickManager;
@@ -46,3 +47,5 @@ ref map<string, bool> playerVotesKick = new map<string, bool>();  // playerID ->
 private bool isVotingKickActive = false;
 private float votingKickDuration = 120.0; // 2 minutos
 private ref Timer votingKickTimer;
+
+bool serverWillRestartSoon = false;

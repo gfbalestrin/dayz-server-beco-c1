@@ -232,19 +232,32 @@ bool ExecuteCommand(TStringArray tokens)
             break;        
         case "votemap":
             if (tokens.Count() < 3) {
-                g_VoteMapManager.CheckCurrentVotingMap(playerID);
-                SendPrivateMessage(playerID, "Uso: !votemap <ID do mapa>", MessageColor.WARNING);
+                if (isVotingMapActive) {
+                    g_VoteMapManager.ShowResultVotingMap(playerID);
+                } else {
+                    SendPrivateMessage(playerID, "Uso: !votemap <ID do mapa>", MessageColor.WARNING);
+                }                 
                 return false;
             }
 
             if (!IsInteger(tokens[2])) {
-                SendPrivateMessage(playerID, "ID inválido.", MessageColor.WARNING);
+                SendPrivateMessage(playerID, "ID do mapa é inválido", MessageColor.WARNING);
                 return false;
+            }
+            if (!isVotingMapActive && serverWillRestartSoon)
+            {
+                SendPrivateMessage(playerID, "Não é possível abrir votação pois o servidor vai reiniciar em breve", MessageColor.WARNING);
+                return false;
+            }
+            if (!isVotingMapActive)
+            {
+                g_VoteMapManager.IniciaVotacaoProximoMapa();
+                changeMapNow = true;
             }
 
             int regionId = tokens[2].ToInt();
             g_VoteMapManager.HandleVote(playerID, regionId);
-            break;        
+            break;   
         case "nextmap":  
             SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
             break;

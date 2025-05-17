@@ -109,6 +109,11 @@ class VoteMapManager
             WriteToLog("Mapa vencedor: (" + regionId + ") " + mapName + " com " + highest.ToString() + " votos.", LogFile.INIT, false, LogType.INFO);
 			BroadcastMessage("Mapa vencedor: " + regionId + " - " + mapName + " com " + highest.ToString() + " votos.", MessageColor.FRIENDLY);
 			SetActiveRegionById(regionId);
+            if (changeMapNow)
+            {
+                AppendExternalAction("{\"action\": \"restart_server\", \"minutes\": 1, \"message\": \"Servidor será reiniciado em 1 minutos\"}");
+                BroadcastMessage("O servidor será reiniciado em instantes...", MessageColor.IMPORTANT);
+            }
             
 		} else {
 			BroadcastMessage("Nenhum voto recebido. O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
@@ -143,13 +148,5 @@ class VoteMapManager
             
             SendPrivateMessage(playerID, linha, MessageColor.FRIENDLY);
         }
-    }
-    void CheckCurrentVotingMap(string playerID)
-    {
-        if (isVotingMapActive) {
-            ShowResultVotingMap(playerID);
-        } else {
-            SendPrivateMessage(playerID, "Nenhuma votação está ativa no momento.", MessageColor.WARNING);
-        }        
     }
 }
