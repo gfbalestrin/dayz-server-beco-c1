@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciar Loadouts</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light p-4">
+  <div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary shadow-sm">
+      <a class="navbar-brand text-white" href="#"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ms-auto">
+          {% if session['is_admin'] %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="/">Armas</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="/general_items">Items gerais</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="/loadout_rules">Regras</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="/log_viewer">logs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="/player_loadouts">Meu Loadout</a>
+          </li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="container mt-5">
+    <h2>Gerenciar Loadouts</h2>
+
+    <form id="loadout-form" class="row g-3 mt-3">
+      <div class="col-md-6">
+        <input type="text" id="loadout-name" class="form-control" placeholder="Nome do Loadout" required>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Adicionar Loadout</button>
+      </div>
+    </form>
+
+    <hr>
+
+    <h4>Lista de Loadouts</h4>
+    <ul id="loadout-list" class="list-group mt-3"></ul>
+  </div>
+
+  <script>
+
+    // Carrega a lista assim que a página abrir
+    document.addEventListener('DOMContentLoaded', fetchLoadouts);
+
+    const form = document.getElementById('loadout-form');
+    const list = document.getElementById('loadout-list');
+    const nameInput = document.getElementById('loadout-name');
+
+
+    // Força formatação válida ao digitar
+    nameInput.addEventListener('input', () => {
+      let val = nameInput.value;
+
+      // Substituir espaços por underline
+      val = val.replace(/\s+/g, '_');
+
+      // Remover caracteres inválidos
+      val = val.replace(/[^a-z0-9_]/gi, '');
+
+      // Converter para minúsculas
+      val = val.toLowerCase();
+
+      // Atualiza o input
+      nameInput.value = val;
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+
+      // Verificações adicionais antes de enviar
+      if (!name) {
+        alert('Nome não pode estar vazio.');
+        return;
+      }
+
+      if (name.length > 20) {
+        alert('O nome do loadout deve ter no máximo 20 caracteres.');
+        return;
+      }
+
+      fetch('/api/loadouts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      }).then(res => {
+        if (res.ok) {
+          nameInput.value = '';
+          fetchLoadouts();
+        } else {
+          res.json().then(data => alert(data.error || 'Erro ao criar loadout.'));
+        }
+      });
+    });
+
+    function fetchLoadouts() {
+      fetch(`/api/loadouts`)
+        .then(res => res.json())
+        .then(data => {
+          list.innerHTML = '';
+          data.forEach(loadout => {
+            const li = document.createElement('li');
+
+            // Estilização condicional
+            const isActive = loadout.is_active;
+            const activeClass = isActive ? 'border-success bg-light' : '';
+            const checked = isActive ? 'checked' : '';
+            const activeBadge = isActive ? '<span class="badge bg-success ms-2">Ativo</span>' : '';
+
+            li.className = `list-group-item border rounded mb-3 p-3 ${activeClass}`;
+
+            li.innerHTML = `
+              <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                  <strong>${loadout.name}</strong> ${activeBadge}
+                  <div class="mt-2">
+                    <a href="/player_loadout/${loadout.id}/weapons" class="btn btn-primary btn-sm me-2">🔫 Armas</a>
+                    <a href="/player_loadout/${loadout.id}/items" class="btn btn-secondary btn-sm">🎒 Itens</a>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div class="form-check me-3 text-center">
+                    <input class="form-check-input" type="radio" name="activeLoadout" ${checked} onchange="activateLoadout(${loadout.id})" id="radio-${loadout.id}">
+                    <label class="form-check-label small" for="radio-${loadout.id}">Ativo</label>
+                  </div>
+                  <button class="btn btn-danger btn-sm ms-2" onclick="confirmDelete(${loadout.id}, '${loadout.name}')">🗑️ Excluir</button>
+                </div>
+              </div>
+            `;
+
+            list.appendChild(li);
+          });
+        });
+    }
+
+
+  function activateLoadout(loadoutId) {
+    fetch(`/api/loadouts/${loadoutId}/activate`, {
+      method: 'POST'
+    }).then(res => {
+      if (res.ok) {
+        fetchLoadouts(); // Atualiza a UI após ativação
+      }
+    });
+  }
+
+
+    function deleteLoadout(id) {
+      fetch(`/api/loadouts/${id}`, { method: 'DELETE' })
+        .then(res => {
+          if (res.ok) fetchLoadouts();
+        });
+    }
+    function confirmDelete(id, name) {
+      if (confirm(`Tem certeza que deseja excluir o loadout "${name}"?`)) {
+        deleteLoadout(id);
+      }
+    }
+  </script>
+
+</body>
+
+</html>

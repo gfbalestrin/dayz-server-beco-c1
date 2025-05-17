@@ -65,3 +65,10 @@ class LoadoutData {
     ref array<ref Explosive> explosives;
     ref array<ref LoadoutItem> items;
 }
+
+class LoadoutPlayer {
+    string LoadoutId;
+    bool IsActive;
+    string LoadoutName;
+    ref LoadoutData Loadout;
+}

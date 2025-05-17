@@ -1,6 +1,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Globals.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/SafeZoneData.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/LoadoutData.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/LoadoutPlayer.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/LoadoutPlayerId.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Log.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Functions.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
@@ -313,19 +314,19 @@ class CustomMission: MissionServer
 		GetGame().SelectPlayer(identity, m_player);
 		if (CheckIfIsAdmin(identity.GetId()))
 		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " é admin.", LogFile.INIT, false, LogType.DEBUG);
+			WriteToLog("CreateCharacter(): " + identity.GetName() + " (" + identity.GetId() + ")" + " é admin.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
-			GiveAdminLoadout(m_player);
+			GiveAdminLoadout(m_player, identity.GetId());
 		}
 		else
 		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " é jogador comum.", LogFile.INIT, false, LogType.DEBUG);
+			WriteToLog("CreateCharacter(): " + identity.GetName() + " (" + identity.GetId() + ")" + " é jogador comum.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
 
 			if (!GiveCustomLoadout(m_player, identity.GetId()))
 			{
 				WriteToLog("CreateCharacter(): Loadout customizado não encontrado. Aplicando padrão.", LogFile.INIT, false, LogType.DEBUG);
-				GiveDefaultLoadout(m_player);
+				GiveDefaultLoadout(m_player, identity.GetId());
 			}
 
 			m_player.SetHealth("", "", 100);

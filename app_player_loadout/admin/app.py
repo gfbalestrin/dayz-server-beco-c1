@@ -13,14 +13,18 @@ import traceback
 import time
 import chardet
 import html
+import re
+import base64
 
 app = Flask(__name__)
 
-app.secret_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+app.secret_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 JSON_PATH = '/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.json'
 TMP_PATH = "/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/custom_loadouts.tmp.json"
 LOG_PATH = "/home/dayzadmin/servers/dayz-server/profiles/init.log"
 ADMIN_IDS_FILE = '/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/files/admin_ids.txt'
+PLAYERS_LOADOUT_JSON="/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/loadouts/players_ids.json"
+PLAYERS_LOADOUT_FOLDER="/home/dayzadmin/servers/dayz-server/mpmissions/dayzOffline.chernarusplus/admin/loadouts/players"
 
 def login_required(f):
     @wraps(f)
@@ -146,7 +150,7 @@ def export_loadouts_json():
     player_rows = query_db("""
         SELECT DISTINCT player_id FROM player_loadouts_weapons
         UNION
-        SELECT DISTINCT player_id FROM player_items
+        SELECT DISTINCT player_id FROM player_loadouts_items
     """)
 
     full_data = {}
@@ -221,7 +225,7 @@ def export_loadouts_json():
         # Buscar itens do jogador
         items = query_db("""
             SELECT i.*, it.name as type_name, pi.quantity
-            FROM player_items pi
+            FROM player_loadouts_items pi
             JOIN item i ON i.id = pi.item_id
             JOIN item_types it ON it.id = i.type_id
             WHERE pi.player_id = ?
@@ -424,7 +428,7 @@ def login():
             if session['is_admin']:
                 return redirect(url_for('index'))
             else:
-                return redirect(url_for('loadout_players'))
+                return redirect(url_for('player_loadouts'))
         else:
             flash("Usuário ou senha inválidos", "danger")
 
@@ -1922,221 +1926,223 @@ def list_player_weapons(player_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/player_loadout_weapons/<player_id>', methods=['GET', 'POST'])
-@login_required
-def player_loadout_weapons(player_id):
-    conn = get_db_connection()
-    conn2 = get_db_connection_players_beco_c1()
+# @app.route('/player_loadout_weapons/<player_id>', methods=['GET', 'POST'])
+# @login_required
+# def player_loadout_weapons(player_id):
+#     conn = get_db_connection()
+#     conn2 = get_db_connection_players_beco_c1()
 
-    if request.method == 'POST':
-        primary = request.form.get('primary_weapon_id')
-        primary_magazine = request.form.get('primary_magazine_id')
-        primary_ammo = request.form.get('primary_ammo_id')
+#     if request.method == 'POST':
+#         primary = request.form.get('primary_weapon_id')
+#         primary_magazine = request.form.get('primary_magazine_id')
+#         primary_ammo = request.form.get('primary_ammo_id')
 
-        secondary = request.form.get('secondary_weapon_id')
-        secondary_magazine = request.form.get('secondary_magazine_id')
-        secondary_ammo = request.form.get('secondary_ammo_id')
+#         secondary = request.form.get('secondary_weapon_id')
+#         secondary_magazine = request.form.get('secondary_magazine_id')
+#         secondary_ammo = request.form.get('secondary_ammo_id')
 
-        small = request.form.get('small_weapon_id')
-        small_magazine = request.form.get('small_magazine_id')
-        small_ammo = request.form.get('small_ammo_id')
+#         small = request.form.get('small_weapon_id')
+#         small_magazine = request.form.get('small_magazine_id')
+#         small_ammo = request.form.get('small_ammo_id')
 
-        # Validação das armas
-        errors = []
-        for weapon_id, slot_type in [
-            (primary, 'primary'),
-            (secondary, 'secondary'),
-            (small, 'small')
-        ]:
-            if weapon_id:
-                rule = conn.execute('SELECT * FROM loadout_rules_weapons WHERE weapon_id = ?', (weapon_id,)).fetchone()
-                if not rule:
-                    errors.append(f"A arma selecionada para {slot_type} é inválida.")
-                elif rule['is_banned']:
-                    errors.append(f"A arma selecionada para {slot_type} está banida.")
+#         # Validação das armas
+#         errors = []
+#         for weapon_id, slot_type in [
+#             (primary, 'primary'),
+#             (secondary, 'secondary'),
+#             (small, 'small')
+#         ]:
+#             if weapon_id:
+#                 rule = conn.execute('SELECT * FROM loadout_rules_weapons WHERE weapon_id = ?', (weapon_id,)).fetchone()
+#                 if not rule:
+#                     errors.append(f"A arma selecionada para {slot_type} é inválida.")
+#                 elif rule['is_banned']:
+#                     errors.append(f"A arma selecionada para {slot_type} está banida.")
 
-        if errors:
-            for err in errors:
-                flash(err, 'danger')
-            return redirect(request.url)
+#         if errors:
+#             for err in errors:
+#                 flash(err, 'danger')
+#             return redirect(request.url)
 
-        conn.execute('''
-            INSERT INTO player_loadouts_weapons (
-                player_id,
-                primary_weapon_id, primary_magazine_id, primary_ammo_id,
-                secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
-                small_weapon_id, small_magazine_id, small_ammo_id
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(player_id) DO UPDATE SET
-                primary_weapon_id = excluded.primary_weapon_id,
-                primary_magazine_id = excluded.primary_magazine_id,
-                primary_ammo_id = excluded.primary_ammo_id,                
-                secondary_weapon_id = excluded.secondary_weapon_id,
-                secondary_magazine_id = excluded.secondary_magazine_id,
-                secondary_ammo_id = excluded.secondary_ammo_id,                
-                small_weapon_id = excluded.small_weapon_id,
-                small_magazine_id = excluded.small_magazine_id,
-                small_ammo_id = excluded.small_ammo_id;
-        ''', (
-            player_id,
-            primary, primary_magazine, primary_ammo,
-            secondary, secondary_magazine, secondary_ammo,
-            small, small_magazine, small_ammo
-        ))
+#         conn.execute('''
+#             INSERT INTO player_loadouts_weapons (
+#                 player_id,
+#                 primary_weapon_id, primary_magazine_id, primary_ammo_id,
+#                 secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
+#                 small_weapon_id, small_magazine_id, small_ammo_id
+#             )
+#             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ON CONFLICT(player_id) DO UPDATE SET
+#                 primary_weapon_id = excluded.primary_weapon_id,
+#                 primary_magazine_id = excluded.primary_magazine_id,
+#                 primary_ammo_id = excluded.primary_ammo_id,                
+#                 secondary_weapon_id = excluded.secondary_weapon_id,
+#                 secondary_magazine_id = excluded.secondary_magazine_id,
+#                 secondary_ammo_id = excluded.secondary_ammo_id,                
+#                 small_weapon_id = excluded.small_weapon_id,
+#                 small_magazine_id = excluded.small_magazine_id,
+#                 small_ammo_id = excluded.small_ammo_id;
+#         ''', (
+#             player_id,
+#             primary, primary_magazine, primary_ammo,
+#             secondary, secondary_magazine, secondary_ammo,
+#             small, small_magazine, small_ammo
+#         ))
 
-        conn.commit()
-        conn.close()
-        conn2.close()
-        flash("Loadout atualizado com sucesso!", "success")
-        return redirect(url_for('player_loadout', player_id=player_id))
+#         conn.commit()
+#         conn.close()
+#         conn2.close()
+#         flash("Loadout atualizado com sucesso!", "success")
+#         return redirect(url_for('player_loadout', player_id=player_id))
 
-    weapons = conn.execute('''
-        SELECT w.*, r.is_banned
-        FROM weapons w
-        LEFT JOIN loadout_rules_weapons r ON w.id = r.weapon_id
-    ''').fetchall()
+#     weapons = conn.execute('''
+#         SELECT w.*, r.is_banned
+#         FROM weapons w
+#         LEFT JOIN loadout_rules_weapons r ON w.id = r.weapon_id
+#     ''').fetchall()
 
-    # Criar um dicionário de loadout padrão
-    default_loadout = {
-        'loadout_id': None,
-        'player_id': player_id,
-        'primary_weapon_id': None,
-        'primary_weapon_name': None,
-        'primary_weapon_img': None,
-        'primary_magazine_id': None,
-        'primary_magazine_name': None,
-        'primary_magazine_img': None,
-        'primary_ammo_id': None,
-        'primary_ammo_name': None,
-        'primary_ammo_img': None,
-        'secondary_weapon_id': None,
-        'secondary_weapon_name': None,
-        'secondary_weapon_img': None,
-        'secondary_magazine_id': None,
-        'secondary_magazine_name': None,
-        'secondary_magazine_img': None,
-        'secondary_ammo_id': None,
-        'secondary_ammo_name': None,
-        'secondary_ammo_img': None,
-        'small_weapon_id': None,
-        'small_weapon_name': None,
-        'small_weapon_img': None,
-        'small_magazine_id': None,
-        'small_magazine_name': None,
-        'small_magazine_img': None,
-        'small_ammo_id': None,
-        'small_ammo_name': None,
-        'small_ammo_img': None
-    }
+#     # Criar um dicionário de loadout padrão
+#     default_loadout = {
+#         'loadout_id': None,
+#         'player_id': player_id,
+#         'primary_weapon_id': None,
+#         'primary_weapon_name': None,
+#         'primary_weapon_img': None,
+#         'primary_magazine_id': None,
+#         'primary_magazine_name': None,
+#         'primary_magazine_img': None,
+#         'primary_ammo_id': None,
+#         'primary_ammo_name': None,
+#         'primary_ammo_img': None,
+#         'secondary_weapon_id': None,
+#         'secondary_weapon_name': None,
+#         'secondary_weapon_img': None,
+#         'secondary_magazine_id': None,
+#         'secondary_magazine_name': None,
+#         'secondary_magazine_img': None,
+#         'secondary_ammo_id': None,
+#         'secondary_ammo_name': None,
+#         'secondary_ammo_img': None,
+#         'small_weapon_id': None,
+#         'small_weapon_name': None,
+#         'small_weapon_img': None,
+#         'small_magazine_id': None,
+#         'small_magazine_name': None,
+#         'small_magazine_img': None,
+#         'small_ammo_id': None,
+#         'small_ammo_name': None,
+#         'small_ammo_img': None
+#     }
 
-    # Buscar loadout do banco de dados
-    db_loadout = conn.execute("""
-        SELECT 
-            plw.id AS loadout_id,
-            plw.player_id,
-            wp_primary.id AS primary_weapon_id,
-            wp_primary.name AS primary_weapon_name,
-            wp_primary.img AS primary_weapon_img,
-            mag_primary.id AS primary_magazine_id,
-            mag_primary.name AS primary_magazine_name,
-            mag_primary.img AS primary_magazine_img,
-            ammo_primary.id AS primary_ammo_id,
-            ammo_primary.name AS primary_ammo_name,
-            ammo_primary.img AS primary_ammo_img,
-            wp_secondary.id AS secondary_weapon_id,
-            wp_secondary.name AS secondary_weapon_name,
-            wp_secondary.img AS secondary_weapon_img,
-            mag_secondary.id AS secondary_magazine_id,
-            mag_secondary.name AS secondary_magazine_name,
-            mag_secondary.img AS secondary_magazine_img,
-            ammo_secondary.id AS secondary_ammo_id,
-            ammo_secondary.name AS secondary_ammo_name,
-            ammo_secondary.img AS secondary_ammo_img,
-            wp_small.id AS small_weapon_id,
-            wp_small.name AS small_weapon_name,
-            wp_small.img AS small_weapon_img,
-            mag_small.id AS small_magazine_id,
-            mag_small.name AS small_magazine_name,
-            mag_small.img AS small_magazine_img,
-            ammo_small.id AS small_ammo_id,
-            ammo_small.name AS small_ammo_name,
-            ammo_small.img AS small_ammo_img
-        FROM player_loadouts_weapons plw
-        LEFT JOIN weapons wp_primary ON plw.primary_weapon_id = wp_primary.id
-        LEFT JOIN weapons wp_secondary ON plw.secondary_weapon_id = wp_secondary.id
-        LEFT JOIN weapons wp_small ON plw.small_weapon_id = wp_small.id
-        LEFT JOIN magazines mag_primary ON plw.primary_magazine_id = mag_primary.id
-        LEFT JOIN magazines mag_secondary ON plw.secondary_magazine_id = mag_secondary.id
-        LEFT JOIN magazines mag_small ON plw.small_magazine_id = mag_small.id
-        LEFT JOIN ammunitions ammo_primary ON plw.primary_ammo_id = ammo_primary.id
-        LEFT JOIN ammunitions ammo_secondary ON plw.secondary_ammo_id = ammo_secondary.id
-        LEFT JOIN ammunitions ammo_small ON plw.small_ammo_id = ammo_small.id
-        WHERE plw.player_id = ?
-    """, (player_id,)).fetchone()
+#     # Buscar loadout do banco de dados
+#     db_loadout = conn.execute("""
+#         SELECT 
+#             plw.id AS loadout_id,
+#             plw.player_id,
+#             wp_primary.id AS primary_weapon_id,
+#             wp_primary.name AS primary_weapon_name,
+#             wp_primary.img AS primary_weapon_img,
+#             mag_primary.id AS primary_magazine_id,
+#             mag_primary.name AS primary_magazine_name,
+#             mag_primary.img AS primary_magazine_img,
+#             ammo_primary.id AS primary_ammo_id,
+#             ammo_primary.name AS primary_ammo_name,
+#             ammo_primary.img AS primary_ammo_img,
+#             wp_secondary.id AS secondary_weapon_id,
+#             wp_secondary.name AS secondary_weapon_name,
+#             wp_secondary.img AS secondary_weapon_img,
+#             mag_secondary.id AS secondary_magazine_id,
+#             mag_secondary.name AS secondary_magazine_name,
+#             mag_secondary.img AS secondary_magazine_img,
+#             ammo_secondary.id AS secondary_ammo_id,
+#             ammo_secondary.name AS secondary_ammo_name,
+#             ammo_secondary.img AS secondary_ammo_img,
+#             wp_small.id AS small_weapon_id,
+#             wp_small.name AS small_weapon_name,
+#             wp_small.img AS small_weapon_img,
+#             mag_small.id AS small_magazine_id,
+#             mag_small.name AS small_magazine_name,
+#             mag_small.img AS small_magazine_img,
+#             ammo_small.id AS small_ammo_id,
+#             ammo_small.name AS small_ammo_name,
+#             ammo_small.img AS small_ammo_img
+#         FROM player_loadouts_weapons plw
+#         LEFT JOIN weapons wp_primary ON plw.primary_weapon_id = wp_primary.id
+#         LEFT JOIN weapons wp_secondary ON plw.secondary_weapon_id = wp_secondary.id
+#         LEFT JOIN weapons wp_small ON plw.small_weapon_id = wp_small.id
+#         LEFT JOIN magazines mag_primary ON plw.primary_magazine_id = mag_primary.id
+#         LEFT JOIN magazines mag_secondary ON plw.secondary_magazine_id = mag_secondary.id
+#         LEFT JOIN magazines mag_small ON plw.small_magazine_id = mag_small.id
+#         LEFT JOIN ammunitions ammo_primary ON plw.primary_ammo_id = ammo_primary.id
+#         LEFT JOIN ammunitions ammo_secondary ON plw.secondary_ammo_id = ammo_secondary.id
+#         LEFT JOIN ammunitions ammo_small ON plw.small_ammo_id = ammo_small.id
+#         WHERE plw.player_id = ?
+#     """, (player_id,)).fetchone()
 
-    # Combinar o loadout padrão com os dados do banco (se existirem)
-    loadout = default_loadout
-    if db_loadout:
-        loadout.update(db_loadout)
+#     # Combinar o loadout padrão com os dados do banco (se existirem)
+#     loadout = default_loadout
+#     if db_loadout:
+#         loadout.update(db_loadout)
 
-    # Buscar attachments apenas se houver um loadout_id
-    attachments_by_slot = {'primary': [], 'secondary': [], 'small': []}
-    if loadout['loadout_id'] is not None:
-        attachments_raw = conn.execute('''
-            SELECT a.*, plwa.weapon_slot
-            FROM player_loadouts_weapon_attachments plwa
-            JOIN attachments a ON plwa.attachment_id = a.id
-            WHERE plwa.player_loadouts_weapons_id = ?
-        ''', (loadout['loadout_id'],)).fetchall()
+#     # Buscar attachments apenas se houver um loadout_id
+#     attachments_by_slot = {'primary': [], 'secondary': [], 'small': []}
+#     if loadout['loadout_id'] is not None:
+#         attachments_raw = conn.execute('''
+#             SELECT a.*, plwa.weapon_slot
+#             FROM player_loadouts_weapon_attachments plwa
+#             JOIN attachments a ON plwa.attachment_id = a.id
+#             WHERE plwa.player_loadouts_weapons_id = ?
+#         ''', (loadout['loadout_id'],)).fetchall()
         
-        # Agrupar attachments por slot
-        for att in attachments_raw:
-            slot = att['weapon_slot']
-            if slot in attachments_by_slot:
-                attachments_by_slot[slot].append(att)
+#         # Agrupar attachments por slot
+#         for att in attachments_raw:
+#             slot = att['weapon_slot']
+#             if slot in attachments_by_slot:
+#                 attachments_by_slot[slot].append(att)
     
-    # Buscar explosives apenas se houver um loadout_id
-    explosives = conn.execute('''
-            SELECT a.*, plwa.quantity
-            FROM player_loadouts_weapon_explosives plwa
-            JOIN explosives a ON plwa.explosive_id = a.id
-            WHERE plwa.player_loadouts_weapons_id = ?
-        ''', (loadout['loadout_id'],)).fetchall()
+#     # Buscar explosives apenas se houver um loadout_id
+#     explosives = conn.execute('''
+#             SELECT a.*, plwa.quantity
+#             FROM player_loadouts_weapon_explosives plwa
+#             JOIN explosives a ON plwa.explosive_id = a.id
+#             WHERE plwa.player_loadouts_weapons_id = ?
+#         ''', (loadout['loadout_id'],)).fetchall()
 
-    player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
-    rules = conn.execute('''
-        SELECT r.*, w.name FROM loadout_rules_weapons r
-        JOIN weapons w ON r.weapon_id = w.id
-    ''').fetchall()
+#     player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
+#     rules = conn.execute('''
+#         SELECT r.*, w.name FROM loadout_rules_weapons r
+#         JOIN weapons w ON r.weapon_id = w.id
+#     ''').fetchall()
 
-    conn.close()
-    conn2.close()
+#     conn.close()
+#     conn2.close()
 
-    return render_template(
-        'player_loadout_weapons.html',
-        player=player,
-        weapons=weapons,
-        loadout=loadout,
-        rules=rules,
-        attachments=attachments_by_slot,
-        explosives=explosives
-    )
+#     return render_template(
+#         'player_loadout_weapons.html',
+#         player=player,
+#         weapons=weapons,
+#         loadout=loadout,
+#         rules=rules,
+#         attachments=attachments_by_slot,
+#         explosives=explosives
+#     )
 
-@app.route('/delete_loadout_weapons/<player_id>', methods=['GET'])
+@app.route('/delete_loadout_weapons/<player_loadout_id>', methods=['GET'])
 @login_required
-def delete_loadout_weapons(player_id):
+def delete_loadout_weapons(player_loadout_id):
     conn = get_db_connection()
     
     try:
         # Primeiro deleta os attachments (se houver relacionamento)
-        conn.execute('DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id IN (SELECT id FROM player_loadouts_weapons WHERE player_id = ?)', (player_id,))
-        conn.execute('DELETE FROM player_loadouts_weapon_explosives WHERE player_loadouts_weapons_id IN (SELECT id FROM player_loadouts_weapons WHERE player_id = ?)', (player_id,))
+        conn.execute('DELETE FROM player_loadouts_weapon_attachments WHERE player_loadout_id IN (SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?)', (player_loadout_id,))
+        conn.execute('DELETE FROM player_loadouts_weapon_explosives WHERE player_loadout_id IN (SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?)', (player_loadout_id,))
         
         # Depois deleta o loadout principal
-        conn.execute('DELETE FROM player_loadouts_weapons WHERE player_id = ?', (player_id,))
+        conn.execute('DELETE FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id,))
         
         conn.commit()
+        player_id = session.get('player_id')
+        export_player_loadouts(player_id)
         flash('Loadout excluído com sucesso!', 'success')
     except Exception as e:
         conn.rollback()
@@ -2144,7 +2150,7 @@ def delete_loadout_weapons(player_id):
     finally:
         conn.close()
     
-    return redirect(url_for('player_loadout_weapons', player_id=player_id))
+    return redirect(request.referrer or url_for('index'))
 
 @app.route('/loadout_players', methods=['GET'])
 @login_required
@@ -2198,9 +2204,10 @@ def weapon_attachments(weapon_id):
 
     return jsonify([dict(a) for a in attachments])
 
-@app.route('/save_loadout_weapons/<player_id>', methods=['POST'])
+@app.route('/save_loadout_weapons/<player_loadout_id>', methods=['POST'])
 @login_required
-def save_loadout_weapons(player_id):
+def save_loadout_weapons(player_loadout_id):
+    player_id = session.get('player_id')
     conn = get_db_connection()
 
     try:
@@ -2220,13 +2227,11 @@ def save_loadout_weapons(player_id):
         def parse(val): return int(val) if val else None
 
         # Verifica se os dados de loadout já existem
-        existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
+        existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id)).fetchone()
 
         # Prepara a consulta para inserir ou atualizar
         if existing_loadout:            
             print("Loadout ja existe")
-            player_loadouts_weapons_id = existing_loadout['id']
-            print("player_loadouts_weapons_id: " + str(player_loadouts_weapons_id))
 
             update_data = []
             update_query = "UPDATE player_loadouts_weapons SET "
@@ -2235,7 +2240,7 @@ def save_loadout_weapons(player_id):
 
             if primary_weapon_id:
                 if (primary_weapon_id != existing_loadout['primary_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'primary'", (player_loadouts_weapons_id,))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id))
                     update_query += "primary_magazine_id = ?, "
                     update_data.append(parse(primary_magazine_id))
                     update_query += "primary_ammo_id = ?, "
@@ -2250,16 +2255,16 @@ def save_loadout_weapons(player_id):
                 update_data.append(parse(primary_ammo_id))
             attachment_ids = request.form.getlist(f'primary_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'primary'", (player_loadouts_weapons_id,))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id))
                 for aid in attachment_ids:
                     conn.execute(''' 
-                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
                         VALUES (?, ?, ?)
-                    ''', (player_loadouts_weapons_id, int(aid), "primary"))
+                    ''', (int(aid), "primary", player_loadout_id))
 
             if secondary_weapon_id:
                 if (secondary_weapon_id != existing_loadout['secondary_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'secondary'", (player_loadouts_weapons_id,))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id))
                     update_query += "secondary_magazine_id = ?, "
                     update_data.append(parse(secondary_magazine_id))
                     update_query += "secondary_ammo_id = ?, "
@@ -2274,16 +2279,16 @@ def save_loadout_weapons(player_id):
                 update_data.append(parse(secondary_ammo_id))
             attachment_ids = request.form.getlist(f'secondary_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'secondary'", (player_loadouts_weapons_id,))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id))
                 for aid in attachment_ids:
                     conn.execute(''' 
-                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
                         VALUES (?, ?, ?)
-                    ''', (player_loadouts_weapons_id, int(aid), "secondary"))
+                    ''', (int(aid), "secondary", player_loadout_id))
 
             if small_weapon_id:
                 if (small_weapon_id != existing_loadout['small_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'small'", (player_loadouts_weapons_id,))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id))
                     update_query += "small_magazine_id = ?, "
                     update_data.append(parse(small_magazine_id))
                     update_query += "small_ammo_id = ?, "
@@ -2298,34 +2303,34 @@ def save_loadout_weapons(player_id):
                 update_data.append(parse(small_ammo_id))
             attachment_ids = request.form.getlist(f'small_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE player_loadouts_weapons_id = ? and weapon_slot = 'small'", (player_loadouts_weapons_id,))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id))
                 for aid in attachment_ids:
                     conn.execute(''' 
-                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
                         VALUES (?, ?, ?)
-                    ''', (player_loadouts_weapons_id, int(aid), "small"))
+                    ''', (int(aid), "small", player_loadout_id))
             explosives_json = request.form.get('explosives')
             if (explosives_json):
-                conn.execute("DELETE FROM player_loadouts_weapon_explosives WHERE player_loadouts_weapons_id = ?", (player_loadouts_weapons_id,))              
+                conn.execute("DELETE FROM player_loadouts_weapon_explosives WHERE player_loadout_id = ?", (player_loadout_id))              
                 explosives = json.loads(explosives_json) if explosives_json else []
                 for explosive in explosives:
                     conn.execute('''
-                        INSERT INTO player_loadouts_weapon_explosives (player_loadouts_weapons_id, explosive_id, quantity)
+                        INSERT INTO player_loadouts_weapon_explosives (explosive_id, quantity, player_loadout_id)
                         VALUES (?, ?, ?)
                     ''', (
-                        player_loadouts_weapons_id,
                         int(explosive['id']),
-                        int(explosive['quantity'])
+                        int(explosive['quantity']),
+                        player_loadout_id
                     ))
             
 
             # Remove a vírgula extra no final da consulta de atualização
-            update_query = update_query.rstrip(', ') + " WHERE player_id = ?"            
-            update_data.append(player_id)
+            update_query = update_query.rstrip(', ') + " WHERE player_loadout_id = ?"            
+            update_data.append(player_loadout_id)
             print("update_query: " + update_query)
 
             # Realiza o update
-            if (update_query != "UPDATE player_loadouts_weapons SET WHERE player_id = ?"):
+            if (update_query != "UPDATE player_loadouts_weapons SET WHERE player_loadout_id = ?"):
                 conn.execute(update_query, tuple(update_data))
 
             print("Realizou update")
@@ -2334,41 +2339,40 @@ def save_loadout_weapons(player_id):
             # Caso o loadout não exista, insere um novo
             conn.execute(''' 
                 INSERT INTO player_loadouts_weapons (
-                    player_id, primary_weapon_id, primary_magazine_id, primary_ammo_id,
+                    primary_weapon_id, primary_magazine_id, primary_ammo_id,
                     secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
-                    small_weapon_id, small_magazine_id, small_ammo_id
+                    small_weapon_id, small_magazine_id, small_ammo_id, player_loadout_id
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                player_id,
                 parse(primary_weapon_id), parse(primary_magazine_id), parse(primary_ammo_id),
                 parse(secondary_weapon_id), parse(secondary_magazine_id), parse(secondary_ammo_id),
-                parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id)
+                parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id), parse(player_loadout_id)
             ))
             # Recupera o ID do loadout
-            row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_id = ?', (player_id,)).fetchone()
-            player_loadouts_weapons_id = row['id']
+            row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id)).fetchone()
             # Loop para cada slot de arma
             for slot in ['primary', 'secondary', 'small']:
                 attachment_ids = request.form.getlist(f'{slot}_attachments')
                 for aid in attachment_ids:
                     conn.execute(''' 
-                        INSERT INTO player_loadouts_weapon_attachments (player_loadouts_weapons_id, attachment_id, weapon_slot)
+                        INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
                         VALUES (?, ?, ?)
-                    ''', (player_loadouts_weapons_id, int(aid), slot))  
+                    ''', (int(aid), slot, player_loadout_id))  
 
             explosives_json = request.form.get('explosives')
             explosives = json.loads(explosives_json) if explosives_json else []
             for explosive in explosives:
                 conn.execute('''
-                    INSERT INTO player_loadouts_weapon_explosives (player_loadouts_weapons_id, explosive_id, quantity)
+                    INSERT INTO player_loadouts_weapon_explosives (explosive_id, quantity, player_loadout_id)
                     VALUES (?, ?, ?)
                 ''', (
-                    player_loadouts_weapons_id,
                     int(explosive['id']),
-                    int(explosive['quantity'])
+                    int(explosive['quantity']),
+                    player_loadout_id
                 ))
 
         conn.commit()
+        export_player_loadouts(player_id)
         flash("Loadout salvo com sucesso!", "success")
 
     except Exception as e:
@@ -2380,7 +2384,7 @@ def save_loadout_weapons(player_id):
     finally:
         conn.close()
 
-    return redirect(url_for('player_loadout_weapons', player_id=player_id))
+    return redirect(url_for('loadout_weapons', loadout_id=player_loadout_id))
 
 # Items
 # @app.route('/items', methods=['GET'])
@@ -2726,64 +2730,66 @@ def delete_compatibility(item_id, child_item_id):
         conn.close()
 
 # Loadout de items para players
-@app.route('/player_loadout_items/<player_id>', methods=['GET', 'POST'])
-@login_required
-def player_loadout_items(player_id):
-    conn = get_db_connection()
+# @app.route('/player_loadout_items/<player_id>', methods=['GET', 'POST'])
+# @login_required
+# def player_loadout_items(player_id):
+#     conn = get_db_connection()
     
-    items = conn.execute('''
-        SELECT pi.id AS player_item_id, i.*
-        FROM player_items pi
-        JOIN item i ON pi.item_id = i.id
-        WHERE pi.player_id = ?
-    ''', (player_id,)).fetchall()
-    conn.close()
-    conn2 = get_db_connection_players_beco_c1()
-    player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
-    conn.close()
-    return render_template(
-        'player_loadout_items.html',
-        items=items, player=player
-    )
+#     items = conn.execute('''
+#         SELECT pi.id AS player_item_id, i.*
+#         FROM player_loadouts_items pi
+#         JOIN item i ON pi.item_id = i.id
+#         WHERE pi.player_id = ?
+#     ''', (player_id,)).fetchall()
+#     conn.close()
+#     conn2 = get_db_connection_players_beco_c1()
+#     player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
+#     conn.close()
+#     return render_template(
+#         'player_loadout_items.html',
+#         items=items, player=player
+#     )
 
 @app.route('/players/<player_id>/items', methods=['DELETE'])
 @login_required
-def clear_player_items(player_id):
+def clear_player_loadouts_items(player_id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM player_items WHERE player_id = ?', (player_id,))
+    conn.execute('DELETE FROM player_loadouts_items WHERE player_id = ?', (player_id,))
     conn.commit()
     conn.close()
+    player_id = session.get('player_id')
+    export_player_loadouts(player_id)
     return jsonify({'message': f'Todos os itens do jogador {player_id} foram removidos.'})
 
 # Novos metodos do loadout de items
 # Função auxiliar para obter os itens do jogador
-def get_player_items(player_id):
+def get_player_loadouts_items(player_loadout_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT i.*, pi.quantity, it.name as type_name
-        FROM player_items pi
+        FROM player_loadouts_items pi
         JOIN item i ON pi.item_id = i.id
         JOIN item_types it ON i.type_id = it.id
-        WHERE pi.player_id = ?
-    """, (player_id,))
+        WHERE pi.player_loadout_id = ?
+    """, (player_loadout_id,))
     items = cursor.fetchall()
     return items
 
 # Endpoint para listar os itens de um jogador
-@app.route('/players/<player_id>/items', methods=['GET'])
+@app.route('/players/<player_loadout_id>/items', methods=['GET'])
 @login_required
-def list_player_items(player_id):
+def list_player_loadouts_items(player_loadout_id):
     try:
-        items = get_player_items(player_id)
+        items = get_player_loadouts_items(player_loadout_id)
         return jsonify([dict(item) for item in items])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para adicionar um item ao jogador
-@app.route('/players/<player_id>/items', methods=['POST'])
+@app.route('/players/<player_loadout_id>/items', methods=['POST'])
 @login_required
-def add_item_to_player(player_id):
+def add_item_to_player(player_loadout_id):
     item_id = request.json.get('item_id')
     if not item_id:
         return jsonify({'error': 'Item ID é obrigatório'}), 400
@@ -2792,37 +2798,41 @@ def add_item_to_player(player_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT quantity FROM player_items WHERE player_id = ? AND item_id = ?
-    """, (player_id, item_id))
+        SELECT quantity FROM player_loadouts_items WHERE player_loadout_id = ? AND item_id = ?
+    """, (player_loadout_id, item_id))
     result = cursor.fetchone()
 
     # Se o item já existe, incrementa a quantidade
     if result:
         cursor.execute("""
-            UPDATE player_items
+            UPDATE player_loadouts_items
             SET quantity = quantity + 1
-            WHERE player_id = ? AND item_id = ?
-        """, (player_id, item_id))
+            WHERE player_loadout_id = ? AND item_id = ?
+        """, (player_loadout_id, item_id))
     else:
         # Caso contrário, insere o item com quantidade 1
         cursor.execute("""
-            INSERT INTO player_items (player_id, item_id, quantity)
+            INSERT INTO player_loadouts_items (player_loadout_id, item_id, quantity)
             VALUES (?, ?, 1)
-        """, (player_id, item_id))
+        """, (player_loadout_id, item_id))
 
     conn.commit()
+    player_id = session.get('player_id')
+    export_player_loadouts(player_id)
     return jsonify({'message': 'Item adicionado com sucesso'}), 200
 
 # Endpoint para remover um item do jogador
-@app.route('/players/<player_id>/items/<item_id>', methods=['DELETE'])
+@app.route('/players/<player_loadout_id>/items/<item_id>', methods=['DELETE'])
 @login_required
-def remove_item_from_player(player_id, item_id):
+def remove_item_from_player(player_loadout_id, item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        DELETE FROM player_items WHERE player_id = ? AND item_id = ?
-    """, (player_id, item_id))
+        DELETE FROM player_loadouts_items WHERE player_loadout_id = ? AND item_id = ?
+    """, (player_loadout_id, item_id))
     conn.commit()
+    player_id = session.get('player_id')
+    export_player_loadouts(player_id)
     return jsonify({'message': 'Item removido com sucesso'}), 200
 
 # Endpoint para verificar compatibilidade entre os itens
@@ -2863,9 +2873,10 @@ def list_items():
         'img': item['img']
     } for item in items])
 
-@app.route('/players/<player_id>/items/<int:item_id>/quantity', methods=['PATCH'])
+@app.route('/players/<player_loadout_id>/items/<int:item_id>/quantity', methods=['PATCH'])
 @login_required
-def update_item_quantity(player_id, item_id):
+def update_item_quantity(player_loadout_id, item_id):
+    player_id = session.get('player_id')
     delta = request.json.get('delta')
     if not isinstance(delta, int):
         return jsonify({'error': 'Delta inválido'}), 400
@@ -2873,29 +2884,32 @@ def update_item_quantity(player_id, item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT quantity FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
+    cursor.execute('SELECT quantity FROM player_loadouts_items WHERE player_loadout_id = ? AND item_id = ?', (player_loadout_id, item_id))
     row = cursor.fetchone()
     if not row:
         return jsonify({'error': 'Item não encontrado'}), 404
 
     new_quantity = row['quantity'] + delta
     if new_quantity < 1:
-        cursor.execute('DELETE FROM player_items WHERE player_id = ? AND item_id = ?', (player_id, item_id))
+        cursor.execute('DELETE FROM player_loadouts_items WHERE player_loadout_id = ? AND item_id = ?', (player_loadout_id, item_id))
     else:
-        cursor.execute('UPDATE player_items SET quantity = ? WHERE player_id = ? AND item_id = ?', (new_quantity, player_id, item_id))
+        cursor.execute('UPDATE player_loadouts_items SET quantity = ? WHERE player_loadout_id = ? AND item_id = ?', (new_quantity, player_loadout_id, item_id))
 
     conn.commit()
     conn.close()
+
+    export_player_loadouts(player_id)
+
     return jsonify({'success': True})
 
-@app.route('/delete_loadout_items/<player_id>', methods=['GET'])
+@app.route('/delete_loadout_items/<player_loadout_id>', methods=['GET'])
 @login_required
-def delete_loadout_items(player_id):
+def delete_loadout_items(player_loadout_id):
     conn = get_db_connection()
     
     try:
         # Depois deleta o loadout principal
-        conn.execute('DELETE FROM player_items WHERE player_id = ?', (player_id,))
+        conn.execute('DELETE FROM player_loadouts_items WHERE player_loadout_id = ?', (player_loadout_id,))
         
         conn.commit()
         flash('Loadout excluído com sucesso!', 'success')
@@ -2905,9 +2919,731 @@ def delete_loadout_items(player_id):
     finally:
         conn.close()
     
-    return redirect(url_for('player_loadout_items', player_id=player_id))
+    player_id = session.get('player_id')
+    export_player_loadouts(player_id)
+    
+    return redirect(request.referrer or url_for('index'))
+
+# Loadouts do player
+@app.route('/player_loadouts', methods=['GET'])
+@login_required
+def player_loadouts():
+    player_id = session.get('player_id')
+    conn = get_db_connection_players_beco_c1()
+    player = conn.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
+    conn.close()
+    return render_template('player_loadouts.html', player=player)
+
+@app.route('/api/loadouts')
+def get_loadouts():
+    player_id = session.get('player_id')
+    if not player_id:
+        return jsonify([])
+
+    conn = get_db_connection()
+    rows = conn.execute("""
+        SELECT id, name, is_active FROM player_loadouts
+        WHERE player_id = ?
+    """, (player_id,)).fetchall()
+    conn.close()
+
+    return jsonify([
+        {"id": row["id"], "name": row["name"], "is_active": bool(row["is_active"])}
+        for row in rows
+    ])
+
+@app.route('/api/loadouts', methods=['POST'])
+def create_loadout():
+    data = request.json
+    player_id = session.get('player_id')
+    name = data.get('name', '').strip()
+
+    # Verifica se campos obrigatórios foram fornecidos
+    if not player_id or not name:
+        return jsonify({"error": "player_id e name são obrigatórios"}), 400
+
+    # Validações do nome
+    if len(name) > 20:
+        return jsonify({"error": "O nome do loadout deve ter no máximo 20 caracteres"}), 400
+
+    if ' ' in name:
+        return jsonify({"error": "O nome do loadout não pode conter espaços internos"}), 400
+
+    if not re.match(r'^[a-z0-9_]+$', name):
+        return jsonify({"error": "O nome só pode conter letras minúsculas, números e underline"}), 400
+
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            "INSERT INTO player_loadouts (player_id, name) VALUES (?, ?)",
+            (player_id, name)
+        )
+        conn.commit()
+        return jsonify({"message": "Loadout criado com sucesso"}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "Já existe um loadout com esse nome para esse jogador"}), 409
+    finally:
+        conn.close()
+
+@app.route('/api/loadouts/<int:loadout_id>/activate', methods=['POST'])
+def activate_loadout(loadout_id):
+    player_id = session.get('player_id')
+    if not player_id:
+        return jsonify({"error": "Sessão inválida"}), 401
+
+    conn = get_db_connection()
+
+    # Verifica se o loadout pertence ao jogador
+    loadout = conn.execute(
+        "SELECT * FROM player_loadouts WHERE id = ? AND player_id = ?",
+        (loadout_id, player_id)
+    ).fetchone()
+
+    if not loadout:
+        conn.close()
+        return jsonify({"error": "Loadout não encontrado"}), 404
+
+    try:
+        conn.execute(
+            "UPDATE player_loadouts SET is_active = 0 WHERE player_id = ?",
+            (player_id,)
+        )
+        conn.execute(
+            "UPDATE player_loadouts SET is_active = 1 WHERE id = ?",
+            (loadout_id,)
+        )
+        conn.commit()
+        export_player_loadouts(player_id)  # Atualiza JSON do jogador
+        return jsonify({"message": "Loadout ativado com sucesso"}), 200
+    finally:
+        conn.close()
+
+
+@app.route('/api/loadouts/<int:loadout_id>', methods=['DELETE'])
+def delete_loadout(loadout_id):
+    player_id = session.get('player_id')
+    if not player_id:
+        return jsonify({"error": "Sessão inválida"}), 401
+
+    conn = get_db_connection()
+
+    # Ativa o suporte a FOREIGN KEY no SQLite (obrigatório)
+    conn.execute("PRAGMA foreign_keys = ON")
+
+    # Verifica se o loadout pertence ao jogador
+    loadout = conn.execute(
+        "SELECT id FROM player_loadouts WHERE id = ? AND player_id = ?",
+        (loadout_id, player_id)
+    ).fetchone()
+
+    if not loadout:
+        conn.close()
+        return jsonify({"error": "Loadout não encontrado"}), 404
+
+    # Deleta o loadout (tabelas relacionadas serão afetadas via ON DELETE CASCADE)
+    conn.execute("DELETE FROM player_loadouts WHERE id = ? AND player_id = ?", (loadout_id, player_id))
+    conn.commit()
+    conn.close()
+
+    export_player_loadouts(player_id)
+
+    return jsonify({"message": "Loadout removido com sucesso"}), 200
+
+@app.route('/player_loadout/<int:loadout_id>/weapons')
+def loadout_weapons(loadout_id):
+    player_id = session.get('player_id')
+    conn = get_db_connection()
+    conn2 = get_db_connection_players_beco_c1()
+
+    
+    # Buscar o loadout do jogador
+    loadout_record = conn.execute(
+        'SELECT * FROM player_loadouts WHERE player_id = ? AND id = ?',
+        (player_id, loadout_id)
+    ).fetchone()
+
+    if not loadout_record:
+        flash("Loadout não encontrado.", "danger")
+        return redirect(url_for('player_loadouts'))
+
+    player_loadout_id = loadout_record['id']
+
+    if request.method == 'POST':
+        primary = request.form.get('primary_weapon_id')
+        primary_magazine = request.form.get('primary_magazine_id')
+        primary_ammo = request.form.get('primary_ammo_id')
+
+        secondary = request.form.get('secondary_weapon_id')
+        secondary_magazine = request.form.get('secondary_magazine_id')
+        secondary_ammo = request.form.get('secondary_ammo_id')
+
+        small = request.form.get('small_weapon_id')
+        small_magazine = request.form.get('small_magazine_id')
+        small_ammo = request.form.get('small_ammo_id')
+
+        errors = []
+        for weapon_id, slot_type in [(primary, 'primary'), (secondary, 'secondary'), (small, 'small')]:
+            if weapon_id:
+                rule = conn.execute(
+                    'SELECT * FROM loadout_rules_weapons WHERE weapon_id = ?',
+                    (weapon_id,)
+                ).fetchone()
+                if not rule:
+                    errors.append(f"A arma selecionada para {slot_type} é inválida.")
+                elif rule['is_banned']:
+                    errors.append(f"A arma selecionada para {slot_type} está banida.")
+
+        if errors:
+            for err in errors:
+                flash(err, 'danger')
+            return redirect(request.url)
+
+        # Inserir ou atualizar o loadout
+        existing = conn.execute(
+            'SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?',
+            (player_loadout_id,)
+        ).fetchone()
+
+        if existing:
+            conn.execute('''
+                UPDATE player_loadouts_weapons SET
+                    primary_weapon_id = ?, primary_magazine_id = ?, primary_ammo_id = ?,
+                    secondary_weapon_id = ?, secondary_magazine_id = ?, secondary_ammo_id = ?,
+                    small_weapon_id = ?, small_magazine_id = ?, small_ammo_id = ?
+                WHERE player_loadout_id = ?
+            ''', (
+                primary, primary_magazine, primary_ammo,
+                secondary, secondary_magazine, secondary_ammo,
+                small, small_magazine, small_ammo,
+                player_loadout_id
+            ))
+        else:
+            conn.execute('''
+                INSERT INTO player_loadouts_weapons (
+                    player_loadout_id,
+                    primary_weapon_id, primary_magazine_id, primary_ammo_id,
+                    secondary_weapon_id, secondary_magazine_id, secondary_ammo_id,
+                    small_weapon_id, small_magazine_id, small_ammo_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                player_loadout_id,
+                primary, primary_magazine, primary_ammo,
+                secondary, secondary_magazine, secondary_ammo,
+                small, small_magazine, small_ammo
+            ))
+
+        conn.commit()
+        flash("Loadout atualizado com sucesso!", "success")
+        return redirect(url_for('player_loadout', player_id=player_id))
+
+    # Armas disponíveis
+    weapons = conn.execute('''
+        SELECT w.*, r.is_banned
+        FROM weapons w
+        LEFT JOIN loadout_rules_weapons r ON w.id = r.weapon_id
+    ''').fetchall()
+
+    # Dados do loadout
+    db_loadout = conn.execute("""
+        SELECT 
+            plw.id AS loadout_id,
+            plw.player_loadout_id,
+            wp_primary.id AS primary_weapon_id,
+            wp_primary.name AS primary_weapon_name,
+            wp_primary.img AS primary_weapon_img,
+            mag_primary.id AS primary_magazine_id,
+            mag_primary.name AS primary_magazine_name,
+            mag_primary.img AS primary_magazine_img,
+            ammo_primary.id AS primary_ammo_id,
+            ammo_primary.name AS primary_ammo_name,
+            ammo_primary.img AS primary_ammo_img,
+            wp_secondary.id AS secondary_weapon_id,
+            wp_secondary.name AS secondary_weapon_name,
+            wp_secondary.img AS secondary_weapon_img,
+            mag_secondary.id AS secondary_magazine_id,
+            mag_secondary.name AS secondary_magazine_name,
+            mag_secondary.img AS secondary_magazine_img,
+            ammo_secondary.id AS secondary_ammo_id,
+            ammo_secondary.name AS secondary_ammo_name,
+            ammo_secondary.img AS secondary_ammo_img,
+            wp_small.id AS small_weapon_id,
+            wp_small.name AS small_weapon_name,
+            wp_small.img AS small_weapon_img,
+            mag_small.id AS small_magazine_id,
+            mag_small.name AS small_magazine_name,
+            mag_small.img AS small_magazine_img,
+            ammo_small.id AS small_ammo_id,
+            ammo_small.name AS small_ammo_name,
+            ammo_small.img AS small_ammo_img
+        FROM player_loadouts_weapons plw
+        LEFT JOIN weapons wp_primary ON plw.primary_weapon_id = wp_primary.id
+        LEFT JOIN weapons wp_secondary ON plw.secondary_weapon_id = wp_secondary.id
+        LEFT JOIN weapons wp_small ON plw.small_weapon_id = wp_small.id
+        LEFT JOIN magazines mag_primary ON plw.primary_magazine_id = mag_primary.id
+        LEFT JOIN magazines mag_secondary ON plw.secondary_magazine_id = mag_secondary.id
+        LEFT JOIN magazines mag_small ON plw.small_magazine_id = mag_small.id
+        LEFT JOIN ammunitions ammo_primary ON plw.primary_ammo_id = ammo_primary.id
+        LEFT JOIN ammunitions ammo_secondary ON plw.secondary_ammo_id = ammo_secondary.id
+        LEFT JOIN ammunitions ammo_small ON plw.small_ammo_id = ammo_small.id
+        WHERE plw.player_loadout_id = ?
+    """, (player_loadout_id,)).fetchone()
+
+    default_loadout = {k: None for k in [
+        'loadout_id', 'player_loadout_id',
+        'primary_weapon_id', 'primary_weapon_name', 'primary_weapon_img',
+        'primary_magazine_id', 'primary_magazine_name', 'primary_magazine_img',
+        'primary_ammo_id', 'primary_ammo_name', 'primary_ammo_img',
+        'secondary_weapon_id', 'secondary_weapon_name', 'secondary_weapon_img',
+        'secondary_magazine_id', 'secondary_magazine_name', 'secondary_magazine_img',
+        'secondary_ammo_id', 'secondary_ammo_name', 'secondary_ammo_img',
+        'small_weapon_id', 'small_weapon_name', 'small_weapon_img',
+        'small_magazine_id', 'small_magazine_name', 'small_magazine_img',
+        'small_ammo_id', 'small_ammo_name', 'small_ammo_img'
+    ]}
+
+    loadout = default_loadout
+    if db_loadout:
+        loadout.update(db_loadout)
+
+    attachments_by_slot = {'primary': [], 'secondary': [], 'small': []}
+    if loadout['loadout_id']:
+        attachments_raw = conn.execute('''
+            SELECT a.*, plwa.weapon_slot
+            FROM player_loadouts_weapon_attachments plwa
+            JOIN attachments a ON plwa.attachment_id = a.id
+            WHERE plwa.player_loadout_id = ?
+        ''', (player_loadout_id,)).fetchall()
+
+        for att in attachments_raw:
+            attachments_by_slot[att['weapon_slot']].append(att)
+
+        explosives = conn.execute('''
+            SELECT e.*, plwe.quantity
+            FROM player_loadouts_weapon_explosives plwe
+            JOIN explosives e ON plwe.explosive_id = e.id
+            WHERE plwe.player_loadout_id = ?
+        ''', (player_loadout_id,)).fetchall()
+    else:
+        explosives = []
+
+    player = conn2.execute(
+        'SELECT * FROM players_database WHERE PlayerID = ?',
+        (player_id,)
+    ).fetchone()
+
+    rules = conn.execute('''
+        SELECT r.*, w.name 
+        FROM loadout_rules_weapons r
+        JOIN weapons w ON r.weapon_id = w.id
+    ''').fetchall()
+
+    conn.close()
+    conn2.close()
+
+    return render_template(
+        'loadout_weapons.html',
+        player=player,
+        weapons=weapons,
+        loadout=loadout,
+        rules=rules,
+        attachments=attachments_by_slot,
+        explosives=explosives,
+        loadout_record=loadout_record
+    )
+
+@app.route('/player_loadout/<int:loadout_id>/items')
+def player_loadout_items(loadout_id):
+    player_id = session.get('player_id')
+    if not player_id:
+        abort(403)
+    conn = get_db_connection()
+    loadout_record = conn.execute(
+        'SELECT * FROM player_loadouts WHERE id = ? AND player_id = ?',
+        (loadout_id, player_id)
+    ).fetchone()
+    if not loadout_record:
+        abort(404)
+
+    query = """
+    SELECT i.*, it.name AS type_name, pli.quantity
+      FROM player_loadouts_items pli
+      JOIN item i ON pli.item_id = i.id
+      JOIN item_types it ON i.type_id = it.id
+     WHERE pli.player_loadout_id = ?
+    """
+
+    items = conn.execute(query, (loadout_id,)).fetchall()
+    conn.close()
+    conn2 = get_db_connection_players_beco_c1()
+    player = conn2.execute('SELECT * FROM players_database WHERE PlayerID = ?', (player_id,)).fetchone()
+    conn2.close()
+
+    return render_template('loadout_items.html', loadout_record=loadout_record, player=player, items=items)
+
+def export_player_loadouts2(player_id):
+    conn = get_db_connection()
+    conn.row_factory = sqlite3.Row
+
+    # Verifica se o jogador existe
+    loadouts = conn.execute("""
+        SELECT * FROM player_loadouts
+        WHERE player_id = ?
+    """, (player_id,)).fetchall()
+
+    if not loadouts:
+        conn.close()
+        return False  # Nada a exportar
+
+    player_b64 = base64.b64encode(player_id.encode()).decode()
+    player_data = []
+
+    for loadout in loadouts:
+        loadout_id = loadout['id']
+        loadout_name = loadout['name']
+        is_active = int(loadout['is_active']) == 1
+
+        weapons_row = conn.execute("""
+            SELECT * FROM player_loadouts_weapons
+            WHERE player_loadout_id = ?
+        """, (loadout_id,)).fetchone()
+
+        def get_weapon_info(slot):
+            if not weapons_row or not weapons_row[f"{slot}_weapon_id"]:
+                return None
+
+            weapon = conn.execute("SELECT * FROM item WHERE id = ?", (weapons_row[f"{slot}_weapon_id"],)).fetchone()
+            if not weapon:
+                return None
+
+            weapon_data = {
+                "name_type": weapon["name_type"],
+                "feed_type": "magazine",
+                "slots": weapon["slots"],
+                "width": weapon["width"],
+                "height": weapon["height"]
+            }
+
+            magazine = conn.execute("SELECT * FROM item WHERE id = ?", (weapons_row[f"{slot}_magazine_id"],)).fetchone()
+            weapon_data["magazine"] = {
+                "name_type": magazine["name_type"],
+                "capacity": magazine["storage_slots"],
+                "slots": magazine["slots"],
+                "width": magazine["width"],
+                "height": magazine["height"]
+            } if magazine else None
+
+            ammo = conn.execute("SELECT * FROM item WHERE id = ?", (weapons_row[f"{slot}_ammo_id"],)).fetchone()
+            weapon_data["ammunitions"] = {
+                "name_type": ammo["name_type"],
+                "slots": ammo["slots"],
+                "width": ammo["width"],
+                "height": ammo["height"]
+            } if ammo else None
+
+            attachments = conn.execute("""
+                SELECT a.*, i.*
+                FROM player_loadouts_weapon_attachments a
+                JOIN item i ON a.attachment_id = i.id
+                WHERE a.player_loadout_id = ? AND a.weapon_slot = ?
+            """, (loadout_id, slot)).fetchall()
+
+            attachment_list = [{
+                "name_type": att["name_type"],
+                "type": att["name"],
+                "slots": att["slots"],
+                "width": att["width"],
+                "height": att["height"],
+                "battery": "battery" in att["name_type"].lower()
+            } for att in attachments]
+
+            weapon_data["attachments"] = attachment_list if attachment_list else None
+            return weapon_data
+
+        weapons = {
+            "primary_weapon": get_weapon_info("primary"),
+            "secondary_weapon": get_weapon_info("secondary"),
+            "small_weapon": get_weapon_info("small")
+        }
+
+        explosives = conn.execute("""
+            SELECT e.*, i.*
+            FROM player_loadouts_weapon_explosives e
+            JOIN item i ON e.explosive_id = i.id
+            WHERE e.player_loadout_id = ?
+        """, (loadout_id,)).fetchall()
+
+        explosive_list = [{
+            "name_type": ex["name_type"],
+            "slots": ex["slots"],
+            "width": ex["width"],
+            "height": ex["height"],
+            "quantity": ex["quantity"]
+        } for ex in explosives]
+
+        explosives_data = explosive_list if explosive_list else None
+
+        items = conn.execute("""
+            SELECT i.*, it.name as type_name
+            FROM player_loadouts_items pli
+            JOIN item i ON pli.item_id = i.id
+            JOIN item_types it ON i.type_id = it.id
+            WHERE pli.player_loadout_id = ?
+        """, (loadout_id,)).fetchall()
+
+        def get_subitems(item_id):
+            subs = conn.execute("""
+                SELECT child.*, it.name as type_name
+                FROM item_compatibility c
+                JOIN item child ON c.child_item_id = child.id
+                JOIN item_types it ON child.type_id = it.id
+                WHERE c.parent_item_id = ?
+            """, (item_id,)).fetchall()
+
+            return [
+                {
+                    "name_type": sub["name_type"],
+                    "type_name": sub["type_name"],
+                    "slots": sub["slots"],
+                    "width": sub["width"],
+                    "height": sub["height"],
+                    "storage_slots": sub["storage_slots"],
+                    "storage_width": sub["storage_width"],
+                    "storage_height": sub["storage_height"],
+                    "localization": sub["localization"],
+                    "subitems": get_subitems(sub["id"])
+                }
+                for sub in subs
+            ]
+
+        item_list = [{
+            "name_type": i["name_type"],
+            "type_name": i["type_name"],
+            "slots": i["slots"],
+            "width": i["width"],
+            "height": i["height"],
+            "storage_slots": i["storage_slots"],
+            "storage_width": i["storage_width"],
+            "storage_height": i["storage_height"],
+            "localization": i["localization"],
+            "subitems": get_subitems(i["id"])
+        } for i in items]
+
+        player_data.append({
+            "Id": loadout_id,
+            "Name": loadout_name,
+            "IsActive": is_active,
+            "Loadout": {
+                "weapons": weapons,
+                "explosives": explosives_data,
+                "items": item_list
+            }
+        })
+
+    conn.close()
+
+    os.makedirs(PLAYERS_LOADOUT_FOLDER, exist_ok=True)
+    with open(f'{PLAYERS_LOADOUT_FOLDER}/{player_b64}.json', 'w', encoding='utf-8') as f:
+        json.dump(player_data, f, indent=4, ensure_ascii=False)
+
+    update_player_index(player_id, player_b64)
+    return True
+
+def export_player_loadouts(player_id):
+    loadouts = query_db("SELECT * FROM player_loadouts WHERE player_id = ?", [player_id])
+    if not loadouts:
+        return False  # jogador sem loadouts
+
+    loadouts_export = []
+
+    for loadout in loadouts:
+        loadout_id = loadout["id"]
+        loadout_name = loadout["name"]
+        is_active = bool(loadout["is_active"])
+
+        loadout_data = {"weapons": {}}
+
+        # Armas
+        weapon_data = query_db("SELECT * FROM player_loadouts_weapons WHERE player_loadout_id = ? LIMIT 1", [loadout_id])
+        if weapon_data:
+            weapon_data = weapon_data[0]
+
+            attachments = query_db("""
+                SELECT a.*, lwa.weapon_slot
+                FROM player_loadouts_weapon_attachments lwa
+                JOIN attachments a ON a.id = lwa.attachment_id
+                WHERE lwa.player_loadout_id = ?
+            """, [loadout_id])
+
+            attachments_by_slot = {"primary": [], "secondary": [], "small": []}
+            for att in attachments:
+                attachments_by_slot[att["weapon_slot"]].append(att)
+
+            loadout_data["weapons"]["primary_weapon"] = get_weapon_data(
+                weapon_data["primary_weapon_id"],
+                weapon_data["primary_magazine_id"],
+                weapon_data["primary_ammo_id"],
+                attachments_by_slot["primary"]
+            )
+            loadout_data["weapons"]["secondary_weapon"] = get_weapon_data(
+                weapon_data["secondary_weapon_id"],
+                weapon_data["secondary_magazine_id"],
+                weapon_data["secondary_ammo_id"],
+                attachments_by_slot["secondary"]
+            )
+            loadout_data["weapons"]["small_weapon"] = get_weapon_data(
+                weapon_data["small_weapon_id"],
+                weapon_data["small_magazine_id"],
+                weapon_data["small_ammo_id"],
+                attachments_by_slot["small"]
+            )
+
+            explosives = query_db("""
+                SELECT e.name_type, e.slots, e.width, e.height, pl.quantity
+                FROM player_loadouts_weapon_explosives pl
+                JOIN explosives e ON pl.explosive_id = e.id
+                WHERE pl.player_loadout_id = ?
+            """, [loadout_id])
+
+            if explosives:
+                loadout_data["explosives"] = [{
+                    "name_type": exp["name_type"],
+                    "slots": exp["slots"],
+                    "width": exp["width"],
+                    "height": exp["height"],
+                    "quantity": exp["quantity"]
+                } for exp in explosives]
+            else:
+                loadout_data["explosives"] = None
+        else:
+            loadout_data["weapons"] = {
+                "primary_weapon": None,
+                "secondary_weapon": None,
+                "small_weapon": None
+            }
+            loadout_data["explosives"] = None
+
+        # Itens
+        items = query_db("""
+            SELECT i.*, it.name as type_name, pli.quantity
+            FROM player_loadouts_items pli
+            JOIN item i ON i.id = pli.item_id
+            JOIN item_types it ON it.id = i.type_id
+            WHERE pli.player_loadout_id = ?
+        """, [loadout_id])
+
+        item_map = {item["id"]: dict(item) for item in items}
+        quantities = {item["id"]: item["quantity"] for item in items}
+
+        compat_rows = query_db("SELECT parent_item_id, child_item_id FROM item_compatibility")
+        compat_map = {}
+        for row in compat_rows:
+            compat_map.setdefault(row["parent_item_id"], []).append(row["child_item_id"])
+
+        used_counts = defaultdict(int)
+        item_list = []
+
+        def build_item_json(item):
+            return {
+                "name_type": item["name_type"],
+                "type_name": item["type_name"],
+                "slots": item["slots"],
+                "width": item["width"],
+                "height": item["height"],
+                "storage_slots": item["storage_slots"],
+                "storage_width": item["storage_width"],
+                "storage_height": item["storage_height"],
+                "localization": item["localization"],
+                "subitems": []
+            }
+
+        def build_item_tree(item, compat_map, item_map, used_counts, depth=0, max_depth=5, ancestry=None):
+            if depth >= max_depth:
+                return build_item_json(item)
+
+            ancestry = ancestry or set()
+            ancestry.add(item["id"])
+
+            item_json = build_item_json(item)
+            children = compat_map.get(item["id"], [])
+
+            for child_id in children:
+                if used_counts[child_id] >= quantities.get(child_id, 0) or child_id in ancestry:
+                    continue
+
+                child_item = item_map.get(child_id)
+                if not child_item:
+                    continue
+
+                used_counts[child_id] += 1
+                child_json = build_item_tree(
+                    child_item, compat_map, item_map, used_counts,
+                    depth + 1, max_depth, ancestry.copy()
+                )
+                item_json["subitems"].append(child_json)
+
+            return item_json
+
+        all_child_ids = {row["child_item_id"] for row in compat_rows}
+        root_items = [item_id for item_id in item_map if item_id not in all_child_ids]
+
+        for item_id in root_items:
+            quantity = quantities.get(item_id, 0)
+            for _ in range(quantity):
+                if used_counts[item_id] >= quantity:
+                    continue
+                used_counts[item_id] += 1
+                item = item_map[item_id]
+                item_list.append(build_item_tree(item, compat_map, item_map, used_counts))
+
+        loadout_data["items"] = item_list
+
+        loadouts_export.append({
+            "Id": loadout_id,
+            "Name": loadout_name,
+            "IsActive": is_active,
+            "Loadout": loadout_data
+        })
+
+    # Escreve o arquivo JSON do jogador
+    player_b64 = base64.b64encode(player_id.encode()).decode()
+    os.makedirs(PLAYERS_LOADOUT_FOLDER, exist_ok=True)    
+    with open(f'{PLAYERS_LOADOUT_FOLDER}/{player_b64}.json', 'w', encoding='utf-8') as f:
+        json.dump(loadouts_export, f, indent=4, ensure_ascii=False)
+
+    update_player_index(player_id, player_b64)
+
+    return True
+
+def update_player_index(player_id, player_b64):
+    index_path = PLAYERS_LOADOUT_JSON
+    data = []
+
+    if os.path.exists(index_path):
+        with open(index_path, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except:
+                data = []
+
+    # Atualiza ou insere
+    found = False
+    for entry in data:
+        if entry['PlayerId'] == player_id:
+            entry['PlayerIdBase64'] = player_b64
+            found = True
+            break
+
+    if not found:
+        data.append({
+            "PlayerId": player_id,
+            "PlayerIdBase64": player_b64
+        })
+
+    with open(index_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
 
 # ✅ ESSENCIAL PARA INICIAR O SERVIDOR
 if __name__ == '__main__':
-    start_scheduler()
+    #start_scheduler()
     app.run(host='0.0.0.0', port=54321, debug=True)
