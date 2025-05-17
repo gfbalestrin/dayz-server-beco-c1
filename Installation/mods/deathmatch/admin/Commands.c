@@ -282,6 +282,32 @@ bool ExecuteCommand(TStringArray tokens)
         case "players":          
             g_VoteKickManager.ListarJogadoresOnline(playerID);
             break;
+        case "loadouts":
+            ShowLoadoutsToPlayer(playerID);
+            break;
+        case "loadout":
+            if (tokens.Count() < 3) {
+                ShowLoadoutsToPlayer(playerID);
+                return true;
+            }
+            if (tokens[2] == "reset")
+            {
+                SendPrivateMessage(playerID, "Você solicitou a geração de uma nova de senha de acesso!" , MessageColor.WARNING);
+                SendPrivateMessage(playerID, "Acesse: " + UrlAppPython + " Senha: ASD23XCZ" , MessageColor.WARNING);
+                return true;
+            }
+
+            string loadoutName = tokens[2];
+            LoadoutPlayer loadout = GetLoadoutByName(playerID, loadoutName);
+            if (!loadout)
+            {
+                SendPrivateMessage(playerID, "Nenhum loadout encontrado com esse nome" , MessageColor.WARNING);
+                return false;
+            }
+
+             SendPrivateMessage(playerID, "Loadout ativado com sucesso para o próximo respawn!" , MessageColor.FRIENDLY);
+
+            break;
     }
 
     return true;

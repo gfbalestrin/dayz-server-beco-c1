@@ -67,8 +67,8 @@ class LoadoutData {
 }
 
 class LoadoutPlayer {
-    string LoadoutId;
+    int Id;
     bool IsActive;
-    string LoadoutName;
+    string Name;
     ref LoadoutData Loadout;
 }

@@ -1,4 +1,5 @@
 string DeathMatchConfigJsonFile = "$mission:admin/files/deathmatch_config.json";
+string UrlAppPython = "http://beco.servegame.com:54321/";
 enum MessageColor
 {
     STATUS,     // azul

@@ -2,7 +2,7 @@
     {
         "Id": 1,
         "Name": "admin",
-        "IsActive": false,
+        "IsActive": true,
         "Loadout": {
             "weapons": {
                 "primary_weapon": null,

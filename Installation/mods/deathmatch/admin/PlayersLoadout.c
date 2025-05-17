@@ -1,61 +1,6 @@
 bool GiveCustomLoadout(PlayerBase player, string playerId)
 {
-    string jsonPlayersIds = "$mission:admin/loadouts/players_ids.json";
-    FileHandle handle = OpenFile(jsonPlayersIds, FileMode.READ);
-    if (!handle)
-    {
-        WriteToLog("Arquivo não encontrado: " + jsonPlayersIds, LogFile.INIT, false, LogType.ERROR);
-        return false;
-    }
-    CloseFile(handle);
-
-    ref array<ref LoadoutPlayerId> loadoutPlayersIds;
-    JsonFileLoader<array<ref LoadoutPlayerId>>.JsonLoadFile(jsonPlayersIds, loadoutPlayersIds);
-
-    if (!loadoutPlayersIds || loadoutPlayersIds.Count() == 0)
-    {
-        WriteToLog("JSON carregado, mas lista vazia ou nula.", LogFile.INIT, false, LogType.ERROR);
-        return false;
-    }
-
-    LoadoutPlayerId playerJson = null;
-    foreach (ref LoadoutPlayerId entry : loadoutPlayersIds)
-    {
-        WriteToLog("PlayerID capturado do players_ids.json: " + entry.PlayerId, LogFile.INIT, false, LogType.DEBUG);
-        if (!entry)
-            continue;
-
-        if (entry.PlayerId == playerId)
-        {
-            playerJson = entry;
-            break;
-        }
-    }
-
-    if (!playerJson)
-    {
-        WriteToLog("ID não encontrado no JSON.", LogFile.INIT, false, LogType.INFO);
-        return false;
-    }
-    
-    string jsonPlayerId = "$mission:admin/loadouts/players/" + playerJson.PlayerIdBase64 + ".json";
-    FileHandle handle2 = OpenFile(jsonPlayerId, FileMode.READ);
-    if (!handle2)
-    {
-        WriteToLog("Arquivo não encontrado: " + jsonPlayerId, LogFile.INIT, false, LogType.ERROR);
-        return false;
-    }
-    CloseFile(handle2);
-
-    ref array<ref LoadoutPlayer> loadoutsPlayer;
-    JsonFileLoader<array<ref LoadoutPlayer>>.JsonLoadFile(jsonPlayerId, loadoutsPlayer);
-
-    if (!loadoutsPlayer || loadoutsPlayer.Count() == 0)
-    {
-        WriteToLog("JSON carregado, mas lista vazia ou nula.", LogFile.INIT, false, LogType.ERROR);
-        return false;
-    }
-
+    ref array<ref LoadoutPlayer> loadoutsPlayer = GetAllLoudoutsFromPlayer(playerId);
     LoadoutPlayer loadoutPlayer = null;
     foreach (ref LoadoutPlayer entry2 : loadoutsPlayer)
     {
@@ -102,7 +47,13 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
                 if (ex)
                     WriteToLog("Criado explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
                 else
-                    WriteToLog("Erro ao criar explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.ERROR);
+                {
+                    if (TryCreateItemInInventoryOrOnGround(player, explosive.name_type))
+                        WriteToLog("Criado explosivo criado no chão por falta de espaço: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
+                    else
+                        WriteToLog("Erro ao criar explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.ERROR);
+                }
+                    
             }
         }
     }
@@ -141,8 +92,12 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         weaponEntity = player.GetInventory().CreateInInventory(weaponData.name_type);
 
     if (!weaponEntity) {
-        WriteToLog("Falha ao criar arma: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
-        return;
+        weaponEntity = TryCreateItemInInventoryOrOnGround(player, weaponData.name_type);
+        if (!weaponEntity)
+        {
+            WriteToLog("Falha ao criar arma: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
+            return;
+        }        
     }
 
     player.SetQuickBarEntityShortcut(weaponEntity, quickBarSlot, true);
@@ -189,7 +144,8 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
                             WriteToLog("Falha ao adicionar bateria à: " + att.name_type, LogFile.INIT, false, LogType.INFO);
                     }
                 } else {
-                    WriteToLog("Falha ao anexar: " + att.name_type, LogFile.INIT, false, LogType.ERROR);
+                    if (!TryCreateItemInInventoryOrOnGround(player, att.name_type))
+                        WriteToLog("Falha ao anexar: " + att.name_type, LogFile.INIT, false, LogType.ERROR);
                 }
             }
         }
@@ -205,20 +161,9 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
         Magazine mag = weapon_base.SpawnAttachedMagazine(weaponData.magazine.name_type);
         if (!mag) {
             WriteToLog("Falha ao anexar pente " + weaponData.magazine.name_type + " para arma: " + weaponData.name_type, LogFile.INIT, false, LogType.ERROR);
+            TryCreateItemInInventoryOrOnGround(player, weaponData.magazine.name_type);
             return;
         }
-        
-        // FillInnerMagazine	(	string 	ammoType = "",
-        // int 	flags = WeaponWithAmmoFlags.CHAMBER 
-        // )	
-
-        
-        // FillChamber	(	string 	ammoType = "",
-        // int 	flags = WeaponWithAmmoFlags.CHAMBER 
-        // )		
-
-        //ForceSyncSelectionState
-
         if (possuiAmmo)
         {
             // Funciona mas munição aleatória
@@ -273,13 +218,17 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
             EntityAI magExtra = player.GetInventory().CreateInInventory(weaponData.magazine.name_type);
             if (!magExtra)
             {
-                WriteToLog("Erro ao criar pente extra!", LogFile.INIT, false, LogType.ERROR);
-                break;
+                magExtra = TryCreateItemInInventoryOrOnGround(player, weaponData.magazine.name_type);
+                if (!magExtra)
+                {
+                    WriteToLog("Erro ao criar pente extra!", LogFile.INIT, false, LogType.ERROR);
+                    break;
+                }                
             }
             Magazine magExtraCast = Magazine.Cast(magExtra);
             if (!magExtraCast)
             {
-                WriteToLog("Erro ao criar pente extra!", LogFile.INIT, false, LogType.ERROR);
+                WriteToLog("Erro ao tentar colocar munição no pente extra!", LogFile.INIT, false, LogType.ERROR);
                 break;
             }
             magExtraCast.ServerSetAmmoCount(weaponData.magazine.capacity);
@@ -292,15 +241,18 @@ void HandleWeaponData(WeaponData weaponData, PlayerBase player, int quickBarSlot
             EntityAI ammoExtra = player.GetInventory().CreateInInventory(weaponData.ammunitions.name_type);
             if (!ammoExtra)
             {
-                WriteToLog("Erro ao criar munição extra!", LogFile.INIT, false, LogType.ERROR);
-                break;
+                ammoExtra = TryCreateItemInInventoryOrOnGround(player, weaponData.ammunitions.name_type);
+                if (!ammoExtra)
+                {
+                    WriteToLog("Erro ao criar munição extra!", LogFile.INIT, false, LogType.ERROR);
+                    break;
+                }                
             }
         }
         
     }
 
 }
-
 
 EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBase player)
 {
@@ -315,8 +267,12 @@ EntityAI CreateItemWithSubitems(EntityAI parent, LoadoutItem itemData, PlayerBas
     }
 
     if (!item) {
-        WriteToLog("Erro ao criar item: " + itemData.name_type, LogFile.INIT, false, LogType.ERROR);
-        return null;
+        item = TryCreateItemInInventoryOrOnGround(player, itemData.name_type);
+        if (!item)
+        {
+            WriteToLog("CreateItemWithSubitems() Erro ao criar item: " + itemData.name_type, LogFile.INIT, false, LogType.ERROR);
+            return null;
+        }
     }
 
     if (itemData.subitems) {
@@ -343,7 +299,7 @@ bool GiveDefaultLoadout(PlayerBase player, string playerId)
     }
     CloseFile(handle2);
 
-    ref array<ref LoadoutPlayer> loadoutsPlayer;
+    ref array<ref LoadoutPlayer> loadoutsPlayer = new array<ref LoadoutPlayer>();
     JsonFileLoader<array<ref LoadoutPlayer>>.JsonLoadFile(jsonPlayerId, loadoutsPlayer);
 
     if (!loadoutsPlayer || loadoutsPlayer.Count() == 0)
@@ -352,11 +308,10 @@ bool GiveDefaultLoadout(PlayerBase player, string playerId)
         return false;
     }
 
-    LoadoutPlayer loadoutPlayer = null;
+    ref LoadoutPlayer loadoutPlayer = null;
     foreach (ref LoadoutPlayer entry2 : loadoutsPlayer)
     {
-        if (!entry2)
-            continue;
+        if (!entry2) continue;
 
         if (entry2.IsActive)
         {
@@ -365,35 +320,30 @@ bool GiveDefaultLoadout(PlayerBase player, string playerId)
         }
     }
 
-    if (!loadoutPlayer)
+    if (!loadoutPlayer || !loadoutPlayer.Loadout)
     {
-        WriteToLog("O de loadout padrão não tem nenhum loadout ativo.", LogFile.INIT, false, LogType.INFO);
-        return false;
-    }
-
-    LoadoutData data = loadoutPlayer.Loadout;
-    if (!data) {
         WriteToLog("Erro ao obter dados de loadout padrão para: " + playerId, LogFile.INIT, false, LogType.ERROR);
         return false;
     }
 
+    ref LoadoutData data = loadoutPlayer.Loadout;
     WriteToLog("Iniciando loadout padrão para player " + playerId, LogFile.INIT, false, LogType.INFO);
 
-    // Itens extras
-    if (data.items) {
-        foreach (LoadoutItem li : data.items) {
+    if (data.items)
+    {
+        foreach (ref LoadoutItem li : data.items)
             CreateItemWithSubitems(null, li, player);
-        }
     }
 
-    // Armas
     HandleWeaponLoadout(data.weapons, player, playerId);
 
-    // Explosivos
-    if (data.explosives) {
+    if (data.explosives)
+    {
         WriteToLog("Criando explosivos...", LogFile.INIT, false, LogType.INFO);
-        foreach (Explosive explosive : data.explosives) {
-            for (int e = 0; e < explosive.quantity; e++) {
+        foreach (ref Explosive explosive : data.explosives)
+        {
+            for (int e = 0; e < explosive.quantity; e++)
+            {
                 EntityAI ex = player.GetInventory().CreateInInventory(explosive.name_type);
                 if (ex)
                     WriteToLog("Criado explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
@@ -480,4 +430,131 @@ bool GiveAdminLoadout(PlayerBase player, string playerId)
 
     WriteToLog("Loadout aplicado com sucesso", LogFile.INIT, false, LogType.INFO);
     return true;
+}
+
+ref array<ref LoadoutPlayer> GetAllLoudoutsFromPlayer(string playerId)
+{
+    ref array<ref LoadoutPlayer> loadoutsPlayer;
+
+    string jsonPlayersIds = "$mission:admin/loadouts/players_ids.json";
+    FileHandle handle = OpenFile(jsonPlayersIds, FileMode.READ);
+    if (!handle)
+    {
+        WriteToLog("Arquivo não encontrado: " + jsonPlayersIds, LogFile.INIT, false, LogType.ERROR);
+        return loadoutsPlayer;
+    }
+    CloseFile(handle);
+
+    ref array<ref LoadoutPlayerId> loadoutPlayersIds;
+    JsonFileLoader<ref array<ref LoadoutPlayerId>>.JsonLoadFile(jsonPlayersIds, loadoutPlayersIds);
+
+    if (!loadoutPlayersIds || loadoutPlayersIds.Count() == 0)
+    {
+        WriteToLog("JSON carregado, mas lista vazia ou nula.", LogFile.INIT, false, LogType.ERROR);
+        return loadoutsPlayer;
+    }
+
+    LoadoutPlayerId playerJson = null;
+    foreach (ref LoadoutPlayerId entry : loadoutPlayersIds)
+    {
+        WriteToLog("PlayerID capturado do players_ids.json: " + entry.PlayerId, LogFile.INIT, false, LogType.DEBUG);
+        if (!entry)
+            continue;
+
+        if (entry.PlayerId == playerId)
+        {
+            playerJson = entry;
+            break;
+        }
+    }
+
+    if (!playerJson)
+    {
+        WriteToLog("ID não encontrado no JSON.", LogFile.INIT, false, LogType.INFO);
+        return loadoutsPlayer;
+    }
+    
+    string jsonPlayerId = "$mission:admin/loadouts/players/" + playerJson.PlayerIdBase64 + ".json";
+    FileHandle handle2 = OpenFile(jsonPlayerId, FileMode.READ);
+    if (!handle2)
+    {
+        WriteToLog("Arquivo não encontrado: " + jsonPlayerId, LogFile.INIT, false, LogType.ERROR);
+        return loadoutsPlayer;
+    }
+    CloseFile(handle2);
+    
+    JsonFileLoader<ref array<ref LoadoutPlayer>>.JsonLoadFile(jsonPlayerId, loadoutsPlayer);
+
+    if (!loadoutsPlayer || loadoutsPlayer.Count() == 0)
+    {
+        WriteToLog("JSON carregado, mas lista vazia ou nula.", LogFile.INIT, false, LogType.ERROR);
+        return loadoutsPlayer;
+    }
+
+    return loadoutsPlayer;
+}
+
+void ShowLoadoutsToPlayer(string playerId)
+{
+    ref array<ref LoadoutPlayer> loadoutsPlayer = GetAllLoudoutsFromPlayer(playerId);
+    if (!loadoutsPlayer)
+    {
+        SendPrivateMessage(playerId, "Nenhum loadout foi configurado. Para personalizar seu loadout acesse: " + UrlAppPython, MessageColor.WARNING);
+        SendPrivateMessage(playerId, "Para gerar uma nova senha de acesso digite: !loadout reset" , MessageColor.WARNING);
+        return;
+    }
+    if (loadoutsPlayer.Count() == 0)
+    {
+        SendPrivateMessage(playerId, "Nenhum loadout foi configurado. Para personalizar seu loadout acesse: " + UrlAppPython, MessageColor.WARNING);
+        SendPrivateMessage(playerId, "Para gerar uma nova senha de acesso digite: !loadout reset" , MessageColor.WARNING);
+        return;
+    }
+    int ln = 1;
+    foreach (LoadoutPlayer loadoutPlayer : loadoutsPlayer) {  
+        if (loadoutPlayer.IsActive)
+            SendPrivateMessage(playerId, ln.ToString() + " - " + loadoutPlayer.Name + " (Ativo)", MessageColor.FRIENDLY);
+        else
+            SendPrivateMessage(playerId, ln.ToString() + " - " + loadoutPlayer.Name + " (Inativo)", MessageColor.WARNING);
+        ln++;
+    }
+    SendPrivateMessage(playerId, "Para ativar um loadout digite: !loadout nome", MessageColor.WARNING);
+}
+
+LoadoutPlayer GetLoadoutByName(string playerId, string loadoutName)
+{
+    ref LoadoutPlayer loadoutSearch = null;
+    ref array<ref LoadoutPlayer> loadoutsPlayer = GetAllLoudoutsFromPlayer(playerId);
+    foreach (ref LoadoutPlayer loadout : loadoutsPlayer)
+    {
+        if (!loadout) continue;
+        if (loadout.Name == loadoutName) // << Remover aspas do nome da variável
+        {
+            loadoutSearch = loadout;
+            break;
+        }
+    }
+    return loadoutSearch;
+}
+
+EntityAI TryCreateItemInInventoryOrOnGround(PlayerBase player, string itemType)
+{
+    EntityAI item = player.GetInventory().CreateInInventory(itemType);
+
+    if (!item) // Inventário cheio ou item incompatível
+    {
+        vector position = player.GetPosition();
+        position[1] = GetGame().SurfaceY(position[0], position[2]); // Garante o item no solo
+
+        item = EntityAI.Cast(GetGame().CreateObject(itemType, position, false, true));
+        if (item)
+        {
+            WriteToLog("Item " + itemType + " criado no chão por falta de espaço no inventário.", LogFile.INIT, false, LogType.ERROR);
+        }
+        else
+        {
+            WriteToLog("Falha ao criar item " + itemType + " no inventário e no chão.", LogFile.INIT, false, LogType.ERROR);
+        }
+    }
+
+    return item;
 }
