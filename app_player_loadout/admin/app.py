@@ -2974,16 +2974,28 @@ def create_loadout():
 
     conn = get_db_connection()
     try:
+        # Validação de limite por jogador
+        result = conn.execute(
+            "SELECT COUNT(*) as total FROM player_loadouts WHERE player_id = ?",
+            (player_id,)
+        ).fetchone()
+
+        if result["total"] >= 10:
+            return jsonify({"error": "Limite de 10 loadouts por jogador atingido"}), 403
+
         conn.execute(
             "INSERT INTO player_loadouts (player_id, name) VALUES (?, ?)",
             (player_id, name)
         )
         conn.commit()
         return jsonify({"message": "Loadout criado com sucesso"}), 201
+
     except sqlite3.IntegrityError:
         return jsonify({"error": "Já existe um loadout com esse nome para esse jogador"}), 409
+
     finally:
         conn.close()
+
 
 @app.route('/api/loadouts/<int:loadout_id>/activate', methods=['POST'])
 def activate_loadout(loadout_id):
