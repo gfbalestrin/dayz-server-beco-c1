@@ -201,3 +201,10 @@ bool CheckIfIsAdmin(string playerId)
 
     return false;
 }
+
+string GetPlayerId(Man man)
+{
+	PlayerBase player = PlayerBase.Cast(man);
+	if (!player || !player.GetIdentity()) return "";
+	return player.GetIdentity().GetId();
+}

@@ -84,7 +84,7 @@ class CustomMission: MissionServer
 		WriteToLog("CustomMission(): Inicializando CustomMission", LogFile.INIT, false, LogType.INFO);
 
 		FixedMessages = new array<string>;
-		//FixedMessages.Insert("Você pode criar qualquer item pelo chat, por exemplo: !giveitem M67Grenade");
+		FixedMessages.Insert("Para visualizar os comandos digite no chat: !help");
 
 		currentMap = LoadActiveRegionData(DeathMatchConfigJsonFile);
 		if (currentMap)
@@ -198,7 +198,7 @@ class CustomMission: MissionServer
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em"))
 				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.FRIENDLY);
 			
-			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos") && !isVotingMapActive)
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos"))
 			{
 				serverWillRestartSoon = true;
 				g_VoteMapManager.IniciaVotacaoProximoMapa();	
@@ -222,6 +222,7 @@ class CustomMission: MissionServer
 			tokens.Insert(playerID);
 			for (int i = 0; i < tokensCommands.Count(); i++)
 				tokens.Insert(tokensCommands.Get(i));
+
 			ExecuteCommand(tokens);
 		}
 	}
@@ -311,7 +312,7 @@ class CustomMission: MissionServer
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
 			{
-				if (!isVotingMapActive)
+				if (!g_VoteMapManager.GetStatusVotingMap())
 					AppendMessage(msgFixed);
 			}
 			m_AdminCheckTimer60 = 0.0;

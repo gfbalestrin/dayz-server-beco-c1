@@ -2240,7 +2240,7 @@ def save_loadout_weapons(player_loadout_id):
 
             if primary_weapon_id:
                 if (primary_weapon_id != existing_loadout['primary_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id,))
                     update_query += "primary_magazine_id = ?, "
                     update_data.append(parse(primary_magazine_id))
                     update_query += "primary_ammo_id = ?, "
@@ -2255,7 +2255,7 @@ def save_loadout_weapons(player_loadout_id):
                 update_data.append(parse(primary_ammo_id))
             attachment_ids = request.form.getlist(f'primary_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'primary' and player_loadout_id = ?", (player_loadout_id,))
                 for aid in attachment_ids:
                     conn.execute(''' 
                         INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
@@ -2264,7 +2264,7 @@ def save_loadout_weapons(player_loadout_id):
 
             if secondary_weapon_id:
                 if (secondary_weapon_id != existing_loadout['secondary_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id,))
                     update_query += "secondary_magazine_id = ?, "
                     update_data.append(parse(secondary_magazine_id))
                     update_query += "secondary_ammo_id = ?, "
@@ -2279,7 +2279,7 @@ def save_loadout_weapons(player_loadout_id):
                 update_data.append(parse(secondary_ammo_id))
             attachment_ids = request.form.getlist(f'secondary_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'secondary' and player_loadout_id = ?", (player_loadout_id,))
                 for aid in attachment_ids:
                     conn.execute(''' 
                         INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
@@ -2288,7 +2288,7 @@ def save_loadout_weapons(player_loadout_id):
 
             if small_weapon_id:
                 if (small_weapon_id != existing_loadout['small_weapon_id']):
-                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id))
+                    conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id,))
                     update_query += "small_magazine_id = ?, "
                     update_data.append(parse(small_magazine_id))
                     update_query += "small_ammo_id = ?, "
@@ -2303,7 +2303,7 @@ def save_loadout_weapons(player_loadout_id):
                 update_data.append(parse(small_ammo_id))
             attachment_ids = request.form.getlist(f'small_attachments')
             if (attachment_ids):
-                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id))
+                conn.execute("DELETE FROM player_loadouts_weapon_attachments WHERE weapon_slot = 'small' and player_loadout_id = ?", (player_loadout_id,))
                 for aid in attachment_ids:
                     conn.execute(''' 
                         INSERT INTO player_loadouts_weapon_attachments (attachment_id, weapon_slot, player_loadout_id)
@@ -2311,7 +2311,7 @@ def save_loadout_weapons(player_loadout_id):
                     ''', (int(aid), "small", player_loadout_id))
             explosives_json = request.form.get('explosives')
             if (explosives_json):
-                conn.execute("DELETE FROM player_loadouts_weapon_explosives WHERE player_loadout_id = ?", (player_loadout_id))              
+                conn.execute("DELETE FROM player_loadouts_weapon_explosives WHERE player_loadout_id = ?", (player_loadout_id,))              
                 explosives = json.loads(explosives_json) if explosives_json else []
                 for explosive in explosives:
                     conn.execute('''

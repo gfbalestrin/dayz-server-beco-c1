@@ -64,6 +64,16 @@ bool ExecuteCommand(TStringArray tokens)
 
     switch (command)
     {
+        case "help":
+            SendPrivateMessage(playerID, "'!loadouts' -> Lista loadouts configurados", MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!loadout meuloadout1' -> Ativa meuloadout1", MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!loadout reset' -> Gera nova senha aleatória para acessar o sistema de loadout: " + UrlAppPython, MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!maps' -> Lista mapas disponíveis", MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!votemap 1' -> Vota no mapa 1", MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!players' -> Lista jogadores online", MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, "'!votekick nRhBiJjrM' -> Vota para kickar o jogador de ID nRhBiJjrM", MessageColor.FRIENDLY);
+            
+            break;
         case "teleport":
             if (!isAdmin)
             {
@@ -117,7 +127,12 @@ bool ExecuteCommand(TStringArray tokens)
             target.MessageStatus("God Mode desativado");
             break;
 
-        case "giveitem":            
+        case "giveitem":  
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }          
             if (tokens.Count() >= 3)
             {
                 string itemName = tokens[2];
@@ -148,6 +163,11 @@ bool ExecuteCommand(TStringArray tokens)
             break;
 
         case "spawnvehicle":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+            }
             if (tokens.Count() == 3)
             {
                 string vehicleType = tokens[2];
@@ -232,11 +252,7 @@ bool ExecuteCommand(TStringArray tokens)
             break;        
         case "votemap":
             if (tokens.Count() < 3) {
-                if (isVotingMapActive) {
-                    g_VoteMapManager.ShowResultVotingMap(playerID);
-                } else {
-                    SendPrivateMessage(playerID, "Uso: !votemap <ID do mapa>", MessageColor.WARNING);
-                }                 
+                g_VoteMapManager.CheckVotingStatus(playerID);                 
                 return false;
             }
 
@@ -244,19 +260,9 @@ bool ExecuteCommand(TStringArray tokens)
                 SendPrivateMessage(playerID, "ID do mapa é inválido", MessageColor.WARNING);
                 return false;
             }
-            if (!isVotingMapActive && serverWillRestartSoon)
-            {
-                SendPrivateMessage(playerID, "Não é possível abrir votação pois o servidor vai reiniciar em breve", MessageColor.WARNING);
-                return false;
-            }
-            if (!isVotingMapActive)
-            {
-                g_VoteMapManager.IniciaVotacaoProximoMapa();
-                changeMapNow = true;
-            }
 
             int regionId = tokens[2].ToInt();
-            g_VoteMapManager.HandleVote(playerID, regionId);
+            g_VoteMapManager.CheckIfVotingAndStart(playerID, regionId);
             break;   
         case "nextmap":  
             SendPrivateMessage(playerID, "O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);

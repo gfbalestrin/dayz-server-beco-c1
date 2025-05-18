@@ -34,12 +34,6 @@ ref SafeZoneData nextMap;
 
 // Votação de mapa
 ref VoteMapManager g_VoteMapManager;
-ref map<string, int> playerVotesMap = new map<string, int>();  // playerID -> RegionId
-ref map<int, int> voteCountsMap = new map<int, int>();         // RegionId -> contagem de votos
-bool isVotingMapActive = false;
-float votingMapDuration = 300.0; // 300 segundos = 5 minutos
-ref Timer votingMapTimer;
-bool changeMapNow = false;
 
 // Votação de kick
 ref VoteKickManager g_VoteKickManager;
