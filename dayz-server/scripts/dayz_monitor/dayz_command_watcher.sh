@@ -187,26 +187,22 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             ;;
         event_start_finished)     
             CurrentMap=$(echo "$line" | jq -r '.current_map')
-            CurrentHour=$(echo "$line" | jq -r '.current_hour')
-            FormattedHour=$(printf "%02d:%02d" ${CurrentHour%%:*} ${CurrentHour##*:})
-            CurrentPeriod=$(echo "$line" | jq -r '.current_period')
+            CurrentTime=$(echo "$line" | jq -r '.current_time')
             echo "Evento de servidor reiniciado!" 
             INSERT_CUSTOM_LOG "Evento de início do servidor!" "INFO" "$ScriptName"
             Content="Servidor iniciado e liberado para jogadores!"
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
-            Content="Mapa atual: $CurrentMap, Horário: $FormattedHour ($CurrentPeriod)"
+            Content="Mapa atual: $CurrentMap, Horário: $CurrentTime"
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"            
             ;;
         event_minutes_to_restart)     
             CurrentMap=$(echo "$line" | jq -r '.current_map')
-            CurrentHour=$(echo "$line" | jq -r '.current_hour')
-            FormattedHour=$(printf "%02d:%02d" ${CurrentHour%%:*} ${CurrentHour##*:})
-            CurrentPeriod=$(echo "$line" | jq -r '.current_period')
+            CurrentTime=$(echo "$line" | jq -r '.current_time')
             Message=$(echo "$line" | jq -r '.message')
             echo "Evento de servidor reiniciando!" 
             INSERT_CUSTOM_LOG "Evento de aviso de tempo para reiniciar o servidor!" "INFO" "$ScriptName"
 
-            Content="Mapa atual: $CurrentMap, Horário: $FormattedHour da $CurrentPeriod"
+            Content="Mapa atual: $CurrentMap, Horário: $CurrentTime"
             SEND_DISCORD_WEBHOOK "$Message ($Content)" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
             ;;
         send_log_discord)     

@@ -72,13 +72,14 @@ bool ExecuteCommand(TStringArray tokens)
             SendPrivateMessage(playerID, "!votemap 1 -> Vota no mapa 1", MessageColor.FRIENDLY);
             SendPrivateMessage(playerID, "!players -> Lista jogadores online", MessageColor.FRIENDLY);
             SendPrivateMessage(playerID, "!votekick 12345679 -> Vota para kickar o jogador de ID 12345679", MessageColor.FRIENDLY);
-            
+            SendPrivateMessage(playerID, "!kill -> Cometer suicídio", MessageColor.FRIENDLY);
             break;
         case "teleport":
             if (!isAdmin)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             if (tokens.Count() == 5)
             {
@@ -93,6 +94,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             target.SetHealth("", "", 100);
             target.SetHealth("GlobalHealth", "Blood", 5000);
@@ -112,6 +114,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             target.SetAllowDamage(false);
             target.MessageStatus("God Mode ativado");
@@ -122,6 +125,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             target.SetAllowDamage(true);
             target.MessageStatus("God Mode desativado");
@@ -132,6 +136,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }          
             if (tokens.Count() >= 3)
             {
@@ -167,6 +172,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             if (tokens.Count() == 3)
             {
@@ -180,6 +186,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             target.SetInvisible(true);
             target.SetScale(0.0001);
@@ -191,6 +198,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             target.SetInvisible(false);
             target.MessageStatus("Você está visível");
@@ -226,6 +234,7 @@ bool ExecuteCommand(TStringArray tokens)
             {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 WriteToLog("Comando foi bloqueado para o jogador!", LogFile.INIT, false, LogType.ERROR);
+                return false;
             }
             if (tokens.Count() >= 3)
             {

@@ -32,6 +32,7 @@ class VoteMapManager
 
 		BroadcastMessage("Votação iniciada! Você tem " + tempo + " para votar.", MessageColor.FRIENDLY);
 		WriteToLog("Votação iniciada! Os jogadores têm " + tempo + " para votar.", LogFile.INIT, false, LogType.INFO);
+		AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Votação de mapa iniciada para a troca de mapa\"}");
 
 		foreach (ref SafeZoneData mapV : maps)
 		{
@@ -153,15 +154,18 @@ class VoteMapManager
 
 				WriteToLog("Total online: " + totalOnline.ToString(), LogFile.INIT, false, LogType.DEBUG);
 				WriteToLog("Votos no vencedor: " + votosNoVencedor.ToString(), LogFile.INIT, false, LogType.DEBUG);
+				
 
 				if (votosNoVencedor == totalOnline && totalOnline > 0)
 				{
 					BroadcastMessage("Votação unânime! Reiniciando com o mapa: " + mapName, MessageColor.IMPORTANT);
+					AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Votação de mapa finalizada! O próximo mapa será: " + mapName + "\"}");
 					SetActiveRegionById(winner);
 					AppendExternalAction("{\"action\": \"restart_server\", \"minutes\": 1, \"message\": \"Servidor será reiniciado em 1 minuto\"}");
 				}
 				else
 				{
+					AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Votação de mapa finalizada! A votação não foi unânime e nenhuma troca será feita.\"}");
 					BroadcastMessage("A votação não foi unânime. Nenhuma troca será feita.", MessageColor.WARNING);
 				}
 			}
@@ -171,12 +175,14 @@ class VoteMapManager
 	                mapName = "ID " + winner.ToString();
 
 				BroadcastMessage("Mapa vencedor: " + winner + " - " + mapName + " com " + highest.ToString() + " votos.", MessageColor.FRIENDLY);
+				AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Mapa vencedor: " + winner + " - " + mapName + " com " + highest.ToString() + " votos.\"}");
 				SetActiveRegionById(winner);
 			}
 		}
 		else
 		{
 			BroadcastMessage("Nenhum voto recebido. O próximo mapa será " + nextMap.Region, MessageColor.FRIENDLY);
+			AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Nenhum voto recebido. O próximo mapa será: " + nextMap.Region + "\"}");
 		}
 
 		ResetVotingMap();
@@ -228,7 +234,7 @@ class VoteMapManager
 
     void CheckIfVotingAndStart(string playerID, int regionId)
     {
-        if (serverWillRestartSoon && changeMapNow)
+        if (serverWillRestartSoon)
         {
             SendPrivateMessage(playerID, "Não é possível abrir votação pois o servidor vai reiniciar em breve", MessageColor.WARNING);
             return;

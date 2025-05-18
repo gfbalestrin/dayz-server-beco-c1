@@ -208,3 +208,98 @@ string GetPlayerId(Man man)
 	if (!player || !player.GetIdentity()) return "";
 	return player.GetIdentity().GetId();
 }
+
+string GetCurrentTimeInGame()
+{
+	int year, month, day, hour, minute;
+	GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+
+	string periodo;
+	if (hour >= 0 && hour < 6)
+		periodo = "madrugada";
+	else if (hour >= 6 && hour < 12)
+		periodo = "manhã";
+	else if (hour >= 12 && hour < 18)
+		periodo = "tarde";
+	else
+		periodo = "noite";
+
+	string hourStr;
+	if (hour < 10)
+		hourStr = "0" + hour.ToString();
+	else
+		hourStr = hour.ToString();
+
+	string minuteStr;
+	if (minute < 10)
+		minuteStr = "0" + minute.ToString();
+	else
+		minuteStr = minute.ToString();
+
+	string horaFormatada = hourStr + ":" + minuteStr;
+
+	return horaFormatada + " (" + periodo + ")";
+}
+
+void CleanUpDeadEntities()
+{
+	array<Object> objects = new array<Object>();
+	GetGame().GetObjectsAtPosition(Vector(0, 0, 0), 999999, objects, null);
+
+	int countRemoved = 0;
+
+	foreach (Object obj : objects)
+	{
+		if (!obj) continue;
+
+		PlayerBase player = PlayerBase.Cast(obj);
+		ZombieBase zombie = ZombieBase.Cast(obj);
+
+		if ((player && !player.IsAlive()) || (zombie && !zombie.IsAlive()))
+		{
+			GetGame().ObjectDelete(obj);
+			countRemoved++;
+		}
+	}
+
+	if (countRemoved > 0)
+	{
+		WriteToLog("CleanUpDeadEntities(): Removidos " + countRemoved.ToString() + " corpos mortos.", LogFile.INIT, false, LogType.DEBUG);
+	}
+}
+
+void CleanUpDeadEntitiesNearPlayers()
+{
+	array<Man> players = new array<Man>();
+	GetGame().GetPlayers(players);
+
+	int radius = 100; // ajustável
+	int countRemoved = 0;
+
+	foreach (Man man : players)
+	{
+		vector pos = man.GetPosition();
+
+		array<Object> nearby = new array<Object>();
+		GetGame().GetObjectsAtPosition(pos, radius, nearby, null);
+
+		foreach (Object obj : nearby)
+		{
+			if (!obj) continue;
+
+			PlayerBase player = PlayerBase.Cast(obj);
+			ZombieBase zombie = ZombieBase.Cast(obj);
+
+			if ((player && !player.IsAlive()) || (zombie && !zombie.IsAlive()))
+			{
+				GetGame().ObjectDelete(obj);
+				countRemoved++;
+			}
+		}
+	}
+
+	if (countRemoved > 0)
+	{
+		WriteToLog("CleanUp: " + countRemoved.ToString() + " corpos removidos próximos a jogadores.", LogFile.INIT, false, LogType.DEBUG);
+	}
+}

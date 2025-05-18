@@ -4,6 +4,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/models/LoadoutPlayerId.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Log.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Functions.c"
+#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/ExternalActions.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Construction.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteMapManager.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VoteKickManager.c"
@@ -12,7 +13,7 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/VehicleSpawner.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/DeathMatchConfig.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Messages.c"
-#include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/ExternalActions.c"
+
 
 void main()
 {
@@ -178,22 +179,7 @@ class CustomMission: MissionServer
 
 		WriteToLog("OnMissionStart(): Servidor reiniciado com sucesso!", LogFile.INIT, false, LogType.INFO);
         ActivePlayers = new set<string>();
-		int year, month, day, hour, minute;
-		GetGame().GetWorld().GetDate(year, month, day, hour, minute);
-
-		string periodo;
-
-		if (hour >= 0 && hour < 6)
-			periodo = "madrugada";
-		else if (hour >= 6 && hour < 12)
-			periodo = "manhã";
-		else if (hour >= 12 && hour < 18)
-			periodo = "tarde";
-		else
-			periodo = "noite";
-
-		string time = hour.ToString() + ":" + minute.ToString();
-		AppendExternalAction("{\"action\":\"event_start_finished\",\"current_map\":\"" + currentMap.Region + "\",\"current_hour\":\"" + time + "\",\"current_period\":\"" + periodo + "\"}");
+		
     }
 	
 	override void OnEvent(EventType eventTypeId, Param params)
@@ -223,29 +209,19 @@ class CustomMission: MissionServer
 			{
 				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.FRIENDLY);				
 			}
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 60 minutos"))
+			{
+				AppendExternalAction("{\"action\":\"event_start_finished\",\"current_map\":\"" + currentMap.Region + "\",\"current_time\":\"" + GetCurrentTimeInGame() + "\"}");
+				AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"O servidor será reiniciado daqui 1 hora\"}");
+			}
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 1 minutos"))
 			{
 				AppendExternalAction("{\"action\":\"event_restarting\",\"next_map\":\"" + nextMap.Region + "\"}");
 				WriteToLog("Servidor reiniciando...", LogFile.INIT, false, LogType.INFO);
 			}
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 5 minutos"))
-			{
-				int year, month, day, hour, minute;
-				GetGame().GetWorld().GetDate(year, month, day, hour, minute);
-
-				string periodo;
-
-				if (hour >= 0 && hour < 6)
-					periodo = "madrugada";
-				else if (hour >= 6 && hour < 12)
-					periodo = "manhã";
-				else if (hour >= 12 && hour < 18)
-					periodo = "tarde";
-				else
-					periodo = "noite";
-
-				string time = hour.ToString() + ":" + minute.ToString();
-				AppendExternalAction("{\"action\":\"event_minutes_to_restart\",\"current_map\":\"" + currentMap.Region + "\",\"current_hour\":\"" + time + "\",\"current_period\":\"" + periodo + "\",\"message\":\"" + text + "\"}");
+			{	
+				AppendExternalAction("{\"action\":\"event_minutes_to_restart\",\"current_map\":\"" + currentMap.Region + "\",\"current_time\":\"" + GetCurrentTimeInGame() + "\",\"message\":\"" + text + "\"}");
 			}
 			
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos"))
@@ -376,10 +352,7 @@ class CustomMission: MissionServer
 
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
 		{			
-			int year, month, day, hour, minute;
-			GetGame().GetWorld().GetDate(year, month, day, hour, minute);
-			string time = hour.ToString() + ":" + minute.ToString();
-			WriteToLog("OnUpdate(): Horário atual do servidor: " + time, LogFile.INIT, false, LogType.DEBUG);
+			WriteToLog("OnUpdate(): Horário atual do servidor: " + GetCurrentTimeInGame(), LogFile.INIT, false, LogType.DEBUG);
 			
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
@@ -387,6 +360,8 @@ class CustomMission: MissionServer
 				if (!g_VoteMapManager.GetStatusVotingMap())
 					AppendMessage(msgFixed);
 			}
+
+			//CleanUpDeadEntitiesNearPlayers();
 			m_AdminCheckTimer60 = 0.0;
 		}
 	}

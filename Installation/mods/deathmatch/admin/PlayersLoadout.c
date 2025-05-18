@@ -629,4 +629,3 @@ void ActiveLoadoutByName(string playerId, string loadoutName)
         WriteToLog("Falha ao carregar os loadouts do jogador: " + path, LogFile.INIT, false, LogType.ERROR);
     }
 }
-

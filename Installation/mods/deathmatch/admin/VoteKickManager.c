@@ -55,6 +55,7 @@ class VoteKickManager
 
 		BroadcastMessage("Votação para kickar " + targetPlayerName + " iniciada! Digite 1 para SIM ou 2 para NÃO.", MessageColor.WARNING);
 		WriteToLog("Votação de kick iniciada por " + callerId + " contra " + targetPlayerId, LogFile.INIT, false, LogType.INFO);
+		AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Votação para kickar " + targetPlayerName + " iniciada!\"}");
 	}
 
 	// Processa o voto de um jogador
@@ -144,8 +145,10 @@ class VoteKickManager
 			KickPlayerById(targetPlayerId);
 			BroadcastMessage("Jogador " + targetPlayerName + " foi kickado por votação unânime!", MessageColor.IMPORTANT);
 			WriteToLog("Jogador " + targetPlayerId + " kickado após votação.", LogFile.INIT, false, LogType.INFO);
+			AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Jogador " + targetPlayerId + " kickado após votação.\"}");
 		} else {
 			BroadcastMessage("Votação para kickar " + targetPlayerName + " falhou. Votos SIM: " + simVotes + "/" + totalVoters, MessageColor.WARNING);
+			AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"Votação para kickar " + targetPlayerName + " falhou. Votos SIM: " + simVotes + "/" + totalVoters + "\"}");
 		}
 
 		ResetKickVote();
