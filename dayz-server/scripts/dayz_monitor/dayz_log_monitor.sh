@@ -12,7 +12,7 @@ LogFileName="$DayzServerFolder/$DayzLogAdmFile"
 
 INSERT_CUSTOM_LOG "Monitorando arquivo: $LogFileName" "INFO" "$ScriptName"
 
-tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been disconnected" -e "killed by" -e "is unconscious" -e "AdminLog started on" -e "bled out" -e "died. Stats" -e "Chat(" -e "hit by Player" | while IFS='' read Line; do
+tail -n 0 -F $LogFileName | grep --line-buffered -e "killed by" -e "is unconscious" -e "bled out" -e "died. Stats" -e "hit by Player" | while IFS='' read Line; do
 	echo "$Line" | grep -q "\[HP: 0\]" && continue
 
 	INSERT_ADM_LOG "$Line" "INFO"
@@ -77,48 +77,7 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			Content="Jogador $SafePlayerVictimInfo foi atingido por $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $metros metros, HP restante: $Health"
 		else
 			INSERT_CUSTOM_LOG "Falha ao realizar o parse das informações de dano do player" "ERROR" "$ScriptName"
-		fi
-	elif [[ "$Content" == *"is connected"* || "$Content" == *"has been disconnected"* ]]; then
-		continue
-		INSERT_CUSTOM_LOG "Evento de player conectado ou desconectado detectado!" "INFO" "$ScriptName"
-		PlayerId=$(echo $Content | awk -F'id=' '{print $2}' | awk -F')' '{print $1}')
-		PlayerName=$(echo $Content | awk -F'"' '{print $2}' | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
-
-		if [[ "$PlayerId" == "Unknown" ]]; then
-			INSERT_CUSTOM_LOG "PlayerId Unknown. Ignorando..." "INFO" "$ScriptName"
-			continue
-		fi
-
-		PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
-		if [[ -z "$PlayerExists" ]]; then
-			INSERT_CUSTOM_LOG "Ignorando pois player não consta no banco" "INFO" "$ScriptName"
-			continue
-		fi
-
-		PlayerName=$(echo "$PlayerExists" | cut -d'|' -f1 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
-		SteamID=$(echo "$PlayerExists" | cut -d'|' -f2)
-		SteamName=$(echo "$PlayerExists" | cut -d'|' -f3 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)		
-
-		if [[ -f "$DayzServerFolder/$DayzAdminIdsFile" ]] && grep -q "$PlayerId" "$DayzServerFolder/$DayzAdminIdsFile"; then
-			INSERT_CUSTOM_LOG "Ignorando conta do administrador e matando player para renascer com loot admin..." "INFO" "$ScriptName"
-			# Mata o administrador para renascer com loot admin
-			sqlite3 "$DayzServerFolder/$DayzPlayerDbFile" "UPDATE Players set Alive = 0 where UID = '$PlayerId';"
-			continue
-		fi
-
-		if [[ "$Content" == *"is connected"* ]]; then
-			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) conectou"
-			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" &
-			# if [[ "$DayzDeathmatch" -eq "1" ]]; then
-			# 	INSERT_CUSTOM_LOG "Matando jogador $PlayerId ..." "INFO" "$ScriptName"
-			# 	echo "Matando jogador $PlayerId ..."
-			# 	echo "$PlayerId kill" >>"$DayzServerFolder/$DayzAdminCmdsFile"
-			# 	sqlite3 "$DayzServerFolder/$DayzPlayerDbFile" "UPDATE Players set Alive = 0 where UID = '$PlayerId';"
-			# fi
-		elif [[ "$Content" == *"has been disconnected"* ]]; then
-			Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) desconectou"
-			"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "DISCONNECT" &			
-		fi
+		fi	
 	# Evento de morte por player
 	elif [[ "$Content" == *"killed by Player"* ]]; then
 		INSERT_CUSTOM_LOG "Evento de PVP detectado!" "INFO" "$ScriptName"
@@ -166,14 +125,6 @@ tail -n 0 -F $LogFileName | grep --line-buffered -e "is connected" -e "has been 
 			echo "Jogador $PlayerKillerName eliminou $PlayerVictimName" >> "$DayzServerFolder/$DayzMessagesToSendoFile"
 		else
 			INSERT_CUSTOM_LOG "PlayerIdKilled ou PlayerIdVictim não encontrado no banco de dados. Usando o conteúdo original para o discord..." "ERROR" "$ScriptName"
-		fi
-	# Eventos de restart do server
-	elif [[ "$Line" == *"AdminLog started on"* ]]; then
-		INSERT_CUSTOM_LOG "Evento de restart do server detectado! O serviço dayz-infos-logs-discord.service será reiniciado..." "INFO" "$ScriptName"		
-		if [[ "$DayzWipeOnRestart" -eq "1" ]]; then
-			Content="Wipe realizado e servidor reiniciado. Aguardando liberação de conexão..."
-		else
-			Content="Servidor reiniciado. Aguardando liberação de conexão..."
 		fi
 	else
 		

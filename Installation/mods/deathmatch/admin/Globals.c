@@ -37,9 +37,5 @@ ref VoteMapManager g_VoteMapManager;
 
 // Votação de kick
 ref VoteKickManager g_VoteKickManager;
-ref map<string, bool> playerVotesKick = new map<string, bool>();  // playerID -> true (sim) / false (não)
-private bool isVotingKickActive = false;
-private float votingKickDuration = 120.0; // 2 minutos
-private ref Timer votingKickTimer;
 
 bool serverWillRestartSoon = false;

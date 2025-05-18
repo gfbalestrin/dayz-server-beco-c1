@@ -2227,7 +2227,7 @@ def save_loadout_weapons(player_loadout_id):
         def parse(val): return int(val) if val else None
 
         # Verifica se os dados de loadout já existem
-        existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id)).fetchone()
+        existing_loadout = conn.execute('SELECT * FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id,)).fetchone()
 
         # Prepara a consulta para inserir ou atualizar
         if existing_loadout:            
@@ -2349,7 +2349,7 @@ def save_loadout_weapons(player_loadout_id):
                 parse(small_weapon_id), parse(small_magazine_id), parse(small_ammo_id), parse(player_loadout_id)
             ))
             # Recupera o ID do loadout
-            row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id)).fetchone()
+            row = conn.execute('SELECT id FROM player_loadouts_weapons WHERE player_loadout_id = ?', (player_loadout_id,)).fetchone()
             # Loop para cada slot de arma
             for slot in ['primary', 'secondary', 'small']:
                 attachment_ids = request.form.getlist(f'{slot}_attachments')

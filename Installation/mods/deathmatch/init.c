@@ -175,7 +175,25 @@ class CustomMission: MissionServer
 	override void OnMissionStart()
     {
         super.OnMissionStart();
+
+		WriteToLog("OnMissionStart(): Servidor reiniciado com sucesso!", LogFile.INIT, false, LogType.INFO);
         ActivePlayers = new set<string>();
+		int year, month, day, hour, minute;
+		GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+
+		string periodo;
+
+		if (hour >= 0 && hour < 6)
+			periodo = "madrugada";
+		else if (hour >= 6 && hour < 12)
+			periodo = "manhã";
+		else if (hour >= 12 && hour < 18)
+			periodo = "tarde";
+		else
+			periodo = "noite";
+
+		string time = hour.ToString() + ":" + minute.ToString();
+		AppendExternalAction("{\"action\":\"event_start_finished\",\"current_map\":\"" + currentMap.Region + "\",\"current_hour\":\"" + time + "\",\"current_period\":\"" + periodo + "\"}");
     }
 	
 	override void OnEvent(EventType eventTypeId, Param params)
@@ -202,7 +220,33 @@ class CustomMission: MissionServer
             	return;
 			
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em"))
-				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.FRIENDLY);
+			{
+				BroadcastMessage("Próximo mapa: " + nextMap.Region, MessageColor.FRIENDLY);				
+			}
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 1 minutos"))
+			{
+				AppendExternalAction("{\"action\":\"event_restarting\",\"next_map\":\"" + nextMap.Region + "\"}");
+				WriteToLog("Servidor reiniciando...", LogFile.INIT, false, LogType.INFO);
+			}
+			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 5 minutos"))
+			{
+				int year, month, day, hour, minute;
+				GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+
+				string periodo;
+
+				if (hour >= 0 && hour < 6)
+					periodo = "madrugada";
+				else if (hour >= 6 && hour < 12)
+					periodo = "manhã";
+				else if (hour >= 12 && hour < 18)
+					periodo = "tarde";
+				else
+					periodo = "noite";
+
+				string time = hour.ToString() + ":" + minute.ToString();
+				AppendExternalAction("{\"action\":\"event_minutes_to_restart\",\"current_map\":\"" + currentMap.Region + "\",\"current_hour\":\"" + time + "\",\"current_period\":\"" + periodo + "\",\"message\":\"" + text + "\"}");
+			}
 			
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 10 minutos"))
 			{
@@ -251,8 +295,8 @@ class CustomMission: MissionServer
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
 			ref set<string> currentPlayers = new set<string>();
-			if (players.Count() > 0)
-				WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
+			// if (players.Count() > 0)
+			// 	WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
 
 			foreach (Man man : players)
 			{
@@ -421,11 +465,15 @@ class CustomMission: MissionServer
 			m_player.SetAllowDamage(true);
 		}
 
-		
-
 		return m_player;
 	}
 
+	override void OnMissionFinish()
+    {
+        super.OnMissionFinish();
+
+		
+    }
 
 };
 

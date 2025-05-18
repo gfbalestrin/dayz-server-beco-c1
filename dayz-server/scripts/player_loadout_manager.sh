@@ -67,25 +67,47 @@ source "$VENV_DIR/bin/activate"
 # Verifica se o jogador existe no banco principal
 PlayerExists=$(sqlite3 -separator "|" "$PLAYERS_BECO_C1_DB" "SELECT 1 FROM players_database WHERE PlayerID = '$PLAYER_ID' LIMIT 1;")
 if [[ -z "$PlayerExists" ]]; then
-    echo "{\"error\": \"PlayerID não consta na database de jogadores\"}"
+    echo "{\"error\": \"PlayerID não consta na database de jogadores. Ative sua conta antes.\"}"
     exit 1
 fi
 
 # RESET PASSWORD
 if [[ "$RESET_PASSWORD" == "1" ]]; then
-    PlayerLoadoutExists=$(sqlite3 -separator "|" "$DAYZ_ITEMS_DB" "SELECT login FROM player_logins WHERE player_id = '$PLAYER_ID';")
-    if [[ -z "$PlayerLoadoutExists" ]]; then
-        echo "{\"error\": \"PlayerID não consta na database de loadout\"}"
-        exit 1
+    # Obtém SteamName
+    PlayerRow=$(sqlite3 -separator "|" "$PLAYERS_BECO_C1_DB" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PLAYER_ID';")
+    SteamName=$(echo "$PlayerRow" | cut -d'|' -f3 | sed 's/[^a-zA-Z0-9_-]//g' | xargs)
+
+    # Verifica se já está na tabela player_logins
+    PlayerLoginRow=$(sqlite3 -separator "|" "$DAYZ_ITEMS_DB" "SELECT login FROM player_logins WHERE player_id = '$PLAYER_ID';")
+
+    if [[ -z "$PlayerLoginRow" ]]; then
+        # Se não existe, criar login e senha
+        senha=$(head -c 100 /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+        hash=$(python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('$senha'))")
+
+        login=$(echo "$SteamName" | tr '[:upper:]' '[:lower:]' | tr -dc 'a-z0-9' | cut -c1-16)
+        if [[ -z "$login" ]]; then login="user_$(date +%s)"; fi
+
+        sqlite3 "$DAYZ_ITEMS_DB" "INSERT INTO player_logins (player_id, login, password, active, admin) VALUES ('$PLAYER_ID', '$login', '$hash', 1, 0);"
+    else
+        # Senha nova para quem já está cadastrado
+        login=$(echo "$PlayerLoginRow" | cut -d'|' -f1 | xargs)
+        senha=$(head -c 100 /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+        hash=$(python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('$senha'))")
+        sqlite3 "$DAYZ_ITEMS_DB" "UPDATE player_logins SET password = '$hash' WHERE player_id = '$PLAYER_ID';"
     fi
 
-    login=$(echo "$PlayerLoadoutExists" | cut -d'|' -f1 | tr -d '|' | sed 's/[^a-zA-Z0-9_-]//g' | xargs)
-    senha=$(head -c 100 /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
-    hash=$(python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('$senha'))")
-    sqlite3 "$DAYZ_ITEMS_DB" "UPDATE player_logins SET password = '$hash' WHERE player_id = '$PLAYER_ID';"
+    # Verifica se o jogador já tem algum loadout
+    loadout_count=$(sqlite3 "$DAYZ_ITEMS_DB" "SELECT COUNT(*) FROM player_loadouts WHERE player_id = '$PLAYER_ID';")
 
+    if [[ "$loadout_count" -eq 0 ]]; then
+        sqlite3 "$DAYZ_ITEMS_DB" "INSERT INTO player_loadouts (player_id, name, is_active) VALUES ('$PLAYER_ID', 'Loadout Padrão', 1);"
+    fi
+
+    # Resposta final
     echo "{\"login\": \"$login\", \"senha\": \"$senha\", \"url\": \"$URL_LOADOUT\"}"
     exit 0
+
 fi
 
 # ACTIVATE LOADOUT

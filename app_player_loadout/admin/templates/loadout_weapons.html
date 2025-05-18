@@ -592,7 +592,7 @@
                 </div>
                 <div class="modal-footer">
 
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="btnOkModalLoadout">OK</button>
                 </div>
             </div>
         </div>
@@ -602,7 +602,22 @@
     </div>
     <script>
         let modalAvisoContent = ""
+        function scrollToElementCenter(selector) {
+            const element = document.querySelector(selector);
+            if (!element) return;
 
+            const elementRect = element.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.pageYOffset;
+            const elementCenter = absoluteElementTop + (elementRect.height / 2);
+
+            const viewportHeight = window.innerHeight;
+            const scrollTo = elementCenter - (viewportHeight / 2);
+
+            window.scrollTo({
+                top: scrollTo,
+                behavior: 'smooth'
+            });
+        }
         document.addEventListener('DOMContentLoaded', function () {
 
 
@@ -621,9 +636,11 @@
 
                 const divAttachments = document.getElementById(`div-${weaponType}-attachments`);
                 const attachmentsSection = document.getElementById(`${weaponType}-attachments-section`);
+                
+                const btnOkModalLoadout = document.getElementById(`btnOkModalLoadout`);
 
                 weaponCards.forEach(card => {
-                    card.addEventListener('click', function () {
+                    card.addEventListener('click', function () {                        
                         const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");
                         bodyModalAviso.innerHTML = '';
                         const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal'));
@@ -669,6 +686,7 @@
                                     //   </div>`;
                                     //                                     if (!document.getElementById('avisoMarcacaoModal').classList.contains('show'))
                                     //                                         modalModalAviso.show(); 
+                                   
 
                                     divMagazines.classList.remove("d-none");
                                     data.forEach(mag => {
@@ -692,6 +710,7 @@
 
                                             // Carregar munições compatíveis
                                             loadAmmos(weaponId, weaponType);
+ 
                                         });
 
                                         magazineList.appendChild(card);
@@ -771,7 +790,7 @@
 
                 fetch(`/get_attachments/${weaponId}`)
                     .then(response => response.json())
-                    .then(data => {
+                    .then(data => {                        
                         if (data.length > 0) {
                             divAttachments.classList.remove("d-none");
                             //                             const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                

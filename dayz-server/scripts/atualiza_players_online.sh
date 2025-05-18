@@ -13,7 +13,7 @@ EVENT=$2
 
 CONTENT=""
 
-function SincronizaDiscord() {
+function AtualizaPlayersOnlineDiscord() {
     [[ -z "$DiscordDesactive" || "$DiscordDesactive" -eq 0 ]] || return 0
     URL="https://discord.com/api/v10/channels/$DISCORD_CHANNEL_ID/messages/$DISCORD_MESSAGE_ID"
     echo "Atualizando a mensagem com ID $DISCORD_MESSAGE_ID no canal $DISCORD_CHANNEL_ID..."
@@ -30,13 +30,46 @@ function SincronizaDiscord() {
     echo $response
     if [[ "$response" == *"Maximum number of edits to messages"* ]]; then
         sleep 5
-        SincronizaDiscord
+        AtualizaPlayersOnlineDiscord
     fi
 }
 
+function EnviaLogsDiscord() {
+    PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PLAYER_ID';")
+    if [[ -z "$PlayerExists" ]]; then
+        echo "Ignorando pois player não consta no banco"
+        INSERT_CUSTOM_LOG "Ignorando pois player não consta no banco" "INFO" "$ScriptName"
+        continue
+    fi
+    PlayerName=$(echo "$PlayerExists" | cut -d'|' -f1 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
+    SteamID=$(echo "$PlayerExists" | cut -d'|' -f2)
+    SteamName=$(echo "$PlayerExists" | cut -d'|' -f3 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
+
+    if [[ -f "$DayzServerFolder/$DayzAdminIdsFile" ]] && grep -q "$PLAYER_ID" "$DayzServerFolder/$DayzAdminIdsFile"; then
+        echo "Ignorando conta do administrador e matando player para renascer com loot admin..."
+        INSERT_CUSTOM_LOG "Ignorando conta do administrador e matando player para renascer com loot admin..." "INFO" "$ScriptName"
+        continue
+    fi
+
+    if [[ "$EVENT" == "CONNECT" ]]; then
+        Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) conectou"
+    else
+        Content="Jogador **$PlayerName** ([$SteamName](<https://steamcommunity.com/profiles/$SteamID>)) desconectou"
+    fi
+    			
+    SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
+}
+
 if [[ "$PLAYER_ID" == "RESET" ]]; then
-    CONTENT="**(0/60) Usuários online (atualizado em $CURRENT_DATE)**\n\n"
-    SincronizaDiscord
+    DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
+    CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+    NEXT_INDEX=$((CURRENT_INDEX + 1))
+    CURRENT_REGION=$(jq -r ".[$CURRENT_INDEX].Region" "$DeathMatchCoords")  
+    NEXT_REGION=$(jq -r ".[$NEXT_INDEX].Region" "$DeathMatchCoords")  
+    CONTENT="**(0/60) Usuários online (atualizado em $CURRENT_DATE)**\n"  
+    CONTENT="${CONTENT}**Mapa atual: ${CURRENT_REGION}** \n"
+
+    AtualizaPlayersOnlineDiscord
 
     # SQLITE
     for ((i = 1; i <= 5; i++)); do
@@ -90,6 +123,7 @@ if [ -n "$DATACONNECT" ]; then
 
             if [ $? -eq 0 ]; then
                 echo "Registro da tabela 'players_online' excluído com sucesso."
+                EnviaLogsDiscord
                 break;
             else
                 if echo "$OUTPUT" | grep -q "database is locked"; then
@@ -133,6 +167,7 @@ else
 
             if [ $? -eq 0 ]; then
                 echo "Registro da tabela 'players_online' inserido com sucesso."
+                EnviaLogsDiscord
                 break;
             else
                 if echo "$OUTPUT" | grep -q "database is locked"; then
@@ -148,21 +183,21 @@ else
     fi
 fi
 
-
 NUM_REGISTROS=$(sqlite3 "$PLAYERS_BECO_C1_DB" "SELECT COUNT(*) FROM players_online;")
 
 if [[ "$DayzDeathmatch" -eq "1" ]]; then
     DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
     CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
-    NEXT_REGION=$(jq -r ".[$CURRENT_INDEX].Region" "$DeathMatchCoords")  
+    PREV_INDEX=$((CURRENT_INDEX - 1))
+    CURRENT_REGION=$(jq -r ".[$PREV_INDEX].Region" "$DeathMatchCoords")  
     CONTENT="**($NUM_REGISTROS/60) Usuários online (atualizado em $CURRENT_DATE)**\n"  
-    CONTENT="${CONTENT}**Mapa atual: ${NEXT_REGION}** \n\n"
+    CONTENT="${CONTENT}**Mapa atual: ${CURRENT_REGION}** \n\n"
 else
     CONTENT="**($NUM_REGISTROS/60) Usuários online (atualizado em $CURRENT_DATE)**\n\n"
 fi
 
 if [[ $NUM_REGISTROS -eq 0 ]]; then
-    SincronizaDiscord
+    AtualizaPlayersOnlineDiscord
     exit 0
 fi
 
@@ -196,4 +231,4 @@ ORDER BY
     o.DataConnect ASC;
 ")
 
-SincronizaDiscord
+AtualizaPlayersOnlineDiscord

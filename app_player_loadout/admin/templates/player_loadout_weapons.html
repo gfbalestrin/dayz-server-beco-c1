@@ -584,6 +584,22 @@
 
     <script>
         let modalAvisoContent = ""
+        function scrollToElementCenter(selector) {
+            const element = document.querySelector(selector);
+            if (!element) return;
+
+            const elementRect = element.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.pageYOffset;
+            const elementCenter = absoluteElementTop + (elementRect.height / 2);
+
+            const viewportHeight = window.innerHeight;
+            const scrollTo = elementCenter - (viewportHeight / 2);
+
+            window.scrollTo({
+                top: scrollTo,
+                behavior: 'smooth'
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
            
@@ -632,6 +648,8 @@
                         magazineInput.value = '';
                         ammoInput.value = '';
 
+                        let magazineExists = false;
+
                         // Carregar magazines compatíveis
                         fetch(`/get_magazines/${weaponId}`)
                             .then(res => res.json())
@@ -641,6 +659,8 @@
                                 if (data.length === 0) {
                                     magazineList.innerHTML = '<p>Nenhum carregador compatível.</p>';
                                 } else {
+                                        magazineExists = true;
+                                        scrollToElementCenter(`${weaponType}-magazine-list`);
 //                                     const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                
 //                                 const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
 //                                     bodyModalAviso.innerHTML += `<div class="mb-3 text-center">
@@ -673,7 +693,7 @@
                                             magazineInput.value = mag.id;
 
                                             // Carregar munições compatíveis
-                                            loadAmmos(weaponId, weaponType);
+                                            loadAmmos(weaponId, weaponType);                                                                                       
                                         });
 
                                         magazineList.appendChild(card);
@@ -705,6 +725,8 @@
                             ammoList.innerHTML = '<p>Nenhuma munição compatível.</p>';
                             ammoInput.value = '';
                         } else {
+                                if (!magazineExists)
+                                    scrollToElementCenter(`${weaponType}-ammo-list`);
 //                             const bodyModalAviso = document.getElementById("avisoMarcacaoBodyModal");                
 //                             const modalModalAviso = bootstrap.Modal.getOrCreateInstance(document.getElementById('avisoMarcacaoModal')); 
 //                             bodyModalAviso.innerHTML += `<div class="mb-3 text-center">
@@ -735,6 +757,7 @@
                                     document.querySelectorAll(`.ammo-card[data-weapon-type="${weaponType}"]`).forEach(c => c.classList.remove('selected'));
                                     card.classList.add('selected');
                                     ammoInput.value = ammo.id;
+                                    scrollToElementCenter(`div-${weaponType}-attachments`);
                                 });
 
                                 ammoList.appendChild(card);
@@ -1086,6 +1109,7 @@
 
 
     </script>
+
 </body>
 
 </html>
