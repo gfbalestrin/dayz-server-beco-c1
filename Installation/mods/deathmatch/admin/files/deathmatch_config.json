@@ -45,7 +45,7 @@
     },
     {
         "RegionId": 2,
-        "Active": true,
+        "Active": false,
         "Region": "Ilha de Skalisty",
         "CustomMessage": "NÃO SAIA DA ILHA OU VOCÊ LEVARÁ PENALIDADES!",
         "AreaMin": "12896 0 2499",
@@ -136,7 +136,7 @@
     },
     {
         "RegionId": 4,
-        "Active": false,
+        "Active": true,
         "Region": "Airfiled full",
         "CustomMessage": "NÃO ULTRAPASSE A ÁREA DEMARCADA DO AIRFILED OU VOCÊ LEVARÁ PENALIDADES!",
         "SpawnZones": [

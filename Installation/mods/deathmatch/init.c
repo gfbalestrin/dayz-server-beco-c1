@@ -61,10 +61,10 @@ void main()
 	}
 }
 
-
 class CustomMission: MissionServer
 {
 	
+	ref set<string> ActivePlayers;
 	ref array<string> FixedMessages;
 	float m_AdminCheckCooldown10 = 10.0;
 	float m_AdminCheckTimer10 = 0.0;
@@ -171,11 +171,17 @@ class CustomMission: MissionServer
 			WriteToLog("CustomMission(): Erro ao carregar SafeZoneData", LogFile.INIT, false, LogType.ERROR);
 		}
 	}
+
+	override void OnMissionStart()
+    {
+        super.OnMissionStart();
+        ActivePlayers = new set<string>();
+    }
 	
 	override void OnEvent(EventType eventTypeId, Param params)
 	{
 		super.OnEvent(eventTypeId, params);
-
+		
 		if (eventTypeId == ChatMessageEventTypeID)
 		{
 			ChatMessageEventParams chatParams = ChatMessageEventParams.Cast(params);
@@ -244,6 +250,7 @@ class CustomMission: MissionServer
 
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
+			ref set<string> currentPlayers = new set<string>();
 			if (players.Count() > 0)
 				WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
 
@@ -253,6 +260,15 @@ class CustomMission: MissionServer
 				if (player && player.GetIdentity())
 				{
 					//WriteToLog("OnUpdate(): Validando player: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
+					string playerId = player.GetIdentity().GetId();
+					currentPlayers.Insert(playerId);
+					// Novo jogador
+					if (ActivePlayers.Find(playerId) == -1)
+					{
+						ActivePlayers.Insert(playerId);
+						WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
+						AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
+					}
 
 					if (wallZones)
 						CheckPlayerAreaPolygonal(player, wallZones);
@@ -300,6 +316,18 @@ class CustomMission: MissionServer
 					}
 				}
 			}
+
+			// Detecta quem saiu
+			for (int i = ActivePlayers.Count() - 1; i >= 0; i--)
+			{
+				string id = ActivePlayers.Get(i);
+				if (currentPlayers.Find(id) == -1)
+				{
+					ActivePlayers.Remove(i);	
+					WriteToLog("Jogador deslogou " + id, LogFile.INIT, false, LogType.INFO);
+					AppendExternalAction("{\"action\":\"player_disconnected\",\"player_id\":\"" + id + "\"}");				
+				}
+			}
 		}
 
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
@@ -331,6 +359,22 @@ class CustomMission: MissionServer
 
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
+		string playerId   = identity.GetId();
+		string playerName = identity.GetName();		
+		string steamId = identity.GetPlainId();
+
+		// Verifica se esse jogador já foi registrado na sessão
+        if (!ActivePlayers) {
+            ActivePlayers = new set<string>(); 
+        }
+        if (ActivePlayers.Find(playerId) == -1) {
+            ActivePlayers.Insert(playerId);
+			WriteToLog("Atualizando jogador: " + playerId, LogFile.INIT, false, LogType.DEBUG);
+			AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");
+			WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
+			AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
+        }
+
 		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);
 		vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
 		WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
@@ -377,9 +421,15 @@ class CustomMission: MissionServer
 			m_player.SetAllowDamage(true);
 		}
 
+		
+
 		return m_player;
 	}
+
+
 };
+
+
 
 Mission CreateCustomMission(string path)
 {

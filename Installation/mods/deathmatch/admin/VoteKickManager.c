@@ -28,7 +28,7 @@ class VoteKickManager
 		bool found = false;
 		foreach (Man man : players) {
 			PlayerBase player = PlayerBase.Cast(man);
-			if (player && player.GetIdentity() && player.GetIdentity().GetPlainId() == targetId) {
+			if (player && player.GetIdentity() && player.GetIdentity().GetId() == targetId) {
 				found = true;
 				break;
 			}
@@ -89,7 +89,7 @@ class VoteKickManager
 			PlayerBase player = PlayerBase.Cast(man);
 			if (!player || !player.GetIdentity()) continue;
 
-			string id = player.GetIdentity().GetPlainId();
+			string id = player.GetIdentity().GetId();
 			if (id != targetPlayerId) totalVoters++;
 		}
 
@@ -123,7 +123,7 @@ class VoteKickManager
 			PlayerBase player = PlayerBase.Cast(man);
 			if (!player || !player.GetIdentity()) continue;
 
-			string id = player.GetIdentity().GetPlainId();
+			string id = player.GetIdentity().GetId();
 			if (id != targetPlayerId) totalVoters++;
 		}
 
@@ -163,7 +163,7 @@ class VoteKickManager
             PlayerBase player = PlayerBase.Cast(man);
             if (!player || !player.GetIdentity()) continue;
 
-            string playerId = player.GetIdentity().GetPlainId();
+            string playerId = player.GetIdentity().GetId();
             string playerName = player.GetIdentity().GetName();
 
             if (playerId == solicitanteId) continue; // Oculta o próprio jogador da lista

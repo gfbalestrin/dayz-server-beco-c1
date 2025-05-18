@@ -158,7 +158,7 @@ class VoteMapManager
 				{
 					BroadcastMessage("Votação unânime! Reiniciando com o mapa: " + mapName, MessageColor.IMPORTANT);
 					SetActiveRegionById(winner);
-					AppendExternalAction("{\"action\": \"restart_server\", \"minutes\": 1, \"message\": \"Servidor será reiniciado em 1 minutos\"}");
+					AppendExternalAction("{\"action\": \"restart_server\", \"minutes\": 1, \"message\": \"Servidor será reiniciado em 1 minuto\"}");
 				}
 				else
 				{
