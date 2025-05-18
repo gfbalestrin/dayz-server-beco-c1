@@ -150,8 +150,6 @@ tail -F "$COMMAND_FILE" | while read -r line; do
 			if [[ -z "$PlayerExists" ]]; then
 				INSERT_CUSTOM_LOG "Player não consta no banco. O player será inserido no banco de dados." "INFO" "$ScriptName"
 				INSERT_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
-                Content="Jogador **$PlayerName** ([$PlayerSteamName](<https://steamcommunity.com/profiles/$PlayerSteamId>)) conectou"
-				SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
 				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" 		
 				continue
 			fi

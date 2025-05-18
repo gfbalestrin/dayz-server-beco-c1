@@ -415,8 +415,8 @@ class CustomMission: MissionServer
             ActivePlayers.Insert(playerId);
 			WriteToLog("Atualizando jogador: " + playerId, LogFile.INIT, false, LogType.DEBUG);
 			AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");
-			WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
-			AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
+			// WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
+			// AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
         }
 
 		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);

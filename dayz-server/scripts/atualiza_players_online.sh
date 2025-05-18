@@ -39,7 +39,7 @@ function EnviaLogsDiscord() {
     if [[ -z "$PlayerExists" ]]; then
         echo "Ignorando pois player não consta no banco"
         INSERT_CUSTOM_LOG "Ignorando pois player não consta no banco" "INFO" "$ScriptName"
-        continue
+        return 1
     fi
     PlayerName=$(echo "$PlayerExists" | cut -d'|' -f1 | tr -d '|' | sed 's/[^a-zA-Z0-9_ -]//g' | xargs)
     SteamID=$(echo "$PlayerExists" | cut -d'|' -f2)
@@ -48,7 +48,7 @@ function EnviaLogsDiscord() {
     if [[ -f "$DayzServerFolder/$DayzAdminIdsFile" ]] && grep -q "$PLAYER_ID" "$DayzServerFolder/$DayzAdminIdsFile"; then
         echo "Ignorando conta do administrador e matando player para renascer com loot admin..."
         INSERT_CUSTOM_LOG "Ignorando conta do administrador e matando player para renascer com loot admin..." "INFO" "$ScriptName"
-        continue
+        return 1
     fi
 
     if [[ "$EVENT" == "CONNECT" ]]; then
