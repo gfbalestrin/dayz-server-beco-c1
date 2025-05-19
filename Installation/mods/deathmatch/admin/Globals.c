@@ -39,3 +39,6 @@ ref VoteMapManager g_VoteMapManager;
 ref VoteKickManager g_VoteKickManager;
 
 bool serverWillRestartSoon = false;
+
+ref map<string, float> lastSeenPlayers = new map<string, float>();
+const float PLAYER_TIMEOUT = 15.0; // tempo em segundos para considerar desconexão

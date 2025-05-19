@@ -92,9 +92,15 @@ vector GetRandomSafeSpawnPosition(array<vector> spawnZones)
     }
 
     int index = Math.RandomInt(0, spawnZones.Count());
-    WriteToLog("Posição segura selecionada: " + spawnZones[index].ToString(), LogFile.INIT, false, LogType.DEBUG);
-    return spawnZones[index];
+    vector basePos = spawnZones[index];
+
+    float surfaceY = GetGame().SurfaceY(basePos[0], basePos[2]);
+    vector safePosition = Vector(basePos[0], surfaceY + 0.2, basePos[2]);
+
+    WriteToLog("Posição segura selecionada: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
+    return safePosition;
 }
+
 
 bool IsInsidePolygon(vector point, array<vector> polygon)
 {

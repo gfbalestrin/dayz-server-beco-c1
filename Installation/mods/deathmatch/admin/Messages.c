@@ -23,8 +23,8 @@ array<string> CheckMessages()
     }
 
     CloseFile(file);
-    if (count > 0)
-        WriteToLog("Mensagens lidas: " + count.ToString(), LogFile.INIT, false, LogType.DEBUG);
+    // if (count > 0)
+    //     WriteToLog("Mensagens lidas: " + count.ToString(), LogFile.INIT, false, LogType.DEBUG);
 
     // Limpa o conteúdo do arquivo após leitura
     FileHandle clearFile = OpenFile(path, FileMode.WRITE);

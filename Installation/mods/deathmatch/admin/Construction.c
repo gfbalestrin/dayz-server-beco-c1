@@ -184,6 +184,8 @@ void RemoveObjectsOutsidePolygon(array<vector> polygon)
     {
         if (!obj || obj.IsMan() || obj.IsInherited(PlayerBase) || obj.IsTransport())
             continue;
+        if (obj.IsInherited(BuildingBase) || obj.IsInherited(House))
+	        continue;
 
         string className = obj.GetType();
         if (blacklist.Find(className) != -1)

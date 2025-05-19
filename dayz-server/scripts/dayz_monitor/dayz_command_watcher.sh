@@ -163,7 +163,7 @@ tail -F "$COMMAND_FILE" | while read -r line; do
 				INSERT_CUSTOM_LOG "Player alterou seus dados desde a última conexão." "INFO" "$ScriptName"
 				INSERT_PLAYER_NAME_HISTORY "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
 			fi
-            
+            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" 
             ;;
         player_connected)     
             PlayerId=$(echo "$line" | jq -r '.player_id')

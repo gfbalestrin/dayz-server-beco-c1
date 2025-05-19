@@ -241,6 +241,7 @@ string GetCurrentTimeInGame()
 	return horaFormatada + " (" + periodo + ")";
 }
 
+// Limpa em todo cenário
 void CleanUpDeadEntities()
 {
 	array<Object> objects = new array<Object>();
@@ -267,7 +268,7 @@ void CleanUpDeadEntities()
 		WriteToLog("CleanUpDeadEntities(): Removidos " + countRemoved.ToString() + " corpos mortos.", LogFile.INIT, false, LogType.DEBUG);
 	}
 }
-
+// Limpa ao redor do player
 void CleanUpDeadEntitiesNearPlayers()
 {
 	array<Man> players = new array<Man>();
@@ -290,7 +291,7 @@ void CleanUpDeadEntitiesNearPlayers()
 			PlayerBase player = PlayerBase.Cast(obj);
 			ZombieBase zombie = ZombieBase.Cast(obj);
 
-			if ((player && !player.IsAlive()) || (zombie && !zombie.IsAlive()))
+            if (player && (!player.IsAlive() && player.GetHealth("GlobalHealth", "Shock") <= 0))
 			{
 				GetGame().ObjectDelete(obj);
 				countRemoved++;

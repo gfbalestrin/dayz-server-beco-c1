@@ -14,7 +14,6 @@
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/DeathMatchConfig.c"
 #include "$CurrentDir:mpmissions/dayzOffline.chernarusplus/admin/Messages.c"
 
-
 void main()
 {
 	WriteToLog("main(): Inicializando servidor...", LogFile.INIT, false, LogType.INFO);
@@ -142,8 +141,7 @@ class CustomMission: MissionServer
 				// CreateLinePathFromPoints(points, "Land_Container_1Bo", 6.0, 3.5, 0.0);
 				CreateLinePathFromPoints(points, "StaticObj_Roadblock_Wood_Long_DE", 3.0, 0.5, 90.0);
 				WriteToLog("CustomMission(): Wallzones construídas com sucesso", LogFile.INIT, false, LogType.INFO);
-				// Remoção de objetos fora da área
-    			//RemoveObjectsOutsidePolygon(points);
+				
 			}
 
 			if (currentMap.Spawns)
@@ -179,7 +177,16 @@ class CustomMission: MissionServer
 
 		WriteToLog("OnMissionStart(): Servidor reiniciado com sucesso!", LogFile.INIT, false, LogType.INFO);
         ActivePlayers = new set<string>();
-		
+		// if (wallZones.Count() > 0) 
+		// {
+		// 	// Remoção de objetos fora da área
+		// 	array<vector> points = new array<vector>;
+		// 	for (int i = 0; i < wallZones.Count(); i++)
+		// 	{
+		// 		points.Insert(wallZones[i]);
+		// 	}
+    	// 	RemoveObjectsOutsidePolygon(points);
+		// }		
     }
 	
 	override void OnEvent(EventType eventTypeId, Param params)
@@ -259,9 +266,12 @@ class CustomMission: MissionServer
 		m_AdminCheckTimer10 += timeslice;
 		m_AdminCheckTimer60 += timeslice;
 
+		// Garante que o mapa de rastreamento foi inicializado
+		if (!lastSeenPlayers)
+			lastSeenPlayers = new map<string, float>();
+
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
-			//WriteToLog("OnUpdate(): Executando verificação a cada 10s", LogFile.INIT, false, LogType.DEBUG);
 			m_AdminCheckTimer10 = 0.0;
 
 			CheckCommands();
@@ -271,89 +281,107 @@ class CustomMission: MissionServer
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
 			ref set<string> currentPlayers = new set<string>();
-			// if (players.Count() > 0)
-			// 	WriteToLog("OnUpdate(): Jogadores online: " + players.Count(), LogFile.INIT, false, LogType.DEBUG);
 
 			foreach (Man man : players)
 			{
 				PlayerBase player = PlayerBase.Cast(man);
-				if (player && player.GetIdentity())
+				if (!player)
+					continue;
+
+				PlayerIdentity identity = player.GetIdentity();
+				if (!identity)
+					continue;
+
+				string playerId = identity.GetId();
+				currentPlayers.Insert(playerId);
+
+				// Atualiza ou insere no mapa de "vistos recentemente"
+				if (lastSeenPlayers.Contains(playerId))
 				{
-					//WriteToLog("OnUpdate(): Validando player: " + player.GetIdentity().GetName(), LogFile.INIT, false, LogType.DEBUG);
-					string playerId = player.GetIdentity().GetId();
-					currentPlayers.Insert(playerId);
-					// Novo jogador
-					if (ActivePlayers.Find(playerId) == -1)
+					lastSeenPlayers.Set(playerId, GetGame().GetTime());
+				}
+				else
+				{
+					lastSeenPlayers.Insert(playerId, GetGame().GetTime());
+					WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
+					AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
+				}
+
+				// Verifica zona de barreira
+				if (wallZones)
+					CheckPlayerAreaPolygonal(player, wallZones);
+
+				// Mensagens públicas
+				if (msgs)
+				{
+					foreach (string msg : msgs)
 					{
-						ActivePlayers.Insert(playerId);
-						WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
-						AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
+						if (msg != "")
+							player.MessageImportant(msg);
 					}
+				}
 
-					if (wallZones)
-						CheckPlayerAreaPolygonal(player, wallZones);
-
-					if (msgs)
+				// Mensagens privadas
+				if (privMsgs)
+				{
+					foreach (string privMsg : privMsgs)
 					{
-						foreach (string msg : msgs)
+						if (privMsg == "")
+							continue;
+
+						TStringArray privMsgArr = new TStringArray;
+						privMsg.Split(";", privMsgArr);
+						if (privMsgArr.Count() != 2)
 						{
-							if (msg != "")
-								player.MessageImportant(msg);
+							WriteToLog("Mensagem privada fora do padrão: " + privMsg, LogFile.INIT, false, LogType.ERROR);
+							continue;
 						}
-					}
-					if (privMsgs)
-					{						
-						foreach (string privMsg : privMsgs)
+
+						if (privMsgArr[0] != playerId)
+							continue;
+
+						string messageText = privMsgArr[1];
+						bool isError = messageText.Contains("[ERROR]");
+
+						if (isError)
 						{
-							if (privMsg == "")
-								continue;
-							
-							TStringArray privMsgArr = new TStringArray;
-							privMsg.Split(";", privMsgArr);
-							if (privMsgArr.Count() != 2)
-							{
-								WriteToLog("Mensagem privada fora do padrão: " + privMsg, LogFile.INIT, false, LogType.ERROR);
-								continue;
-							}
-
-							if (privMsgArr[0] != player.GetIdentity().GetId())
-								continue;
-							
-							string messageText = privMsgArr[1];
-							bool isError = messageText.Contains("[ERROR]");
-
-							if (isError)
-							{
-								messageText.Replace("[ERROR]", "");
-								SendPrivateMessage(player.GetIdentity().GetId(), messageText, MessageColor.IMPORTANT);
-							}
-							else
-							{
-								SendPrivateMessage(player.GetIdentity().GetId(), messageText, MessageColor.FRIENDLY);
-							}
-								
+							messageText.Replace("[ERROR]", "");
+							SendPrivateMessage(playerId, messageText, MessageColor.IMPORTANT);
+						}
+						else
+						{
+							SendPrivateMessage(playerId, messageText, MessageColor.FRIENDLY);
 						}
 					}
 				}
 			}
 
-			// Detecta quem saiu
-			for (int i = ActivePlayers.Count() - 1; i >= 0; i--)
+			// Verifica quem desconectou
+			array<string> disconnected = new array<string>();
+			foreach (string pid, float timestamp : lastSeenPlayers)
 			{
-				string id = ActivePlayers.Get(i);
-				if (currentPlayers.Find(id) == -1)
+				if (currentPlayers.Find(pid) == -1)
 				{
-					ActivePlayers.Remove(i);	
-					WriteToLog("Jogador deslogou " + id, LogFile.INIT, false, LogType.INFO);
-					AppendExternalAction("{\"action\":\"player_disconnected\",\"player_id\":\"" + id + "\"}");				
+					float elapsed = GetGame().GetTime() - timestamp;
+					if (elapsed > PLAYER_TIMEOUT * 1000)
+					{
+						disconnected.Insert(pid);
+					}
 				}
+			}
+
+			foreach (string disconnectedId : disconnected)
+			{
+				lastSeenPlayers.Remove(disconnectedId);
+				WriteToLog("Jogador deslogou " + disconnectedId, LogFile.INIT, false, LogType.INFO);
+				AppendExternalAction("{\"action\":\"player_disconnected\",\"player_id\":\"" + disconnectedId + "\"}");
 			}
 		}
 
 		if (m_AdminCheckTimer60 >= m_AdminCheckCooldown60)
-		{			
+		{
 			WriteToLog("OnUpdate(): Horário atual do servidor: " + GetCurrentTimeInGame(), LogFile.INIT, false, LogType.DEBUG);
-			
+
 			AppendMessage(customMessage);
 			foreach (string msgFixed : FixedMessages)
 			{
@@ -361,10 +389,11 @@ class CustomMission: MissionServer
 					AppendMessage(msgFixed);
 			}
 
-			//CleanUpDeadEntitiesNearPlayers();
+			CleanUpDeadEntitiesNearPlayers();
 			m_AdminCheckTimer60 = 0.0;
 		}
 	}
+
 
 	void SetRandomHealth(EntityAI itemEnt)
 	{
@@ -380,68 +409,66 @@ class CustomMission: MissionServer
 	{
 		string playerId   = identity.GetId();
 		string playerName = identity.GetName();		
-		string steamId = identity.GetPlainId();
+		string steamId    = identity.GetPlainId();
 
-		// Verifica se esse jogador já foi registrado na sessão
-        if (!ActivePlayers) {
-            ActivePlayers = new set<string>(); 
-        }
-        if (ActivePlayers.Find(playerId) == -1) {
-            ActivePlayers.Insert(playerId);
-			WriteToLog("Atualizando jogador: " + playerId, LogFile.INIT, false, LogType.DEBUG);
-			AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");
-			// WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
-			// AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
-        }
+		WriteToLog("CreateCharacter(): Criando personagem para " + playerName, LogFile.INIT, false, LogType.DEBUG);
 
-		WriteToLog("CreateCharacter(): Criando personagem para " + identity.GetName(), LogFile.INIT, false, LogType.DEBUG);
+		// 🔥 Verifica se já existe um jogador ativo e remove para evitar conflito
+		PlayerBase existingPlayer = PlayerBase.Cast(GetGame().GetPlayer());
+		if (existingPlayer && existingPlayer.IsAlive()) {
+			WriteToLog("CreateCharacter(): Player anterior detectado. Deletando entidade antiga para evitar conflitos.", LogFile.INIT, false, LogType.ERROR);
+			GetGame().ObjectDelete(existingPlayer);
+		}
+
+		// Gera posição segura de respawn
 		vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
 		WriteToLog("CreateCharacter(): Posicionando jogador em: " + safePosition.ToString(), LogFile.INIT, false, LogType.DEBUG);
 
+		// Cria nova entidade do jogador
 		Entity playerEnt = GetGame().CreatePlayer(identity, characterName, safePosition, 0, "NONE");
-		if (!playerEnt)
-		{
+		if (!playerEnt) {
 			WriteToLog("CreateCharacter(): Erro ao criar player!", LogFile.INIT, false, LogType.ERROR);
 			return null;
 		}
 
-		Class.CastTo(m_player, playerEnt);
-		if (!m_player)
-		{
+		if (!Class.CastTo(m_player, playerEnt)) {
 			WriteToLog("CreateCharacter(): Erro ao fazer cast para PlayerBase", LogFile.INIT, false, LogType.ERROR);
 			return null;
 		}
 
+		// Seleciona o novo player para a sessão
 		GetGame().SelectPlayer(identity, m_player);
-		if (CheckIfIsAdmin(identity.GetId()))
-		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " (" + identity.GetId() + ")" + " é admin.", LogFile.INIT, false, LogType.DEBUG);
+
+		// Admin
+		if (CheckIfIsAdmin(playerId)) {
+			WriteToLog("CreateCharacter(): " + playerName + " é admin.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
-			GiveAdminLoadout(m_player, identity.GetId());
+			GiveAdminLoadout(m_player, playerId);
 		}
-		else
-		{
-			WriteToLog("CreateCharacter(): " + identity.GetName() + " (" + identity.GetId() + ")" + " é jogador comum.", LogFile.INIT, false, LogType.DEBUG);
+
+		// Jogador comum
+		else {
+			WriteToLog("CreateCharacter(): " + playerName + " é jogador comum.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
 
-			if (!GiveCustomLoadout(m_player, identity.GetId()))
-			{
+			if (!GiveCustomLoadout(m_player, playerId)) {
 				WriteToLog("CreateCharacter(): Loadout customizado não encontrado. Aplicando padrão.", LogFile.INIT, false, LogType.DEBUG);
-				GiveDefaultLoadout(m_player, identity.GetId());
+				GiveDefaultLoadout(m_player, playerId);
 			}
 
+			// Atributos base
 			m_player.SetHealth("", "", 100);
 			m_player.SetHealth("GlobalHealth", "Blood", 5000);
 			m_player.SetHealth("GlobalHealth", "Shock", 0);
 			m_player.GetStatEnergy().Set(4000);
 			m_player.GetStatWater().Set(4000);
-			
-			//m_player.SetPosition(safePosition);
+
 			m_player.SetAllowDamage(true);
 		}
 
 		return m_player;
 	}
+
 
 	override void OnMissionFinish()
     {
