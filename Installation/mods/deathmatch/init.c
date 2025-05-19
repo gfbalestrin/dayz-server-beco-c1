@@ -59,6 +59,8 @@ void main()
 		GetGame().GetWorld().SetDate(year, month, day, hour, minute);
 		WriteToLog("main(): Data mantida, horário ajustado para 06:00.", LogFile.INIT, false, LogType.INFO);
 	}
+
+	SetCleanWeather();
 }
 
 class CustomMission: MissionServer
@@ -177,16 +179,6 @@ class CustomMission: MissionServer
 
 		WriteToLog("OnMissionStart(): Servidor reiniciado com sucesso!", LogFile.INIT, false, LogType.INFO);
         ActivePlayers = new set<string>();
-		// if (wallZones.Count() > 0) 
-		// {
-		// 	// Remoção de objetos fora da área
-		// 	array<vector> points = new array<vector>;
-		// 	for (int i = 0; i < wallZones.Count(); i++)
-		// 	{
-		// 		points.Insert(wallZones[i]);
-		// 	}
-    	// 	RemoveObjectsOutsidePolygon(points);
-		// }		
     }
 	
 	override void OnEvent(EventType eventTypeId, Param params)

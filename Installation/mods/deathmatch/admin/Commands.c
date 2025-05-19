@@ -340,6 +340,159 @@ bool ExecuteCommand(TStringArray tokens)
             AppendExternalAction("{\"action\":\"active_loadout\",\"player_id\":\"" + playerID + "\",\"loadout_name\":\"" + loadoutName + "\"}");
 
             break;
+        case "settime":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                WriteToLog("Comando bloqueado para não-admin: settime", LogFile.INIT, false, LogType.ERROR);
+                return false;
+            }
+
+            if (tokens.Count() < 4 || !IsInteger(tokens[2]) || !IsInteger(tokens[3]))
+            {
+                SendPrivateMessage(playerID, "Uso: !settime <hora> <minuto> (ex: !settime 6 30)", MessageColor.WARNING);
+                return false;
+            }
+
+            int newHour = tokens[2].ToInt();
+            int newMinute = tokens[3].ToInt();
+
+            if (newHour < 0 || newHour > 23 || newMinute < 0 || newMinute > 59)
+            {
+                SendPrivateMessage(playerID, "Hora ou minuto inválido. Use valores entre 0-23 e 0-59.", MessageColor.WARNING);
+                return false;
+            }
+
+            int year, month, day, hour, minute;
+            GetGame().GetWorld().GetDate(year, month, day, hour, minute);
+            GetGame().GetWorld().SetDate(year, month, day, newHour, newMinute);
+
+            string hourStr = "";
+            if (newHour < 10)
+                hourStr = "0";
+            string minuteStr = "";
+            if (newMinute < 10)
+                minuteStr = "0";
+            string horaFormatada = hourStr + newHour.ToString() + ":" + minuteStr + newMinute.ToString();
+
+            SendPrivateMessage(playerID, "Horário do mundo ajustado para " + horaFormatada, MessageColor.FRIENDLY);
+            WriteToLog("Admin " + playerID + " definiu horário do mundo para " + horaFormatada, LogFile.INIT, false, LogType.INFO);
+            break;
+        case "setweather":
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
+                return false;
+            }
+
+            if (tokens.Count() < 3)
+            {
+                SendPrivateMessage(playerID, "Uso: !setweather <clear | cloudy | rain | foggy | default>", MessageColor.WARNING);
+                return false;
+            }
+
+            string clima = tokens[2];
+            clima.ToLower();
+
+            Weather weather = g_Game.GetWeather();
+
+            if (clima == "clear")
+            {
+                // Remove todas as variações automáticas
+                weather.GetRain().SetForecastChangeLimits(0, 0);
+                weather.GetRain().SetForecastTimeLimits(0, 0);
+                weather.GetRain().Set(0);
+
+                weather.GetOvercast().SetForecastChangeLimits(0.01, 0.01);
+                weather.GetOvercast().SetForecastTimeLimits(0, 0);
+                weather.GetOvercast().Set(0.01);
+
+                weather.GetFog().SetForecastChangeLimits(0, 0);
+                weather.GetFog().SetForecastTimeLimits(0, 0);
+                weather.GetFog().Set(0);
+
+                weather.SetWindMaximumSpeed(0);
+            }
+            else if (clima == "cloudy")
+            {
+                weather.GetRain().SetForecastChangeLimits(0, 0);
+                weather.GetRain().SetForecastTimeLimits(0, 0);
+                weather.GetRain().Set(0);
+
+                weather.GetOvercast().SetForecastChangeLimits(0.5, 0.5);
+                weather.GetOvercast().SetForecastTimeLimits(0, 0);
+                weather.GetOvercast().Set(0.5);
+
+                weather.GetFog().SetForecastChangeLimits(0.1, 0.1);
+                weather.GetFog().SetForecastTimeLimits(0, 0);
+                weather.GetFog().Set(0.1);
+
+                weather.SetWindMaximumSpeed(5);
+            }
+            else if (clima == "rain")
+            {
+                weather.GetRain().SetForecastChangeLimits(1.0, 1.0);
+                weather.GetRain().SetForecastTimeLimits(0, 0);
+                weather.GetRain().Set(1.0);
+
+                weather.GetOvercast().SetForecastChangeLimits(1.0, 1.0);
+                weather.GetOvercast().SetForecastTimeLimits(0, 0);
+                weather.GetOvercast().Set(1.0);
+
+                weather.GetFog().SetForecastChangeLimits(0.3, 0.3);
+                weather.GetFog().SetForecastTimeLimits(0, 0);
+                weather.GetFog().Set(0.3);
+
+                weather.SetWindMaximumSpeed(20);
+            }
+            else if (clima == "foggy")
+            {
+                weather.GetRain().SetForecastChangeLimits(0, 0);
+                weather.GetRain().SetForecastTimeLimits(0, 0);
+                weather.GetRain().Set(0);
+
+                weather.GetOvercast().SetForecastChangeLimits(0.3, 0.3);
+                weather.GetOvercast().SetForecastTimeLimits(0, 0);
+                weather.GetOvercast().Set(0.3);
+
+                weather.GetFog().SetForecastChangeLimits(0.7, 0.7);
+                weather.GetFog().SetForecastTimeLimits(0, 0);
+                weather.GetFog().Set(0.7);
+
+                weather.SetWindMaximumSpeed(5);
+            }
+            else if (clima == "default")
+            {
+                weather.GetRain().SetForecastChangeLimits(0.0, 1.0);
+                weather.GetOvercast().SetForecastChangeLimits(0.0, 1.0);
+                weather.GetFog().SetForecastChangeLimits(0.0, 0.3);
+
+                weather.GetRain().SetForecastTimeLimits(1800, 3600);
+                weather.GetOvercast().SetForecastTimeLimits(1800, 3600);
+                weather.GetFog().SetForecastTimeLimits(1800, 3600);
+
+                weather.SetWindMaximumSpeed(25);
+            }
+            else
+            {
+                SendPrivateMessage(playerID, "Clima desconhecido. Use: clear, cloudy, rain, foggy, default", MessageColor.WARNING);
+                return false;
+            }
+
+            // Log e feedback
+            float rain = weather.GetRain().GetActual();
+            float overcast = weather.GetOvercast().GetActual();
+            float fog = weather.GetFog().GetActual();
+            float wind = weather.GetWindSpeed();
+
+            string info = "Clima atual -> Rain: " + rain.ToString() + " | Overcast: " + overcast.ToString() + " | Fog: " + fog.ToString() + " | Wind: " + wind.ToString();
+            SendPrivateMessage(playerID, "Clima ajustado para: " + clima, MessageColor.FRIENDLY);
+            SendPrivateMessage(playerID, info, MessageColor.FRIENDLY);
+            WriteToLog("Admin " + playerID + " ajustou o clima para " + clima + ". " + info, LogFile.INIT, false, LogType.INFO);
+            break;
+
+
+
     }
 
     return true;

@@ -304,3 +304,25 @@ void CleanUpDeadEntitiesNearPlayers()
 		WriteToLog("CleanUp: " + countRemoved.ToString() + " corpos removidos próximos a jogadores.", LogFile.INIT, false, LogType.DEBUG);
 	}
 }
+void SetCleanWeather()
+{
+   // Define clima limpo com melhor desempenho
+	Weather weather = g_Game.GetWeather();
+
+	weather.GetRain().SetForecastChangeLimits(0, 0);
+	weather.GetRain().SetForecastTimeLimits(0, 0);
+	weather.GetRain().Set(0);
+
+	weather.GetOvercast().SetForecastChangeLimits(0.01, 0.01);
+	weather.GetOvercast().SetForecastTimeLimits(0, 0);
+	weather.GetOvercast().Set(0.01);
+
+	weather.GetFog().SetForecastChangeLimits(0, 0);
+	weather.GetFog().SetForecastTimeLimits(0, 0);
+	weather.GetFog().Set(0);
+
+	weather.SetWindMaximumSpeed(0);
+
+	// Log
+	WriteToLog("OnMissionStart(): Clima limpo aplicado automaticamente (rain=0, fog=0, overcast=0.01)", LogFile.INIT, false, LogType.INFO);	
+}
