@@ -1,6 +1,11 @@
 bool GiveCustomLoadout(PlayerBase player, string playerId)
 {
     ref array<ref LoadoutPlayer> loadoutsPlayer = GetAllLoudoutsFromPlayer(playerId);
+    if (!loadoutsPlayer) {
+        WriteToLog("Nenhum loadout encontrado para o playerId: " + playerId, LogFile.INIT, false, LogType.INFO);
+        return false;
+    }
+
     LoadoutPlayer loadoutPlayer = null;
     foreach (ref LoadoutPlayer entry2 : loadoutsPlayer)
     {
@@ -44,16 +49,15 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
         foreach (Explosive explosive : data.explosives) {
             for (int e = 0; e < explosive.quantity; e++) {
                 EntityAI ex = player.GetInventory().CreateInInventory(explosive.name_type);
-                if (ex)
+                if (ex) {
                     WriteToLog("Criado explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
-                else
-                {
-                    if (TryCreateItemInInventoryOrOnGround(player, explosive.name_type))
-                        WriteToLog("Criado explosivo criado no chão por falta de espaço: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
-                    else
+                } else {
+                    if (TryCreateItemInInventoryOrOnGround(player, explosive.name_type)) {
+                        WriteToLog("Criado explosivo no chão por falta de espaço: " + explosive.name_type, LogFile.INIT, false, LogType.INFO);
+                    } else {
                         WriteToLog("Erro ao criar explosivo: " + explosive.name_type, LogFile.INIT, false, LogType.ERROR);
+                    }
                 }
-                    
             }
         }
     }
@@ -61,6 +65,7 @@ bool GiveCustomLoadout(PlayerBase player, string playerId)
     WriteToLog("Loadout aplicado com sucesso", LogFile.INIT, false, LogType.INFO);
     return true;
 }
+
 
 void HandleWeaponLoadout(Weapons weapons, PlayerBase player, string playerId)
 {

@@ -304,9 +304,9 @@ void CleanUpDeadEntitiesNearPlayers()
 		WriteToLog("CleanUp: " + countRemoved.ToString() + " corpos removidos próximos a jogadores.", LogFile.INIT, false, LogType.DEBUG);
 	}
 }
+// Define clima limpo com melhor desempenho
 void SetCleanWeather()
 {
-   // Define clima limpo com melhor desempenho
 	Weather weather = g_Game.GetWeather();
 
 	weather.GetRain().SetForecastChangeLimits(0, 0);

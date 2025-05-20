@@ -63,6 +63,7 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             echo "URL: $url"
 
             echo "$player_id;Nova senha gerada com sucesso. Acesse $url" >> "$DayzServerFolder/$DayzMessagesPrivateToSendoFile"
+            echo "$player_id;Login: $login" >> "$DayzServerFolder/$DayzMessagesPrivateToSendoFile"
             echo "$player_id;Nova senha: $senha" >> "$DayzServerFolder/$DayzMessagesPrivateToSendoFile"
 
             # LOG DISCORD
@@ -150,6 +151,7 @@ tail -F "$COMMAND_FILE" | while read -r line; do
 			if [[ -z "$PlayerExists" ]]; then
 				INSERT_CUSTOM_LOG "Player não consta no banco. O player será inserido no banco de dados." "INFO" "$ScriptName"
 				INSERT_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
+                sleep 2
 				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" 		
 				continue
 			fi

@@ -60,7 +60,7 @@ void main()
 		WriteToLog("main(): Data mantida, horário ajustado para 06:00.", LogFile.INIT, false, LogType.INFO);
 	}
 
-	SetCleanWeather();
+	//SetCleanWeather();
 }
 
 class CustomMission: MissionServer
@@ -285,6 +285,8 @@ class CustomMission: MissionServer
 					continue;
 
 				string playerId = identity.GetId();
+				string playerName = identity.GetName();		
+				string steamId = identity.GetPlainId();
 				currentPlayers.Insert(playerId);
 
 				// Atualiza ou insere no mapa de "vistos recentemente"
@@ -296,6 +298,7 @@ class CustomMission: MissionServer
 				{
 					lastSeenPlayers.Insert(playerId, GetGame().GetTime());
 					WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
+					AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");
 					AppendExternalAction("{\"action\":\"player_connected\",\"player_id\":\"" + playerId + "\"}");
 				}
 
@@ -465,8 +468,6 @@ class CustomMission: MissionServer
 	override void OnMissionFinish()
     {
         super.OnMissionFinish();
-
-		
     }
 
 };

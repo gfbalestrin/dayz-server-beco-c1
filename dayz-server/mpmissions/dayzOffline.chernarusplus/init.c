@@ -66,7 +66,7 @@ class CustomMission: MissionServer
 	}
 	void CheckExternalCommandsToExecute()
 	{
-		string path = ExternalCommandsFile;
+		string path = "$mission:admin_cmds.txt";
         FileHandle file = OpenFile(path, FileMode.READ);
         if (file == 0) return;
 
