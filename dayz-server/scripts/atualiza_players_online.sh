@@ -66,7 +66,7 @@ function EnviaLogsDiscord() {
 
 if [[ "$PLAYER_ID" == "RESET" ]]; then
     DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
-    CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+    CURRENT_INDEX=$(jq 'map(.Active) | index(1)' "$DeathMatchCoords")
     NEXT_INDEX=$((CURRENT_INDEX + 1))
     TOTAL=$(jq 'length' "$DeathMatchCoords")
     if [ "$NEXT_INDEX" -ge "$TOTAL" ]; then
@@ -195,7 +195,7 @@ NUM_REGISTROS=$(sqlite3 "$PLAYERS_BECO_C1_DB" "SELECT COUNT(*) FROM players_onli
 
 if [[ "$DayzDeathmatch" -eq "1" ]]; then
     DeathMatchCoords="$DayzServerFolder/$DayzDeathmatchCoords"
-    CURRENT_INDEX=$(jq 'map(.Active) | index(true)' "$DeathMatchCoords")
+    CURRENT_INDEX=$(jq 'map(.Active) | index(1)' "$DeathMatchCoords")
     PREV_INDEX=$((CURRENT_INDEX - 1))
     if [ "$PREV_INDEX" -lt 0 ]; then
         PREV_INDEX=$(jq 'length - 1' "$DeathMatchCoords")
