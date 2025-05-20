@@ -90,7 +90,7 @@ if [[ "$RESET_PASSWORD" == "1" ]]; then
 
     # Gerar login inicial a partir do SteamName
     base_login=$(echo "$SteamName" | tr '[:upper:]' '[:lower:]' | tr -dc 'a-z0-9' | cut -c1-16)
-    if [[ -z "$base_login" ]]; then base_login="user_$(date +%s)"; fi
+    if [[ -z "$base_login" ]]; then base_login="survivor"; fi
     login="$base_login"
 
     # Verificar se login já existe e gerar novo com sufixo incremental
