@@ -63,7 +63,7 @@ PlayerBase GetPlayerById(string id)
     }
 
     // Se não encontrar, registra no log
-    WriteToLog("GetPlayerByID(): Jogador não encontrado", LogFile.INIT, false, LogType.ERROR);
+    WriteToLog("GetPlayerByID(): Jogador de id " + id + " não encontrado", LogFile.INIT, false, LogType.ERROR);
     return null;
 }
 
@@ -325,4 +325,34 @@ void SetCleanWeather()
 
 	// Log
 	WriteToLog("OnMissionStart(): Clima limpo aplicado automaticamente (rain=0, fog=0, overcast=0.01)", LogFile.INIT, false, LogType.INFO);	
+}
+
+void LogAllVehicles()
+{
+    Print("[DEBUG] Iniciando varredura de veículos no mundo...");
+
+    vector center = "7500 0 7500"; // Centro aproximado do mapa Chernarus
+    float radius = 20000; // Varre praticamente o mapa todo
+
+    array<Object> nearbyObjects = new array<Object>();
+    GetGame().GetObjectsAtPosition(center, radius, nearbyObjects, null);
+
+    int count = 0;
+
+    foreach (Object obj : nearbyObjects)
+    {
+        if (!obj)
+            continue;
+
+        CarScript vehicle = CarScript.Cast(obj);
+        if (vehicle)
+        {
+            vector pos = vehicle.GetPosition();
+            string name = vehicle.GetDisplayName();
+            Print("[VEÍCULO] " + name + " em " + pos.ToString());
+            count++;
+        }
+    }
+
+    Print("[DEBUG] Total de veículos detectados: " + count.ToString());
 }

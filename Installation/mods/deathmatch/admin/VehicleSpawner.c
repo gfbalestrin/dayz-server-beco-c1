@@ -21,14 +21,16 @@ bool SpawnVehicleWithParts(vector pos, string vehicleType)
         return false;
 
     vehicle.SetOrientation("0 0 0");
-    //vehicle.SetDirection(player.GetDirection());
     vehicle.Fill(CarFluid.FUEL, 1000.0);
     vehicle.Fill(CarFluid.OIL, 1000.0);
     vehicle.Fill(CarFluid.BRAKE, 1000.0);
     vehicle.Fill(CarFluid.COOLANT, 1000.0);
     vehicle.SetHealth("", "", 1000);
-    vehicle.SetLifetime(3888000);
+    vehicle.SetLifetime(3888000); // 45 dias
     vehicle.SetAffectPathgraph(true, false);
+    vehicle.SetAllowDamage(true);       // ✅ Garante que CE considere válido
+    vehicle.SetTakeable(true);          // ✅ Extra para segurança
+    //vehicle.SetEnablePersistence(true); // ✅ Força o sistema de persistência INDEFINIDA
 
     string battery, plug, wheel;
     ref array<string> parts = new array<string>;
@@ -86,7 +88,7 @@ bool SpawnVehicleWithParts(vector pos, string vehicleType)
                 "HeadlightH7"
             };
             break;
-        
+
         case "Offroad_02":
             battery = "CarBattery";
             plug = "GlowPlug";
@@ -138,7 +140,10 @@ bool SpawnVehicleWithParts(vector pos, string vehicleType)
     foreach (string part : parts)
         vehicle.GetInventory().CreateAttachment(part);
 
-    // Salvar veículo na persistência
+    // 🔧 Forçar sincronização com persistência
+    vehicle.SetSynchDirty();
+
+    // Salvar veículo na persistência de novo após um momento
     GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SaveVehicle, 1000, false, vehicle);
 
     return true;

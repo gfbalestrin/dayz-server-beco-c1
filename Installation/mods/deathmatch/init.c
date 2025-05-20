@@ -211,7 +211,6 @@ class CustomMission: MissionServer
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 60 minutos"))
 			{
 				AppendExternalAction("{\"action\":\"event_start_finished\",\"current_map\":\"" + currentMap.Region + "\",\"current_time\":\"" + GetCurrentTimeInGame() + "\"}");
-				AppendExternalAction("{\"action\":\"send_log_discord\",\"message\":\"O servidor será reiniciado daqui 1 hora\"}");
 			}
 			if (channel == 1 && playerName == "" && text.Contains("O servidor vai ser reiniciado em 1 minutos"))
 			{
@@ -360,7 +359,7 @@ class CustomMission: MissionServer
 					float elapsed = GetGame().GetTime() - timestamp;
 					if (elapsed > PLAYER_TIMEOUT * 1000)
 					{
-						disconnected.Insert(pid);
+						disconnected.Insert(pid);						
 					}
 				}
 			}
@@ -369,7 +368,7 @@ class CustomMission: MissionServer
 			{
 				lastSeenPlayers.Remove(disconnectedId);
 				WriteToLog("Jogador deslogou " + disconnectedId, LogFile.INIT, false, LogType.INFO);
-				AppendExternalAction("{\"action\":\"player_disconnected\",\"player_id\":\"" + disconnectedId + "\"}");
+				AppendExternalAction("{\"action\":\"player_disconnected\",\"player_id\":\"" + disconnectedId + "\"}");					
 			}
 		}
 
