@@ -120,14 +120,27 @@
 
                     <!-- Seleção de jogadores -->
                     <div class="form-group">
-                        <label for="playerSelect" class="label-text">Todos players<span
-                                id="txtTotalPlayers"></span>:</label>
+                        <label for="playerSelect" class="label-text">
+                            Todos players <span id="txtTotalPlayers"></span>:
+                        </label>
+
                         <select id="playerSelect" multiple class="form-control-lg" size="10"></select>
-                        <div>
+
+                        <div class="mt-2">
                             <button class="btn btn-sm btn-secondary" onclick="ExecucaoPorDataDeHoje()">Online hoje</button>
                             <button class="btn btn-sm btn-secondary" onclick="ExecucaoInicial()">Online agora (padrão)</button>
                         </div>
+
+                        <div class="mt-2">
+                            <label for="dataSelectGeral" class="label-text">Escolher data:</label>
+                            <input type="date" id="dataSelectGeral" class="form-control form-control-sm" />
+                            <div class="mt-1">
+                            <button class="btn btn-sm btn-primary" onclick="ExecucaoPorDataSelecionada()">Online na data</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="ExecucaoPorOntem()">Ontem</button>
+                            </div>
+                        </div>
                     </div>
+
 
                     <div class="form-group">
                         <label for="playerSelect" class="label-text">Players online<span
@@ -864,17 +877,83 @@
             await carregarDatas();
             mostrarToastInfo(`Exibindo última posição dos jogadores online ${txtTotalPlayersOnline.innerHTML }.`);
         }
+        // já existente
         async function ExecucaoPorDataDeHoje() {
-            const hoje = new Date();
-            const saoPauloDate = new Intl.DateTimeFormat('pt-BR', {
-                timeZone: 'America/Sao_Paulo',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).format(hoje);
-            const [day, month, year] = saoPauloDate.split('/');
-            ExecucaoPorData(`${year}-${month}-${day}`)
+        const hoje = new Date();
+        const saoPauloDate = new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(hoje);
+        const [day, month, year] = saoPauloDate.split('/');
+        ExecucaoPorData(`${year}-${month}-${day}`);
         }
+
+        // NOVO: ler a data do <input type="date">
+        function ExecucaoPorDataSelecionada() {
+        const el = document.getElementById('dataSelectGeral');
+        if (!el.value) {
+            alert('Selecione uma data.');
+            el.focus();
+            return;
+        }
+        // el.value já vem em YYYY-MM-DD
+        ExecucaoPorData(el.value);
+        }
+
+        // NOVO: botão de "Ontem" respeitando fuso America/Sao_Paulo
+        function ExecucaoPorOntem() {
+        const agora = new Date();
+        // Pega "hoje" no fuso de SP e subtrai 1 dia
+        const hojeSP = toDateOnlyInTZ(agora, 'America/Sao_Paulo');
+        const ontemSP = addDays(hojeSP, -1);
+        const y = ontemSP.getFullYear();
+        const m = String(ontemSP.getMonth() + 1).padStart(2, '0');
+        const d = String(ontemSP.getDate()).padStart(2, '0');
+        ExecucaoPorData(`${y}-${m}-${d}`);
+        }
+
+        // Helper: dado um Date, retorna outro Date "00:00" daquela data no fuso alvo
+        function toDateOnlyInTZ(date, timeZone) {
+        // formata componentes no fuso desejado
+        const fmt = new Intl.DateTimeFormat('en-CA', {
+            timeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const [y, m, d] = fmt.format(date).split('-').map(Number);
+        // cria um Date local com esses componentes (sem hora)
+        return new Date(y, m - 1, d);
+        }
+
+        function addDays(dateOnly, days) {
+        const d = new Date(dateOnly);
+        d.setDate(d.getDate() + days);
+        return d;
+        }
+
+        // Opcional: ajustar max do input para "hoje" em São Paulo e preencher default
+        document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('dataSelectGeral');
+        if (!el) return;
+
+        const hojeSP = toDateOnlyInTZ(new Date(), 'America/Sao_Paulo');
+        const y = hojeSP.getFullYear();
+        const m = String(hojeSP.getMonth() + 1).padStart(2, '0');
+        const d = String(hojeSP.getDate()).padStart(2, '0');
+        const iso = `${y}-${m}-${d}`;
+
+        el.max = iso;      // evita escolher datas futuras
+        el.value = iso;    // pré-seleciona hoje
+        });
+
+        // BÔNUS: permitir Enter no input disparar a busca
+        document.getElementById('dataSelectGeral')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') ExecucaoPorDataSelecionada();
+        });
+
         async function ExecucaoPorData(filtrarData = "") {
             ctx.drawImage(imagem, offsetX, offsetY);
             await carregarJogadores();
