@@ -234,11 +234,11 @@ class VoteMapManager
 
     void CheckIfVotingAndStart(string playerID, int regionId)
     {
-        if (serverWillRestartSoon)
-        {
-            SendPrivateMessage(playerID, "Não é possível abrir votação pois o servidor vai reiniciar em breve", MessageColor.WARNING);
-            return;
-        }
+        // if (serverWillRestartSoon)
+        // {
+        //     SendPrivateMessage(playerID, "Não é possível abrir votação pois o servidor vai reiniciar em breve", MessageColor.WARNING);
+        //     return;
+        // }
         if (!isVotingMapActive)
         {
             IniciaVotacaoProximoMapa();
