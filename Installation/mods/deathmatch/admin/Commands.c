@@ -65,14 +65,36 @@ bool ExecuteCommand(TStringArray tokens)
     switch (command)
     {
         case "help":
-            SendPrivateMessage(playerID, "!loadouts -> Lista loadouts configurados", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!loadout meuloadout1' -> Ativa meuloadout1", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!loadout reset -> Gera nova senha aleatória para acessar o sistema de loadout: " + UrlAppPython, MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!maps -> Lista mapas disponíveis", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!votemap 1 -> Vota no mapa 1", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!players -> Lista jogadores online", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!votekick 12345679 -> Vota para kickar o jogador de ID 12345679", MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, "!kill -> Cometer suicídio", MessageColor.FRIENDLY);
+            if (!isAdmin)
+            {
+                SendPrivateMessage(playerID, "!loadouts -> Lista loadouts configurados", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!loadout meuloadout1' -> Ativa meuloadout1", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!loadout reset -> Gera nova senha aleatória para acessar o sistema de loadout: " + UrlAppPython, MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!maps -> Lista mapas disponíveis", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!votemap 1 -> Vota no mapa 1", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!players -> Lista jogadores online", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!votekick 12345679 -> Vota para kickar o jogador de ID 12345679", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!kill -> Cometer suicídio", MessageColor.FRIENDLY);
+            } else 
+            {
+                SendPrivateMessage(playerID, "!loadouts -> Lista loadouts configurados", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!loadout meuloadout1' -> Ativa meuloadout1", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!loadout reset -> Gera nova senha aleatória para acessar o sistema de loadout: " + UrlAppPython, MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!maps -> Lista mapas disponíveis", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!votemap 1 -> Vota no mapa 1", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!players -> Lista jogadores online", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!votekick 12345679 -> Vota para kickar o jogador de ID 12345679", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!kill -> Cometer suicídio", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!heal -> Se cura", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!godmode -> Ativa godmode", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!ungodmode -> Desativa godmode", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!giveitem nomeitem 2 -> Cria 2 itens", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!spawnvehicle Sedan_02 -> Cria veículo", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!construct Land_Container_1Bo 1.0 1 6.0 90.0-> Cria 1 objeto container na altura de 1.0 m, 6.0 m de tamanho e angulo de 90 graus", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!settime 6 30 -> Altera o horário para as 06:30", MessageColor.FRIENDLY);
+                SendPrivateMessage(playerID, "!setweather clear -> Altera o tempo para limpo. Opções: clear, cloudy, rain, foggy ou default", MessageColor.FRIENDLY);
+            }
+            
             break;
         case "teleport":
             if (!isAdmin)
