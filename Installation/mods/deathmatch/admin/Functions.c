@@ -448,6 +448,30 @@ void CleanUpDeadEntitiesNearPlayers()
                     }
                 }
             }
+
+            // infectados (suporta tanto DayZInfected quanto ZombieBase)
+            DayZInfected zcorpse = DayZInfected.Cast(obj);
+            if (zcorpse && !zcorpse.IsAlive())
+            {
+                int zid = zcorpse.GetID();
+                if (!marked.Contains(zid))
+                {
+                    marked.Insert(zid, true);
+                    toRemoveBodies.Insert(zcorpse);
+                }
+                continue;
+            }
+            ZombieBase zcorpse2 = ZombieBase.Cast(obj);
+            if (zcorpse2 && !zcorpse2.IsAlive())
+            {
+                int zid2 = zcorpse2.GetID();
+                if (!marked.Contains(zid2))
+                {
+                    marked.Insert(zid2, true);
+                    toRemoveBodies.Insert(zcorpse2);
+                }
+                continue;
+            }
         }
     }
 
