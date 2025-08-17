@@ -399,6 +399,22 @@ class CustomMission: MissionServer
 		}
 	}
 
+	void BoostStaminaOnce(PlayerBase player)
+	{
+		if (!player) return;
+		StaminaHandler sh = player.GetStaminaHandler();
+		if (sh) sh.SetStamina(sh.GetStaminaMax());
+	}
+
+	// Dispara 3 pulses espaçados (cobre janela de sync inicial)
+	void ScheduleSpawnStaminaBurst(PlayerBase player)
+	{
+		auto q = GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY);
+		q.CallLater(BoostStaminaOnce,  50, false, player);
+		q.CallLater(BoostStaminaOnce, 250, false, player);
+		q.CallLater(BoostStaminaOnce,1000, false, player);
+	}
+
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
 		string playerId   = identity.GetId();
@@ -438,6 +454,7 @@ class CustomMission: MissionServer
 			WriteToLog("CreateCharacter(): " + playerName + " é admin.", LogFile.INIT, false, LogType.DEBUG);
 			m_player.SetAllowDamage(false);
 			GiveAdminLoadout(m_player, playerId);
+			m_player.SetAllowDamage(false);
 		}
 
 		// Jogador comum
@@ -460,9 +477,16 @@ class CustomMission: MissionServer
 			m_player.SetAllowDamage(true);
 		}
 
+		ScheduleSpawnStaminaBurst(m_player);
+
 		return m_player;
 	}
 
+	override void OnClientRespawnEvent(PlayerIdentity identity, PlayerBase player)
+	{
+		super.OnClientRespawnEvent(identity, player);
+		ScheduleSpawnStaminaBurst(player);
+	}
 
 	override void OnMissionFinish()
     {
@@ -470,8 +494,6 @@ class CustomMission: MissionServer
     }
 
 };
-
-
 
 Mission CreateCustomMission(string path)
 {
