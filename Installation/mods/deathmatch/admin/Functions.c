@@ -268,42 +268,7 @@ void CleanUpDeadEntities()
 		WriteToLog("CleanUpDeadEntities(): Removidos " + countRemoved.ToString() + " corpos mortos.", LogFile.INIT, false, LogType.DEBUG);
 	}
 }
-// Limpa ao redor do player
-void CleanUpDeadEntitiesNearPlayers()
-{
-	array<Man> players = new array<Man>();
-	GetGame().GetPlayers(players);
 
-	int radius = 100; // ajustável
-	int countRemoved = 0;
-
-	foreach (Man man : players)
-	{
-		vector pos = man.GetPosition();
-
-		array<Object> nearby = new array<Object>();
-		GetGame().GetObjectsAtPosition(pos, radius, nearby, null);
-
-		foreach (Object obj : nearby)
-		{
-			if (!obj) continue;
-
-			PlayerBase player = PlayerBase.Cast(obj);
-			ZombieBase zombie = ZombieBase.Cast(obj);
-
-            if (player && (!player.IsAlive() && player.GetHealth("GlobalHealth", "Shock") <= 0))
-			{
-				GetGame().ObjectDelete(obj);
-				countRemoved++;
-			}
-		}
-	}
-
-	if (countRemoved > 0)
-	{
-		WriteToLog("CleanUp: " + countRemoved.ToString() + " corpos removidos próximos a jogadores.", LogFile.INIT, false, LogType.DEBUG);
-	}
-}
 // Define clima limpo com melhor desempenho
 void SetCleanWeather()
 {
@@ -355,4 +320,164 @@ void LogAllVehicles()
     }
 
     Print("[DEBUG] Total de veículos detectados: " + count.ToString());
+}
+
+// ======== CONFIG ========
+static const float CLEAN_RADIUS_M        = 100.0;   // alcance ao redor de cada player
+static const float PROTECT_NEAR_ALIVE_M  = 2.0;     // 0 = sem proteção
+static const int   WEAPON_TTL_MS         = 60000;   // 60s; 0 = apaga na hora
+// ========================
+
+// TTL para armas no chão
+static ref map<int, int> s_FirstSeenWeapon = new map<int, int>(); // <objectId, firstSeenMs>
+
+// Helper: arma solta no mundo (não em mãos/inventário/contêiner)
+bool IsWorldWeapon(Object obj)
+{
+    if (!obj) return false;
+    if (!obj.IsInherited(Weapon_Base)) return false;
+    EntityAI e = EntityAI.Cast(obj);
+    if (!e) return false;
+
+    if (e.GetHierarchyRootPlayer()) return false; // em mãos/inventário
+    if (e.GetHierarchyParent())     return false; // em contêiner/veículo/corpo
+
+    return true;
+}
+
+void CleanUpDeadEntitiesNearPlayers()
+{
+    DayZGame game = GetGame();
+    if (!game) return;
+    if (!game.IsServer()) return;
+    if (!s_FirstSeenWeapon)
+        s_FirstSeenWeapon = new map<int, int>();
+
+    array<Man> players = new array<Man>();
+    game.GetPlayers(players);
+    if (!players || players.Count() == 0) return;
+
+    // Pré-computa vivos (evita NPE no loop)
+    array<Man> alivePlayers = new array<Man>();
+    foreach (Man m : players)
+        if (m && m.IsAlive()) alivePlayers.Insert(m);
+
+    // Alvos a remover (deleta depois)
+    array<Object> toRemoveBodies  = new array<Object>();
+    array<Object> toRemoveWeapons = new array<Object>();
+
+    // Para deduplicar por id de rede
+    ref map<int, bool> marked = new map<int, bool>();
+
+    int nowMs = game.GetTime();
+    int weaponsSeen = 0;
+    int skippedNearAlive = 0;
+
+    foreach (Man man : players)
+    {
+        if (!man) continue;
+
+        vector center = man.GetPosition();
+        array<Object> nearby = new array<Object>();
+        game.GetObjectsAtPosition(center, CLEAN_RADIUS_M, nearby, null);
+        if (!nearby) continue;
+
+        foreach (Object obj : nearby)
+        {
+            if (!obj) continue;
+
+            // 1) CORPOS (apenas checa IsAlive)
+            PlayerBase corpse = PlayerBase.Cast(obj);
+            if (corpse && !corpse.IsAlive())
+            {
+                int cid = corpse.GetID();
+                if (!marked.Contains(cid))
+                {
+                    marked.Insert(cid, true);
+                    toRemoveBodies.Insert(corpse);
+                }
+                continue;
+            }
+
+            // 2) ARMAS NO CHÃO
+            if (IsWorldWeapon(obj))
+            {
+                weaponsSeen++;
+
+                // Proteção perto de vivo (opcional)
+                if (PROTECT_NEAR_ALIVE_M > 0 && alivePlayers.Count() > 0)
+                {
+                    bool nearAlive = false;
+                    vector wpos = obj.GetPosition();
+                    foreach (Man p : alivePlayers)
+                    {
+                        if (!p) continue;
+                        if (vector.DistanceSq(p.GetPosition(), wpos) <= (PROTECT_NEAR_ALIVE_M * PROTECT_NEAR_ALIVE_M))
+                        {
+                            nearAlive = true;
+                            break;
+                        }
+                    }
+                    if (nearAlive) { skippedNearAlive++; continue; }
+                }
+
+                int wid = obj.GetID();
+                if (WEAPON_TTL_MS <= 0)
+                {
+                    if (!marked.Contains(wid))
+                    {
+                        marked.Insert(wid, true);
+                        toRemoveWeapons.Insert(obj);
+                    }
+                }
+                else
+                {
+                    int firstSeen;
+                    if (!s_FirstSeenWeapon.Find(wid, firstSeen))
+                    {
+                        s_FirstSeenWeapon.Insert(wid, nowMs);
+                    }
+                    else if ((nowMs - firstSeen) >= WEAPON_TTL_MS)
+                    {
+                        if (!marked.Contains(wid))
+                        {
+                            marked.Insert(wid, true);
+                            toRemoveWeapons.Insert(obj);
+                        }
+                        s_FirstSeenWeapon.Remove(wid);
+                    }
+                }
+            }
+        }
+    }
+
+    // ===== Execução das deleções (fora dos loops) =====
+    int bodiesRemoved = 0;
+    int weaponsRemoved = 0;
+
+    foreach (Object b : toRemoveBodies)
+    {
+        if (b) { game.ObjectDelete(b); bodiesRemoved++; }
+    }
+    foreach (Object w : toRemoveWeapons)
+    {
+        if (w) { game.ObjectDelete(w); weaponsRemoved++; }
+    }
+
+    // Poda do mapa de TTL (por segurança)
+    if (s_FirstSeenWeapon && s_FirstSeenWeapon.Count() > 0)
+    {
+        array<int> stale = new array<int>();
+        foreach (int key, int t : s_FirstSeenWeapon)
+            if (nowMs - t > 300000) stale.Insert(key); // >5 min sem completar TTL
+        foreach (int k : stale) s_FirstSeenWeapon.Remove(k);
+    }
+
+    if (bodiesRemoved > 0 || weaponsRemoved > 0)
+    {
+        WriteToLog("CleanUpDeadEntities(): Corpos removidos " + bodiesRemoved.ToString(), LogFile.INIT, false, LogType.DEBUG);
+        WriteToLog("CleanUpDeadEntities(): Armas removidas " + weaponsRemoved.ToString(), LogFile.INIT, false, LogType.DEBUG);
+        WriteToLog("CleanUpDeadEntities(): Armas vistas " + weaponsSeen.ToString(), LogFile.INIT, false, LogType.DEBUG);
+        WriteToLog("CleanUpDeadEntities(): Ignorou " + skippedNearAlive.ToString(), LogFile.INIT, false, LogType.DEBUG);
+    }
 }
