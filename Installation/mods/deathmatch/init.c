@@ -60,7 +60,47 @@ void main()
 		WriteToLog("main(): Data mantida, horário ajustado para 06:00.", LogFile.INIT, false, LogType.INFO);
 	}
 
-	//SetCleanWeather();
+	// >>> Clima CLEAR no start
+    SetClearWeatherNow();
+
+    // (Opcional) Reaplica após alguns segundos, caso algum subsistema mude o clima muito cedo
+    GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SetClearWeatherNow, 4000, false);
+
+}
+
+void SetClearWeatherNow()
+{
+    Weather weather = GetGame().GetWeather();
+    if (!weather) return;
+
+    // Delega o clima ao script da missão
+    weather.MissionWeather(true);
+
+    // Destrava limites e tempos (sem máquina de previsão)
+    weather.GetOvercast().SetLimits(0.0, 1.0);
+    weather.GetOvercast().SetForecastChangeLimits(0, 0);
+    weather.GetOvercast().SetForecastTimeLimits(0, 0);
+
+    weather.GetRain().SetLimits(0.0, 1.0);
+    weather.GetRain().SetForecastChangeLimits(0, 0);
+    weather.GetRain().SetForecastTimeLimits(0, 0);
+    weather.SetRainThresholds(0.0, 1.0, 0); // chuva não fica presa a thresholds
+
+    weather.GetFog().SetLimits(0.0, 1.0);
+    weather.GetFog().SetForecastChangeLimits(0, 0);
+    weather.GetFog().SetForecastTimeLimits(0, 0);
+
+    // Aplica "clear" quase instantâneo
+    weather.GetOvercast().Set(0.01, 1, 0);
+    weather.GetRain().Set(0.0, 1, 0);
+    weather.GetFog().Set(0.0, 1, 0);
+
+    // Vento parado
+    weather.SetWindSpeed(0.0);
+    weather.SetWindMaximumSpeed(0.0);
+    weather.SetWindFunctionParams(0, 0, 0);
+
+    WriteToLog("SetClearWeatherNow(): aplicado CLEAR no init.", LogFile.INIT, false, LogType.INFO);
 }
 
 class CustomMission: MissionServer
@@ -513,10 +553,6 @@ class CustomMission: MissionServer
 
 		// 🔥 Verifica se já existe um jogador ativo e remove para evitar conflito
 		PlayerBase existingPlayer = PlayerBase.Cast(GetGame().GetPlayer());
-		// if (existingPlayer && existingPlayer.IsAlive()) {
-		// 	WriteToLog("CreateCharacter(): Player anterior detectado. Deletando entidade antiga para evitar conflitos.", LogFile.INIT, false, LogType.ERROR);
-		// 	GetGame().ObjectDelete(existingPlayer);
-		// }
 
 		// Gera posição segura de respawn
 		vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
@@ -554,17 +590,6 @@ class CustomMission: MissionServer
 				WriteToLog("CreateCharacter(): Loadout customizado não encontrado. Aplicando padrão.", LogFile.INIT, false, LogType.DEBUG);
 				GiveDefaultLoadout(m_player, playerId);
 			}
-
-			// (Opcional) dar loadout DEPOIS com leve atraso
-			//GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(GiveSpawnLoadoutSafe, 150, false, m_player, identity.GetId());
-			
-
-			// Atributos base
-			// m_player.SetHealth("", "", 100);
-			// m_player.SetHealth("GlobalHealth", "Blood", 5000);
-			// m_player.SetHealth("GlobalHealth", "Shock", 5000);
-			// m_player.GetStatEnergy().Set(4000);
-			// m_player.GetStatWater().Set(4000);
 
 			// Stats/posição/dano depois
 			GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(PostSpawnInit, 300, false, m_player, safePosition);

@@ -401,14 +401,16 @@ bool ExecuteCommand(TStringArray tokens)
             WriteToLog("Admin " + playerID + " definiu horário do mundo para " + horaFormatada, LogFile.INIT, false, LogType.INFO);
             break;
         case "setweather":
-            if (!isAdmin)
-            {
+            if (!isAdmin) {
                 SendPrivateMessage(playerID, "Você não possui permissão para executar esse comando", MessageColor.IMPORTANT);
                 return false;
             }
+            if (!GetGame().IsServer()) {
+                SendPrivateMessage(playerID, "Comando de clima só pode ser executado no servidor.", MessageColor.WARNING);
+                return false;
+            }
 
-            if (tokens.Count() < 3)
-            {
+            if (tokens.Count() < 3) { // "!setweather rain" costuma ter 2 tokens
                 SendPrivateMessage(playerID, "Uso: !setweather <clear | cloudy | rain | foggy | default>", MessageColor.WARNING);
                 return false;
             }
@@ -416,84 +418,65 @@ bool ExecuteCommand(TStringArray tokens)
             string clima = tokens[2];
             clima.ToLower();
 
-            Weather weather = g_Game.GetWeather();
+            Weather weather = GetGame().GetWeather();
 
+            // 1) Tomar controle do clima pela missão
+            weather.MissionWeather(true);
+
+            // 2) Destravar limites e tempos, e liberar threshold da chuva
+            weather.GetOvercast().SetLimits(0.0, 1.0);
+            weather.GetOvercast().SetForecastChangeLimits(0, 0);
+            weather.GetOvercast().SetForecastTimeLimits(0, 0);
+
+            weather.GetRain().SetLimits(0.0, 1.0);
+            weather.GetRain().SetForecastChangeLimits(0, 0);
+            weather.GetRain().SetForecastTimeLimits(0, 0);
+            weather.SetRainThresholds(0.0, 1.0, 0);
+
+            weather.GetFog().SetLimits(0.0, 1.0);
+            weather.GetFog().SetForecastChangeLimits(0, 0);
+            weather.GetFog().SetForecastTimeLimits(0, 0);
+
+            // 3) Aplicar o preset
             if (clima == "clear")
             {
-                // Remove todas as variações automáticas
-                weather.GetRain().SetForecastChangeLimits(0, 0);
-                weather.GetRain().SetForecastTimeLimits(0, 0);
-                weather.GetRain().Set(0);
-
-                weather.GetOvercast().SetForecastChangeLimits(0.01, 0.01);
-                weather.GetOvercast().SetForecastTimeLimits(0, 0);
-                weather.GetOvercast().Set(0.01);
-
-                weather.GetFog().SetForecastChangeLimits(0, 0);
-                weather.GetFog().SetForecastTimeLimits(0, 0);
-                weather.GetFog().Set(0);
-
-                weather.SetWindMaximumSpeed(0);
+                weather.GetRain().Set(0.0, 1, 0);
+                weather.GetOvercast().Set(0.01, 1, 0);
+                weather.GetFog().Set(0.0, 1, 0);
+                weather.SetWindSpeed(0.0);
+                weather.SetWindMaximumSpeed(0.0);
+                weather.SetWindFunctionParams(0, 0, 0); // sem variação
             }
             else if (clima == "cloudy")
             {
-                weather.GetRain().SetForecastChangeLimits(0, 0);
-                weather.GetRain().SetForecastTimeLimits(0, 0);
-                weather.GetRain().Set(0);
-
-                weather.GetOvercast().SetForecastChangeLimits(0.5, 0.5);
-                weather.GetOvercast().SetForecastTimeLimits(0, 0);
-                weather.GetOvercast().Set(0.5);
-
-                weather.GetFog().SetForecastChangeLimits(0.1, 0.1);
-                weather.GetFog().SetForecastTimeLimits(0, 0);
-                weather.GetFog().Set(0.1);
-
-                weather.SetWindMaximumSpeed(5);
+                weather.GetRain().Set(0.0, 1, 0);
+                weather.GetOvercast().Set(0.5, 1, 0);
+                weather.GetFog().Set(0.1, 1, 0);
+                weather.SetWindSpeed(5.0);
+                weather.SetWindMaximumSpeed(5.0);
             }
             else if (clima == "rain")
             {
-                weather.GetRain().SetForecastChangeLimits(1.0, 1.0);
-                weather.GetRain().SetForecastTimeLimits(0, 0);
-                weather.GetRain().Set(1.0);
-
-                weather.GetOvercast().SetForecastChangeLimits(1.0, 1.0);
-                weather.GetOvercast().SetForecastTimeLimits(0, 0);
-                weather.GetOvercast().Set(1.0);
-
-                weather.GetFog().SetForecastChangeLimits(0.3, 0.3);
-                weather.GetFog().SetForecastTimeLimits(0, 0);
-                weather.GetFog().Set(0.3);
-
-                weather.SetWindMaximumSpeed(20);
+                // garante overcast alto e chuva forte
+                weather.GetOvercast().Set(1.0, 1, 0);
+                weather.GetRain().Set(1.0, 1, 0);
+                weather.GetFog().Set(0.3, 1, 0);
+                weather.SetWindSpeed(12.0);
+                weather.SetWindMaximumSpeed(20.0);
             }
             else if (clima == "foggy")
             {
-                weather.GetRain().SetForecastChangeLimits(0, 0);
-                weather.GetRain().SetForecastTimeLimits(0, 0);
-                weather.GetRain().Set(0);
-
-                weather.GetOvercast().SetForecastChangeLimits(0.3, 0.3);
-                weather.GetOvercast().SetForecastTimeLimits(0, 0);
-                weather.GetOvercast().Set(0.3);
-
-                weather.GetFog().SetForecastChangeLimits(0.7, 0.7);
-                weather.GetFog().SetForecastTimeLimits(0, 0);
-                weather.GetFog().Set(0.7);
-
-                weather.SetWindMaximumSpeed(5);
+                weather.GetRain().Set(0.0, 1, 0);
+                weather.GetOvercast().Set(0.3, 1, 0);
+                weather.GetFog().Set(0.7, 1, 0);
+                weather.SetWindSpeed(3.0);
+                weather.SetWindMaximumSpeed(5.0);
             }
             else if (clima == "default")
             {
-                weather.GetRain().SetForecastChangeLimits(0.0, 1.0);
-                weather.GetOvercast().SetForecastChangeLimits(0.0, 1.0);
-                weather.GetFog().SetForecastChangeLimits(0.0, 0.3);
-
-                weather.GetRain().SetForecastTimeLimits(1800, 3600);
-                weather.GetOvercast().SetForecastTimeLimits(1800, 3600);
-                weather.GetFog().SetForecastTimeLimits(1800, 3600);
-
-                weather.SetWindMaximumSpeed(25);
+                // devolve o controle para a state machine padrão/config XML
+                weather.MissionWeather(false);
+                SendPrivateMessage(playerID, "Clima voltou para o comportamento padrão/config.", MessageColor.FRIENDLY);
             }
             else
             {
@@ -501,19 +484,19 @@ bool ExecuteCommand(TStringArray tokens)
                 return false;
             }
 
-            // Log e feedback
-            float rain = weather.GetRain().GetActual();
-            float overcast = weather.GetOvercast().GetActual();
-            float fog = weather.GetFog().GetActual();
-            float wind = weather.GetWindSpeed();
+            // Feedback (leia atual E forecast)
+            float rainA = weather.GetRain().GetActual();
+            float rainF = weather.GetRain().GetForecast();
+            float overA = weather.GetOvercast().GetActual();
+            float overF = weather.GetOvercast().GetForecast();
+            float fogA  = weather.GetFog().GetActual();
+            float fogF  = weather.GetFog().GetForecast();
+            float wind  = weather.GetWindSpeed();
 
-            string info = "Clima atual -> Rain: " + rain.ToString() + " | Overcast: " + overcast.ToString() + " | Fog: " + fog.ToString() + " | Wind: " + wind.ToString();
             SendPrivateMessage(playerID, "Clima ajustado para: " + clima, MessageColor.FRIENDLY);
-            SendPrivateMessage(playerID, info, MessageColor.FRIENDLY);
-            WriteToLog("Admin " + playerID + " ajustou o clima para " + clima + ". " + info, LogFile.INIT, false, LogType.INFO);
+            SendPrivateMessage(playerID, "Rain A/F: " + rainA.ToString() + "/" + rainF.ToString() + " | Overcast A/F: " + overA.ToString() + "/" + overF.ToString() + " | Fog A/F: " + fogA.ToString() + "/" + fogF.ToString() + " | Wind: " + wind.ToString(), MessageColor.FRIENDLY);
+            WriteToLog("Admin " + playerID + " ajustou o clima para " + clima, LogFile.INIT, false, LogType.INFO);
             break;
-
-
 
     }
 
