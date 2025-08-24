@@ -251,6 +251,52 @@ class CustomMission: MissionServer
 		}
 	}
 
+	static const int KICK_DELAY_MS = 1000; // manda a DM e chuta 1s depois
+
+	// comparamos por nome "normalizado"
+	string NormalizeName(string n)
+	{
+		if (!n) return "";
+		n.TrimInPlace();
+		n.ToLower(); // retorna nova string, mas como chamada é por ref em Enforce, OK
+		return n;
+	}
+
+	// acha outro jogador online com o MESMO nome (case-insensitive)
+	bool FindDuplicateName(PlayerIdentity newcomer, out PlayerIdentity conflictWith)
+	{
+		if (!newcomer) return false;
+		string newName = NormalizeName(newcomer.GetName());
+		string newUID  = newcomer.GetId();
+
+		array<Man> arr = new array<Man>();
+		GetGame().GetPlayers(arr);
+
+		foreach (Man m : arr)
+		{
+			PlayerBase p = PlayerBase.Cast(m);
+			if (!p) continue;
+
+			PlayerIdentity id2 = p.GetIdentity();
+			if (!id2) continue;
+			if (id2.GetId() == newUID) continue; // é ele mesmo
+
+			if (NormalizeName(id2.GetName()) == newName)
+			{
+				conflictWith = id2;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void KickIdentity(PlayerIdentity id)
+	{
+		if (!id) return;
+		// Dica: o segundo parâmetro é opcional; passar o UID não atrapalha.
+		GetGame().DisconnectPlayer(id, id.GetId());
+	}
+
 	override void OnUpdate(float timeslice)
 	{
 		super.OnUpdate(timeslice);
@@ -295,6 +341,25 @@ class CustomMission: MissionServer
 				}
 				else
 				{
+					// Checa nome duplicado entre os ONLINE
+					PlayerIdentity conflict;
+					if (FindDuplicateName(identity, conflict))
+					{
+						// avisa e agenda kick do "recém-chegado"
+						SendPrivateMessage(playerId, "Seu nome \"" + playerName + "\" já está em uso neste servidor. " + "Altere seu nome no launcher (Parameters > Profile name ou -name=<seu nome>) " + "e reconecte.", MessageColor.IMPORTANT);
+						string conflictId = "unknown";
+						if (conflict) {
+							conflictId = conflict.GetId();
+						}
+
+						WriteToLog("Kick por nome duplicado: novo=" + playerId + " (" + playerName + ") conflitoCom=" + conflictId, LogFile.INIT, false, LogType.INFO);
+
+						GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(KickIdentity, KICK_DELAY_MS, false, identity);
+
+						// não registra em lastSeenPlayers, nem envia eventos externos
+						continue; // pula processamento deste player neste tick
+					}
+					
 					lastSeenPlayers.Insert(playerId, GetGame().GetTime());
 					WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
 					AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");
@@ -415,6 +480,29 @@ class CustomMission: MissionServer
 		q.CallLater(BoostStaminaOnce,1000, false, player);
 	}
 
+	void PostSpawnInit(PlayerBase p, vector pos)
+	{
+		if (!p) return;
+
+		// Reforça posição (autoridade do servidor)
+		p.SetPosition(pos);
+
+		// Stats base
+		p.SetHealth("", "", 100);
+		p.SetHealth("GlobalHealth", "Blood", 5000);
+		p.SetHealth("GlobalHealth", "Shock", 5000); // <-- não 0
+
+		p.GetStatEnergy().Set(4000);
+		p.GetStatWater().Set(4000);
+
+		// Recarrega stamina para evitar micro-travas
+		StaminaHandler sh = p.GetStaminaHandler();
+		if (sh) sh.SetStamina(sh.GetStaminaMax());
+
+		// Libera dano após estabilizar
+		p.SetAllowDamage(true);
+	}
+
 	override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
 	{
 		string playerId   = identity.GetId();
@@ -425,10 +513,10 @@ class CustomMission: MissionServer
 
 		// 🔥 Verifica se já existe um jogador ativo e remove para evitar conflito
 		PlayerBase existingPlayer = PlayerBase.Cast(GetGame().GetPlayer());
-		if (existingPlayer && existingPlayer.IsAlive()) {
-			WriteToLog("CreateCharacter(): Player anterior detectado. Deletando entidade antiga para evitar conflitos.", LogFile.INIT, false, LogType.ERROR);
-			GetGame().ObjectDelete(existingPlayer);
-		}
+		// if (existingPlayer && existingPlayer.IsAlive()) {
+		// 	WriteToLog("CreateCharacter(): Player anterior detectado. Deletando entidade antiga para evitar conflitos.", LogFile.INIT, false, LogType.ERROR);
+		// 	GetGame().ObjectDelete(existingPlayer);
+		// }
 
 		// Gera posição segura de respawn
 		vector safePosition = GetRandomSafeSpawnPosition(spawnZones);
@@ -467,12 +555,19 @@ class CustomMission: MissionServer
 				GiveDefaultLoadout(m_player, playerId);
 			}
 
+			// (Opcional) dar loadout DEPOIS com leve atraso
+			//GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(GiveSpawnLoadoutSafe, 150, false, m_player, identity.GetId());
+			
+
 			// Atributos base
-			m_player.SetHealth("", "", 100);
-			m_player.SetHealth("GlobalHealth", "Blood", 5000);
-			m_player.SetHealth("GlobalHealth", "Shock", 0);
-			m_player.GetStatEnergy().Set(4000);
-			m_player.GetStatWater().Set(4000);
+			// m_player.SetHealth("", "", 100);
+			// m_player.SetHealth("GlobalHealth", "Blood", 5000);
+			// m_player.SetHealth("GlobalHealth", "Shock", 5000);
+			// m_player.GetStatEnergy().Set(4000);
+			// m_player.GetStatWater().Set(4000);
+
+			// Stats/posição/dano depois
+			GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(PostSpawnInit, 300, false, m_player, safePosition);
 
 			m_player.SetAllowDamage(true);
 		}
@@ -482,9 +577,31 @@ class CustomMission: MissionServer
 		return m_player;
 	}
 
+	void GiveSpawnLoadoutSafe(PlayerBase p, string playerId)
+	{
+		if (!p) return;
+		if (!GiveCustomLoadout(p, playerId)) {
+			GiveDefaultLoadout(p, playerId);
+		}
+	}
+
+	void BlockSprintWindow(PlayerBase p)
+	{
+		if (!p) return;
+		StaminaHandler sh = p.GetStaminaHandler();
+		if (!sh) return;
+
+		// Bloqueia sprint (sem travar WASD)
+		sh.SetStamina(0);
+
+		auto q = GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY);
+		q.CallLater(BoostStaminaOnce, 400, false, p);  // libera depois
+	}
+
 	override void OnClientRespawnEvent(PlayerIdentity identity, PlayerBase player)
 	{
 		super.OnClientRespawnEvent(identity, player);
+		BlockSprintWindow(player);
 		ScheduleSpawnStaminaBurst(player);
 	}
 

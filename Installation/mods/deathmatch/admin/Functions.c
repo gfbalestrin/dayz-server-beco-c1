@@ -347,7 +347,8 @@ bool IsWorldWeapon(Object obj)
 
 void CleanUpDeadEntitiesNearPlayers()
 {
-    DayZGame game = GetGame();
+    //DayZGame game = GetGame();
+    DayZGame game = DayZGame.Cast(GetGame());
     if (!game) return;
     if (!game.IsServer()) return;
     if (!s_FirstSeenWeapon)
