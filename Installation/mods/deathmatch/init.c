@@ -382,23 +382,23 @@ class CustomMission: MissionServer
 				else
 				{
 					// Checa nome duplicado entre os ONLINE
-					PlayerIdentity conflict;
-					if (FindDuplicateName(identity, conflict))
-					{
-						// avisa e agenda kick do "recém-chegado"
-						SendPrivateMessage(playerId, "Seu nome \"" + playerName + "\" já está em uso neste servidor. " + "Altere seu nome no launcher (Parameters > Profile name ou -name=<seu nome>) " + "e reconecte.", MessageColor.IMPORTANT);
-						string conflictId = "unknown";
-						if (conflict) {
-							conflictId = conflict.GetId();
-						}
+					// PlayerIdentity conflict;
+					// if (FindDuplicateName(identity, conflict))
+					// {
+					// 	// avisa e agenda kick do "recém-chegado"
+					// 	SendPrivateMessage(playerId, "Seu nome \"" + playerName + "\" já está em uso neste servidor. " + "Altere seu nome no launcher (Parameters > Profile name ou -name=<seu nome>) " + "e reconecte.", MessageColor.IMPORTANT);
+					// 	string conflictId = "unknown";
+					// 	if (conflict) {
+					// 		conflictId = conflict.GetId();
+					// 	}
 
-						WriteToLog("Kick por nome duplicado: novo=" + playerId + " (" + playerName + ") conflitoCom=" + conflictId, LogFile.INIT, false, LogType.INFO);
+					// 	WriteToLog("Kick por nome duplicado: novo=" + playerId + " (" + playerName + ") conflitoCom=" + conflictId, LogFile.INIT, false, LogType.INFO);
 
-						GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(KickIdentity, KICK_DELAY_MS, false, identity);
+					// 	GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(KickIdentity, KICK_DELAY_MS, false, identity);
 
-						// não registra em lastSeenPlayers, nem envia eventos externos
-						continue; // pula processamento deste player neste tick
-					}
+					// 	// não registra em lastSeenPlayers, nem envia eventos externos
+					// 	continue; // pula processamento deste player neste tick
+					// }
 					
 					lastSeenPlayers.Insert(playerId, GetGame().GetTime());
 					WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);

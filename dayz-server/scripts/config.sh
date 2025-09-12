@@ -175,6 +175,8 @@ INSERT_CUSTOM_LOG() {
     escaped_level=$(echo "$level" | sed "s/'/''/g")
     escaped_source=$(echo "$source" | sed "s/'/''/g")
 
+    echo $escaped_message
+
     while (( attempt <= max_retries )); do
         sqlite3 "$AppFolder/$AppServerBecoC1LogsDbFile" <<EOF
 INSERT INTO logs_custom (Message, LogLevel, Source, TimeStamp)
@@ -532,6 +534,8 @@ SEND_DISCORD_WEBHOOK() {
         INSERT_CUSTOM_LOG "Usage: send_discord_webhook_log <content> <webhook_url> [current_date]" "ERROR" "$source"
         return 1
     fi
+
+    echo $content
 
     local payload=$(
         cat <<EOF

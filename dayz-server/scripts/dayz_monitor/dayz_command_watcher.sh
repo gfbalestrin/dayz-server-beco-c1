@@ -127,13 +127,14 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             ;;
         
         update_player)
+            # Extração dos dados do JSON
             PlayerId=$(echo "$line" | jq -r '.player_id')
-            PlayerName=$(echo "$line" | jq -r '.player_name')
-            PlayerName=$(echo "$PlayerName" | tr -d '\r\n' | sed 's/[^a-zA-Z0-9 _\-\.\[\]()@]//g' | xargs)
+            PlayerName=$(echo "$line" | jq -r '.player_name' | tr -d '\r\n' | sed 's/[^a-zA-Z0-9 _\-\.\[\]()@]//g' | xargs)
             PlayerSteamId=$(echo "$line" | jq -r '.steam_id')
-            
+
             echo ">> Atualizando jogador na player_database: $PlayerId"
 
+            # Obtem o SteamName do perfil
             PlayerSteamName=$(curl -L -s "https://steamcommunity.com/profiles/$PlayerSteamId" \
             | grep actual_persona_name \
             | grep -v "&nbsp;" \
@@ -143,29 +144,37 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             | sed 's/[^a-zA-Z0-9 _\-]//g' \
             | xargs)
 
-            if [ "$PlayerSteamName" == "" ]; then
-				PlayerSteamName="Unknown"
-			fi
+            if [[ -z "$PlayerSteamName" ]]; then
+                PlayerSteamName="Unknown"
+            fi
 
+            # Consulta no banco para ver se o player já existe
             PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
-			if [[ -z "$PlayerExists" ]]; then
-				INSERT_CUSTOM_LOG "Player não consta no banco. O player será inserido no banco de dados." "INFO" "$ScriptName"
-				INSERT_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
-                sleep 2
-				"$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" 		
-				continue
-			fi
 
+            if [[ -z "$PlayerExists" ]]; then
+                INSERT_CUSTOM_LOG "Player não consta no banco. O player será inserido no banco de dados." "INFO" "$ScriptName"
+                INSERT_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
+                sleep 2
+                "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT"
+                continue
+            fi
+
+            # Player já existe - extrair dados atuais do banco
             PlayerNameCurrent=$(echo "$PlayerExists" | cut -d'|' -f1)
-			PlayerSteamIdCurrent=$(echo "$PlayerExists" | cut -d'|' -f2)
-			PlayerSteamNameCurrent=$(echo "$PlayerExists" | cut -d'|' -f3)
-			INSERT_CUSTOM_LOG "Player já consta no banco. O player será atualizado no banco de dados." "INFO" "$ScriptName"
-			UPDATE_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
-			if [[ "$PlayerNameCurrent" != "$PlayerName" ]] || [[ "$PlayerSteamIdCurrent" != "$PlayerSteamId" ]] || [[ "$PlayerSteamNameCurrent" != "$PlayerSteamName" ]]; then
-				INSERT_CUSTOM_LOG "Player alterou seus dados desde a última conexão." "INFO" "$ScriptName"
-				INSERT_PLAYER_NAME_HISTORY "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
-			fi
-            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT" 
+            PlayerSteamIdCurrent=$(echo "$PlayerExists" | cut -d'|' -f2)
+            PlayerSteamNameCurrent=$(echo "$PlayerExists" | cut -d'|' -f3)
+
+            INSERT_CUSTOM_LOG "Player já consta no banco. O player será atualizado no banco de dados." "INFO" "$ScriptName"
+            UPDATE_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
+
+            # Verifica se houve alteração nos dados do player
+            if [[ "$PlayerNameCurrent" != "$PlayerName" ]] || [[ "$PlayerSteamIdCurrent" != "$PlayerSteamId" ]] || [[ "$PlayerSteamNameCurrent" != "$PlayerSteamName" ]]; then
+                INSERT_CUSTOM_LOG "Player alterou seus dados desde a última conexão." "INFO" "$ScriptName"
+                INSERT_PLAYER_NAME_HISTORY "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
+            fi
+
+            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT"
+
             ;;
         player_connected)     
             PlayerId=$(echo "$line" | jq -r '.player_id')
@@ -186,7 +195,7 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             INSERT_CUSTOM_LOG "Evento de restart do servidor!" "INFO" "$ScriptName"
             Content="Servidor reiniciando... (Próximo mapa: $NextMap)"
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
-            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET"
+            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET"     
             ;;
         event_start_finished)     
             CurrentMap=$(echo "$line" | jq -r '.current_map')
@@ -196,7 +205,9 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             Content="Servidor iniciado e liberado para jogadores!"
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
             Content="Mapa atual: $CurrentMap, Horário: $CurrentTime"
-            SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"            
+            SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"   
+            # Gerar estatísticas
+            "$AppFolder/$AppScriptUpdateGeneralKillfeed"         
             ;;
         event_minutes_to_restart)     
             CurrentMap=$(echo "$line" | jq -r '.current_map')
