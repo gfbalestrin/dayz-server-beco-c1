@@ -127,39 +127,57 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             ;;
         
         update_player)
-            # Extração dos dados do JSON
+            # Função de sanitização única (mantém: letras, números, espaço, _ . - [ ] ( ) @ # + |)
+            sanitize_name() {
+            # remove CR/LF embaralhados, mantém apenas imprimíveis, aplica whitelist e normaliza espaços
+            tr -d '\r' | tr -cd '[:print:]\n' \
+            | sed 's/[^[:alnum:] _.\-\[\]()@#+|]/ /g' \
+            | sed 's/[[:space:]]\{1,\}/ /g' \
+            | sed 's/^[[:space:]]\+//; s/[[:space:]]\+$//'
+            }
+
+            # --- Extração do JSON ---
             PlayerId=$(echo "$line" | jq -r '.player_id')
-            PlayerName=$(echo "$line" | jq -r '.player_name' | tr -d '\r\n' | sed 's/[^a-zA-Z0-9 _\-\.\[\]()@]//g' | xargs)
+
+            # aplica sanitização ao player_name vindo do JSON
+            PlayerName=$(echo "$line" | jq -r '.player_name' | sanitize_name)
+            [ -z "$PlayerName" ] && PlayerName="Unknown"
+
             PlayerSteamId=$(echo "$line" | jq -r '.steam_id')
 
             echo ">> Atualizando jogador na player_database: $PlayerId"
 
-            # Obtem o SteamName do perfil
-            PlayerSteamName=$(curl -L -s "https://steamcommunity.com/profiles/$PlayerSteamId" \
-            | grep actual_persona_name \
-            | grep -v "&nbsp;" \
-            | sed 's:</span>:\n:g' \
-            | sed -n 's/.*>//p' \
-            | tr -d '\r\n' \
-            | sed 's/[^a-zA-Z0-9 _\-]//g' \
-            | xargs)
+            # --- Obtém o nome da Steam da página do perfil (sem API key) ---
+            # Dica: usar um User-Agent ajuda a evitar bloqueio
+            PlayerSteamName=$(
+            curl -L -s -A "Mozilla/5.0" "https://steamcommunity.com/profiles/$PlayerSteamId" \
+            | grep -oP '(?<=actual_persona_name">).*(?=</span>)' \
+            | sed 's/<[^>]*>//g' \
+            | sed 's/&amp;/\&/g; s/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&#39;/'"'"'/g' \
+            | sanitize_name
+            )
+            [ -z "$PlayerSteamName" ] && PlayerSteamName="Unknown"
 
-            if [[ -z "$PlayerSteamName" ]]; then
-                PlayerSteamName="Unknown"
-            fi
+            # --- (opcional) proteção extra para SQL: escape de aspas simples, caso suas funções montem SQL literal ---
+            sql_escape() { sed "s/'/''/g"; }
+            PlayerNameSqlEscaped=$(printf "%s" "$PlayerName" | sql_escape)
+            PlayerSteamNameSqlEscaped=$(printf "%s" "$PlayerSteamName" | sql_escape)
 
-            # Consulta no banco para ver se o player já existe
-            PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
+            # Consulta no banco
+            PlayerExists=$(sqlite3 -separator "|" "$AppFolder/$AppPlayerBecoC1DbFile" \
+            "SELECT PlayerName, SteamID, SteamName FROM players_database WHERE PlayerID = '$PlayerId';")
 
             if [[ -z "$PlayerExists" ]]; then
                 INSERT_CUSTOM_LOG "Player não consta no banco. O player será inserido no banco de dados." "INFO" "$ScriptName"
+                # use variáveis normais se suas funções já fazem escape internamente;
+                # caso contrário, troque para as *SqlEscaped*
                 INSERT_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
                 sleep 2
                 "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT"
                 continue
             fi
 
-            # Player já existe - extrair dados atuais do banco
+            # Player já existe
             PlayerNameCurrent=$(echo "$PlayerExists" | cut -d'|' -f1)
             PlayerSteamIdCurrent=$(echo "$PlayerExists" | cut -d'|' -f2)
             PlayerSteamNameCurrent=$(echo "$PlayerExists" | cut -d'|' -f3)
@@ -167,13 +185,15 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             INSERT_CUSTOM_LOG "Player já consta no banco. O player será atualizado no banco de dados." "INFO" "$ScriptName"
             UPDATE_PLAYER_DATABASE "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
 
-            # Verifica se houve alteração nos dados do player
-            if [[ "$PlayerNameCurrent" != "$PlayerName" ]] || [[ "$PlayerSteamIdCurrent" != "$PlayerSteamId" ]] || [[ "$PlayerSteamNameCurrent" != "$PlayerSteamName" ]]; then
+            if [[ "$PlayerNameCurrent" != "$PlayerName" ]] \
+            || [[ "$PlayerSteamIdCurrent" != "$PlayerSteamId" ]] \
+            || [[ "$PlayerSteamNameCurrent" != "$PlayerSteamName" ]]; then
                 INSERT_CUSTOM_LOG "Player alterou seus dados desde a última conexão." "INFO" "$ScriptName"
                 INSERT_PLAYER_NAME_HISTORY "$PlayerId" "$PlayerName" "$PlayerSteamId" "$PlayerSteamName"
             fi
 
             "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "$PlayerId" "CONNECT"
+
 
             ;;
         player_connected)     
@@ -206,6 +226,7 @@ tail -F "$COMMAND_FILE" | while read -r line; do
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"
             Content="Mapa atual: $CurrentMap, Horário: $CurrentTime"
             SEND_DISCORD_WEBHOOK "$Content" "$DiscordWebhookLogs" "$CurrentDate" "$ScriptName"   
+            "$AppFolder/$AppScriptUpdatePlayersOnlineFile" "RESET"  
             # Gerar estatísticas
             "$AppFolder/$AppScriptUpdateGeneralKillfeed"         
             ;;

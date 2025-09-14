@@ -14,9 +14,7 @@ if [[ -z "$FirstDate" ]]; then
   ResumoContent="💀 **Ranking de kills (Sem dados coletados!):**"$'\n'
   Content="💀 Ranking de kills (Sem dados coletados!):"$'\n'
 else
-  ResumoContent+="Obs: Dados coletados a partir de $FirstDate"$'\n'
-  Content+="Obs: Dados coletados a partir de $FirstDate"$'\n'
-
+  FirstDate=$(date -d "$FirstDate" +"%d/%m/%Y %H:%M:%S")
   ResumoContent="💀 **Ranking de kills ($FirstDate à $CURRENT_DATE):**"$'\n'
   Content="💀 Ranking de kills ($FirstDate à $CURRENT_DATE):"$'\n'
 fi
