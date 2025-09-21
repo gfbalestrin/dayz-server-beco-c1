@@ -233,6 +233,8 @@ class CustomMission: MissionServer
 				return;
 			}
 
+			WriteToLog("chatParams: " + chatParams, LogFile.INIT, false, LogType.DEBUG);
+
 			WriteToLog("param1: " + chatParams.param1, LogFile.INIT, false, LogType.DEBUG);
 			WriteToLog("param2: " + chatParams.param2, LogFile.INIT, false, LogType.DEBUG);
 			WriteToLog("param3: " + chatParams.param3, LogFile.INIT, false, LogType.DEBUG);
@@ -270,22 +272,67 @@ class CustomMission: MissionServer
 			}
 			
 			if (text.Length() == 0 || text.Get(0) != "!")
-				return;
+				return;			
+			
+			GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(CheckCommands, 2000, false);
 
-			PlayerBase player = GetPlayerByName(playerName);
-			if (!player) {
-				WriteToLog("Player não identificado.", LogFile.INIT, false, LogType.ERROR);
+			// Desativado os comandos
+			return;
+			
+			// 🔎 NOVO: checa se há homônimos ANTES de resolver o Player
+			playerName.Trim();
+			string playerNameLower = playerName;
+
+			// Coleta de jogadores online e filtra por nome
+			array<Man> online = new array<Man>();
+			GetGame().GetPlayers(online);
+
+			ref array<PlayerBase> matches = new array<PlayerBase>();
+
+			for (int i = 0; i < online.Count(); i++)
+			{
+				PlayerBase pb = PlayerBase.Cast(online[i]);
+				if (!pb) continue;
+
+				PlayerIdentity id = pb.GetIdentity();
+				if (!id) continue;
+
+				WriteToLog("id.GetName() '" + id.GetName() + "'", LogFile.INIT, false, LogType.ERROR);
+				WriteToLog("playerNameLower '" + playerNameLower + "'", LogFile.INIT, false, LogType.ERROR);
+
+				// compare case-insensitive; troque para == se quiser exato
+				if (id.GetName() == playerNameLower)
+				{
+					matches.Insert(pb);
+					if (matches.Count() > 1) break; // já sabemos que é duplicado
+				}
+			}
+
+			// 0: não achou ninguém com esse nome; >1: duplicado
+			if (matches.Count() != 1)
+			{
+				WriteToLog("Comando ignorado: nome '" + playerName + "' produziu " + matches.Count() + " correspondências.", LogFile.INIT, false, LogType.ERROR);
 				return;
 			}
 
+			// Usa o player encontrado (NÃO chame GetPlayerByName)
+			PlayerBase player = matches[0];
+			if (!player) {
+				WriteToLog("Player null após filtro para nome '" + playerName + "'.", LogFile.INIT, false, LogType.ERROR);
+				return;
+			}
+
+			// Continua a lógica dos tokens/comando
 			TStringArray tokensCommands = new TStringArray;
-			text.Split(" ", tokensCommands);			
+			text.Split(" ", tokensCommands);
 			tokensCommands[0] = tokensCommands[0].Substring(1, tokensCommands[0].Length() - 1);
+
 			string playerID = player.GetIdentity().GetId();
+
 			TStringArray tokens = new TStringArray;
 			tokens.Insert(playerID);
-			for (int i = 0; i < tokensCommands.Count(); i++)
-				tokens.Insert(tokensCommands.Get(i));
+			for (int j = 0; j < tokensCommands.Count(); j++)
+				tokens.Insert(tokensCommands.Get(j));
 
 			ExecuteCommand(tokens);
 		}
@@ -350,11 +397,11 @@ class CustomMission: MissionServer
 		if (m_AdminCheckTimer10 >= m_AdminCheckCooldown10)
 		{
 			m_AdminCheckTimer10 = 0.0;
-
-			CheckCommands();
+			
 			array<string> msgs = CheckMessages();
 			array<string> privMsgs = CheckPrivateMessages();
 
+			CheckCommands();
 			array<Man> players = new array<Man>;
 			GetGame().GetPlayers(players);
 			ref set<string> currentPlayers = new set<string>();
@@ -380,26 +427,7 @@ class CustomMission: MissionServer
 					lastSeenPlayers.Set(playerId, GetGame().GetTime());
 				}
 				else
-				{
-					// Checa nome duplicado entre os ONLINE
-					// PlayerIdentity conflict;
-					// if (FindDuplicateName(identity, conflict))
-					// {
-					// 	// avisa e agenda kick do "recém-chegado"
-					// 	SendPrivateMessage(playerId, "Seu nome \"" + playerName + "\" já está em uso neste servidor. " + "Altere seu nome no launcher (Parameters > Profile name ou -name=<seu nome>) " + "e reconecte.", MessageColor.IMPORTANT);
-					// 	string conflictId = "unknown";
-					// 	if (conflict) {
-					// 		conflictId = conflict.GetId();
-					// 	}
-
-					// 	WriteToLog("Kick por nome duplicado: novo=" + playerId + " (" + playerName + ") conflitoCom=" + conflictId, LogFile.INIT, false, LogType.INFO);
-
-					// 	GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(KickIdentity, KICK_DELAY_MS, false, identity);
-
-					// 	// não registra em lastSeenPlayers, nem envia eventos externos
-					// 	continue; // pula processamento deste player neste tick
-					// }
-					
+				{					
 					lastSeenPlayers.Insert(playerId, GetGame().GetTime());
 					WriteToLog("Jogador logou " + playerId, LogFile.INIT, false, LogType.INFO);
 					AppendExternalAction("{\"action\":\"update_player\",\"player_id\":\"" + playerId + "\",\"player_name\":\"" + playerName + "\",\"steam_id\":\"" + steamId + "\"}");

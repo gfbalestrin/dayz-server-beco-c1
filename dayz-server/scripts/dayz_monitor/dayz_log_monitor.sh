@@ -16,7 +16,7 @@ LogFileName="$DayzServerFolder/$DayzLogAdmFile"
 
 INSERT_CUSTOM_LOG "Monitorando arquivo: $LogFileName" "INFO" "$ScriptName"
 
-tail -n 0 -F "$LogFileName" | grep --line-buffered -e "killed by" -e "is unconscious" -e "bled out" -e "died. Stats" -e "hit by Player" | while IFS='' read -r Line; do
+tail -n 0 -F "$LogFileName" | grep --line-buffered -e "killed by" -e "is unconscious" -e "bled out" -e "died. Stats" -e "hit by Player" -e "Chat(" | while IFS='' read -r Line; do
     echo "$Line" | grep -q "\[HP: 0\]" && continue
 
     INSERT_ADM_LOG "$Line" "INFO"
@@ -29,9 +29,10 @@ tail -n 0 -F "$LogFileName" | grep --line-buffered -e "killed by" -e "is unconsc
     # Dano em player
     if [[ "$Content" == *"hit by Player"* ]]; then
         DamageParsed=$("$AppFolder/$AppScriptGetPlayerDamageFile" "$Content")
+        parser_rc=$?
         echo "$DamageParsed"
         INSERT_CUSTOM_LOG "$DamageParsed" "INFO" "$ScriptName"
-        if [ $? -eq 0 ]; then
+        if [ $parser_rc -eq 0 ] && [[ -n "$DamageParsed" ]]; then
             INSERT_CUSTOM_LOG "Inserindo informações de dano no banco de dados..." "INFO" "$ScriptName"
 			PlayerIdVictim=$(echo "$DamageParsed" | cut -d"|" -f2)
             PlayerIdAttacker=$(echo "$DamageParsed" | cut -d"|" -f1)
@@ -78,9 +79,26 @@ tail -n 0 -F "$LogFileName" | grep --line-buffered -e "killed by" -e "is unconsc
             metros=$(echo "$DistanceMeter" | cut -d '.' -f 1)
             Content="Jogador $SafePlayerVictimInfo foi atingido por $SafePlayerAttackerInfo. Local do dano: $LocalDamage, dano sofrido: $Damage, arma: $Weapon, tipo de ataque: $HitType, distância: $metros metros, HP restante: $Health"
         else
-            INSERT_CUSTOM_LOG "Falha ao realizar o parse das informações de dano do player" "ERROR" "$ScriptName"
+            INSERT_CUSTOM_LOG "Falha no parser de dano (rc=$parser_rc)" "ERROR" "$ScriptName"
+            continue
         fi
-
+    # Chat do jogo com comandos 
+	elif [[ "$Content" == *"Chat("* ]]; then
+		PlayerId=$(echo $Content | awk -F'id=' '{print $2}' | awk -F')' '{print $1}')
+		if [[ "$PlayerId" == "" ]]; then			
+			INSERT_CUSTOM_LOG "Ignorando pois PlayerId está em branco" "INFO" "$ScriptName"
+			continue
+		fi
+		if [[ "$DayzDeathmatch" -eq "1" ]]; then			
+			Command="${Content##*: }"
+            if [[ "$Command" == "!"* ]]; then
+                Command="${Command:1}"
+            fi
+            echo $Command
+			echo "$PlayerId $Command" >>"$DayzServerFolder/$DayzAdminCmdsFile"
+			continue
+		fi		
+		continue
     # Evento de morte por player
     elif [[ "$Content" == *"killed by Player"* ]]; then
         INSERT_CUSTOM_LOG "Evento de PVP detectado!" "INFO" "$ScriptName"
