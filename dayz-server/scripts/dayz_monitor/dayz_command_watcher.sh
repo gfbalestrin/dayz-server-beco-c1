@@ -129,11 +129,10 @@ tail -F "$COMMAND_FILE" | while read -r line; do
         update_player)
             # Função de sanitização única (mantém: letras, números, espaço, _ . - [ ] ( ) @ # + |)
             sanitize_name() {
-            # remove CR/LF embaralhados, mantém apenas imprimíveis, aplica whitelist e normaliza espaços
-            tr -d '\r' | tr -cd '[:print:]\n' \
-            | sed 's/[^[:alnum:] _.\-\[\]()@#+|]/ /g' \
-            | sed 's/[[:space:]]\{1,\}/ /g' \
-            | sed 's/^[[:space:]]\+//; s/[[:space:]]\+$//'
+                tr -d '\r' | tr -cd '[:print:]\n' \
+                | sed 's/[^[:alnum:] _.\-\[\]()@#+]/ /g' \
+                | sed 's/[[:space:]]\{1,\}/ /g' \
+                | sed 's/^[[:space:]]\+//; s/[[:space:]]\+$//'
             }
 
             # --- Extração do JSON ---
